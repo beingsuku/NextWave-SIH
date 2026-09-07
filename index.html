@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bharat Border Intelligence — Demo</title>
+
+  <!-- Tailwind (CDN build, fine for a local demo) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React + ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <!-- Babel standalone, so the JSX below can run directly in the browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body { margin: 0; }
+    @keyframes fade-in-blur { from { opacity: 0; filter: blur(6px); } to { opacity: 1; filter: blur(0); } }
+    .animate-fade-in-blur { animation: fade-in-blur 0.8s ease-out; }
+    @keyframes letter-expand { from { opacity: 0; letter-spacing: 0.2em; } to { opacity: 1; letter-spacing: 0.05em; } }
+    .animate-letter-expand { animation: letter-expand 1s ease-out; }
+    @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+    .animate-scan { animation: scan 1.2s linear infinite; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Demo data (fictional/synthetic — names, passport numbers, and risk
+       scores are all made up; nothing here is real) -->
+  <script>
+window.INITIAL_KPI_STATS = {
+  totalScreenings: 1248,
+  lowRiskCount: 942,
+  mediumRiskCount: 211,
+  highRiskCount: 95,
+  manualReviewCount: 37,
+  avgScreeningTimeSec: 4.2,
+  accuracySignalRate: 98.4
+};
+
+// High quality SVG data URIs for synthetic realistic document previews
+window.DEMO_DOCUMENTS = {
+  highRiskPassport: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+      <rect width="800" height="500" rx="16" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+      <!-- Security Pattern Background -->
+      <path d="M0 0 L800 500 M800 0 L0 500" stroke="#1e293b" stroke-width="1" stroke-dasharray="5 5"/>
+      <circle cx="400" cy="250" r="180" fill="none" stroke="#1e293b" stroke-width="2" stroke-dasharray="10 5"/>
+      <text x="400" y="50" font-family="sans-serif" font-size="22" font-weight="bold" fill="#f97316" text-anchor="middle">REPUBLIC OF INDIA / PASSPORT</text>
+      
+      <!-- Passport Photo Box -->
+      <rect x="60" y="90" width="180" height="230" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+      <!-- Photo Silhouette -->
+      <circle cx="150" cy="170" r="50" fill="#475569"/>
+      <path d="M90 290 Q150 220 210 290" fill="#475569"/>
+      
+      <!-- Forensics Highlight Box 1: Photo Replacement Alert -->
+      <rect x="52" y="82" width="196" height="246" rx="10" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" stroke-width="3" stroke-dasharray="6 4"/>
+      <rect x="52" y="60" width="160" height="22" rx="4" fill="#ef4444"/>
+      <text x="60" y="75" font-family="sans-serif" font-size="11" font-weight="bold" fill="#ffffff">⚠ PHOTO REPLACEMENT</text>
+
+      <!-- Fields Grid -->
+      <g font-family="monospace" fill="#94a3b8" font-size="13">
+        <text x="270" y="110">TYPE / TYPE: <tspan fill="#f8fafc" font-weight="bold">P</tspan></text>
+        <text x="500" y="110">COUNTRY CODE: <tspan fill="#f8fafc" font-weight="bold">IND</tspan></text>
+        
+        <text x="270" y="145">PASSPORT NO.: <tspan fill="#f8fafc" font-weight="bold">Z9482103</tspan></text>
+        
+        <text x="270" y="180">SURNAME / SURNAME:</text>
+        <text x="270" y="200" fill="#f8fafc" font-size="16" font-weight="bold">SHARMA</text>
+        
+        <text x="270" y="235">GIVEN NAMES / GIVEN NAMES:</text>
+        <text x="270" y="255" fill="#f8fafc" font-size="16" font-weight="bold">VIKRAM RAJESH</text>
+        
+        <!-- Forensics Highlight Box 2: Text Tampering -->
+        <rect x="262" y="270" width="220" height="45" rx="4" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" stroke-width="2"/>
+        <text x="270" y="288">DATE OF BIRTH / DOB:</text>
+        <text x="270" y="306" fill="#ef4444" font-size="16" font-weight="bold">14 / 08 / 1988</text>
+        <text x="490" y="298" font-size="10" fill="#ef4444" font-weight="bold">⚠ ALTERED FONT</text>
+
+        <text x="520" y="288">NATIONALITY:</text>
+        <text x="520" y="306" fill="#f8fafc" font-size="16" font-weight="bold">INDIAN</text>
+
+        <text x="270" y="340">DATE OF EXPIRY:</text>
+        <text x="270" y="358" fill="#f8fafc" font-size="15" font-weight="bold">22 NOV 2031</text>
+      </g>
+
+      <!-- MRZ Zone -->
+      <rect x="40" y="400" width="720" height="75" fill="#020617" stroke="#334155" rx="6"/>
+      <text x="60" y="430" font-family="monospace" font-size="18" fill="#38bdf8" letter-spacing="3">P&lt;INDSHARMA&lt;&lt;VIKRAM&lt;RAJESH&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text>
+      <text x="60" y="458" font-family="monospace" font-size="18" fill="#38bdf8" letter-spacing="3">Z9482103&lt;4IND8808142M3111224820103120&lt;&lt;&lt;&lt;&lt;&lt;84</text>
+    </svg>
+  `),
+  
+  lowRiskPassport: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+      <rect width="800" height="500" rx="16" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+      <circle cx="400" cy="250" r="180" fill="none" stroke="#1e293b" stroke-width="2" stroke-dasharray="10 5"/>
+      <text x="400" y="50" font-family="sans-serif" font-size="22" font-weight="bold" fill="#f97316" text-anchor="middle">REPUBLIC OF INDIA / PASSPORT</text>
+      
+      <!-- Passport Photo Box -->
+      <rect x="60" y="90" width="180" height="230" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+      <circle cx="150" cy="170" r="50" fill="#334155"/>
+      <path d="M90 290 Q150 220 210 290" fill="#334155"/>
+      <rect x="60" y="90" width="180" height="230" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4 2"/>
+
+      <g font-family="monospace" fill="#94a3b8" font-size="13">
+        <text x="270" y="110">TYPE / TYPE: <tspan fill="#f8fafc" font-weight="bold">P</tspan></text>
+        <text x="500" y="110">COUNTRY CODE: <tspan fill="#f8fafc" font-weight="bold">IND</tspan></text>
+        
+        <text x="270" y="145">PASSPORT NO.: <tspan fill="#f8fafc" font-weight="bold">K1093847</tspan></text>
+        
+        <text x="270" y="180">SURNAME / SURNAME:</text>
+        <text x="270" y="200" fill="#f8fafc" font-size="16" font-weight="bold">VERMA</text>
+        
+        <text x="270" y="235">GIVEN NAMES / GIVEN NAMES:</text>
+        <text x="270" y="255" fill="#f8fafc" font-size="16" font-weight="bold">ANANYA SURESH</text>
+        
+        <text x="270" y="290">DATE OF BIRTH / DOB:</text>
+        <text x="270" y="310" fill="#f8fafc" font-size="16" font-weight="bold">04 / 11 / 1995</text>
+
+        <text x="520" y="290">NATIONALITY:</text>
+        <text x="520" y="310" fill="#f8fafc" font-size="16" font-weight="bold">INDIAN</text>
+
+        <text x="270" y="345">DATE OF EXPIRY:</text>
+        <text x="270" y="365" fill="#10b981" font-size="15" font-weight="bold">18 OCT 2033 (VALID)</text>
+      </g>
+
+      <!-- MRZ Zone -->
+      <rect x="40" y="400" width="720" height="75" fill="#020617" stroke="#10b981" stroke-width="1" rx="6"/>
+      <text x="60" y="430" font-family="monospace" font-size="18" fill="#10b981" letter-spacing="3">P&lt;INDVERMA&lt;&lt;ANANYA&lt;SURESH&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text>
+      <text x="60" y="458" font-family="monospace" font-size="18" fill="#10b981" letter-spacing="3">K1093847&lt;8IND9511046F33101859103847120&lt;&lt;&lt;&lt;&lt;&lt;90</text>
+    </svg>
+  `),
+
+  verificationPerson: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+      <rect width="300" height="300" rx="12" fill="#020617" stroke="#334155" stroke-width="2"/>
+      <circle cx="150" cy="110" r="60" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+      <!-- Face Mesh / Grid lines overlay -->
+      <path d="M150 50 L150 170 M90 110 L210 110" stroke="rgba(56, 189, 248, 0.4)" stroke-dasharray="3 3"/>
+      <circle cx="130" cy="100" r="6" fill="#38bdf8"/>
+      <circle cx="170" cy="100" r="6" fill="#38bdf8"/>
+      <path d="M130 140 Q150 160 170 140" fill="none" stroke="#38bdf8" stroke-width="2"/>
+      <path d="M70 270 Q150 180 230 270" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+      <rect x="10" y="10" width="120" height="24" rx="4" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981"/>
+      <text x="18" y="26" font-family="sans-serif" font-size="11" font-weight="bold" fill="#10b981">LIVE CAMERA CAM-04</text>
+    </svg>
+  `)
+};
+
+// Sample Screening Cases for demonstration
+window.DEMO_SCENARIOS = {
+  high_risk: {
+    id: 'high_risk',
+    name: 'High Risk Alert (Scenario 3)',
+    label: 'HIGH RISK (86/100)',
+    description: 'Passport with potential photo replacement, altered Date of Birth, and low face verification match.',
+    result: {
+      screeningId: 'SCR-2026-8942',
+      timestamp: '2026-09-06 15:42:19',
+      checkpoint: 'Attari Border Checkpoint (ICP Attari-Wagah)',
+      officerId: 'UFS-OFF-9042',
+      documentType: 'passport',
+      documentTypeLabel: 'Indian Passport',
+      documentImage: DEMO_DOCUMENTS.highRiskPassport,
+      verificationImage: DEMO_DOCUMENTS.verificationPerson,
+      
+      ocr: {
+        status: 'passed',
+        confidence: 96.2,
+        fields: {
+          fullName: 'SHARMA VIKRAM RAJESH',
+          passportNumber: 'Z9482103',
+          nationality: 'INDIAN',
+          dateOfBirth: '14/08/1988',
+          dateOfExpiry: '22/11/2031',
+          gender: 'M',
+          issuingAuthority: 'RPO DELHI',
+          mrzLine1: 'P<INDSHARMA<<VIKRAM<RAJESH<<<<<<<<<<<<<<<<<<',
+          mrzLine2: 'Z9482103<4IND8808142M3111224820103120<<<<<<84'
+        }
+      },
+      
+      validation: {
+        status: 'warning',
+        passedCount: 8,
+        warningCount: 2,
+        failedCount: 1,
+        checks: [
+          { id: 'v1', ruleName: 'Required Fields Presence', category: 'Completeness', status: 'passed', details: 'All mandatory passport fields detected' },
+          { id: 'v2', ruleName: 'Document Number Format', category: 'Syntax', status: 'passed', details: 'Passport number structure satisfies standard rules' },
+          { id: 'v3', ruleName: 'MRZ Checksum Verification', category: 'Checksum', status: 'warning', details: 'MRZ checksum digit inconsistency detected in Date of Birth segment' },
+          { id: 'v4', ruleName: 'Expiry Status Check', category: 'Validity', status: 'passed', details: 'Expiry date is valid through 22 Nov 2031' },
+          { id: 'v5', ruleName: 'Date Format Standard', category: 'Format', status: 'passed', details: 'ISO 8601 / Standard date layout confirmed' },
+          { id: 'v6', ruleName: 'Internal Consistency', category: 'Logic', status: 'failed', details: 'DOB font character thickness deviates from standard passport print matrix' }
+        ]
+      },
+      
+      tampering: {
+        riskScore: 84,
+        status: 'high_manipulation',
+        suspiciousRegionsCount: 2,
+        detectedSignals: [
+          {
+            id: 'sig-1',
+            title: 'Potential Photo Replacement',
+            category: 'photo',
+            severity: 'high',
+            confidence: 89.4,
+            description: 'Edge boundary artifact and laminate disruption detected surrounding primary portrait region.',
+            locationBoundingBox: { x: 6.5, y: 16, width: 25, height: 48 }
+          },
+          {
+            id: 'sig-2',
+            title: 'Text Font Inconsistency (Date of Birth)',
+            category: 'text',
+            severity: 'high',
+            confidence: 82.1,
+            description: 'Glyph font width and pixel ink distribution inconsistency detected on DOB text field (14/08/1988).',
+            locationBoundingBox: { x: 33, y: 54, width: 28, height: 10 }
+          }
+        ]
+      },
+      
+      faceVerification: {
+        similarityScore: 42.8,
+        signal: 'LOW_SIMILARITY_MISMATCH',
+        faceDetectedInDocument: true,
+        faceDetectedInVerification: true,
+        imageQualityScore: 92.0,
+        landmarksMatched: 41,
+        poseAlignment: 'Good',
+        lightingQuality: 'Optimal'
+      },
+      
+      databaseCheck: {
+        status: 'NO_MATCHING_ALERT',
+        referenceRecord: 'SIM-REF-9021',
+        notice: 'No active Interpol or national crime watchlist hit detected on Passport #Z9482103 (Simulated Data).'
+      },
+      
+      documentStatus: 'SUSPICIOUS_ALTERED',
+      overallRiskScore: 86,
+      riskLevel: 'high',
+      
+      riskContributors: [
+        { category: 'Tampering Signal', percentage: 84, weight: 0.45, description: 'High visual & laminate anomaly in photo and DOB', level: 'high' },
+        { category: 'Face Verification', percentage: 78, weight: 0.35, description: 'Low face similarity match score (42.8%)', level: 'high' },
+        { category: 'MRZ Validation', percentage: 40, weight: 0.15, description: 'Checksum mismatch in date of birth string', level: 'medium' },
+        { category: 'Expiry & Status', percentage: 0, weight: 0.05, description: 'Document is not expired', level: 'low' }
+      ],
+      
+      recommendation: 'manual_review',
+      recommendationTitle: 'MANUAL REVIEW & FORENSIC SCREENING REQUIRED',
+      recommendationDetails: 'Multiple forensic anomaly signals (photo replacement & text tampering) combined with low face verification match require mandatory secondary inspection by authorized border supervisor.',
+      auditHash: '0x8f3c92a1b4e5780d32fa19c42b87e6321f90ab82c14de378',
+      blockchainLogged: true
+    }
+  },
+
+  medium_risk: {
+    id: 'medium_risk',
+    name: 'Medium Risk Warning (Scenario 2)',
+    label: 'MEDIUM RISK (54/100)',
+    description: 'Document valid but approaching expiry date with minor text quality warning.',
+    result: {
+      screeningId: 'SCR-2026-5120',
+      timestamp: '2026-09-06 14:18:05',
+      checkpoint: 'Raxaul Border Checkpoint (ICP Raxaul)',
+      officerId: 'UFS-OFF-4109',
+      documentType: 'passport',
+      documentTypeLabel: 'Indian Passport',
+      documentImage: DEMO_DOCUMENTS.highRiskPassport,
+      verificationImage: DEMO_DOCUMENTS.verificationPerson,
+      
+      ocr: {
+        status: 'passed',
+        confidence: 94.5,
+        fields: {
+          fullName: 'KUMAR AMIT',
+          passportNumber: 'N7492018',
+          nationality: 'INDIAN',
+          dateOfBirth: '20/03/1990',
+          dateOfExpiry: '15/10/2026',
+          gender: 'M',
+          issuingAuthority: 'RPO PATNA'
+        }
+      },
+      
+      validation: {
+        status: 'warning',
+        passedCount: 9,
+        warningCount: 2,
+        failedCount: 0,
+        checks: [
+          { id: 'v1', ruleName: 'Expiry Proximity Check', category: 'Validity', status: 'warning', details: 'Document expires within 45 days (15 Oct 2026)' },
+          { id: 'v2', ruleName: 'MRZ Checksum', category: 'Checksum', status: 'passed', details: 'MRZ checksum verified' }
+        ]
+      },
+      
+      tampering: {
+        riskScore: 35,
+        status: 'warning',
+        suspiciousRegionsCount: 1,
+        detectedSignals: [
+          {
+            id: 'sig-m1',
+            title: 'Minor Microprint Wear',
+            category: 'noise',
+            severity: 'medium',
+            confidence: 58.0,
+            description: 'Slight ink abrasion near stamp edge. Potential physical wear rather than deliberate alteration.',
+            locationBoundingBox: { x: 60, y: 70, width: 20, height: 15 }
+          }
+        ]
+      },
+      
+      faceVerification: {
+        similarityScore: 78.4,
+        signal: 'MODERATE_SIMILARITY',
+        faceDetectedInDocument: true,
+        faceDetectedInVerification: true,
+        imageQualityScore: 88.0,
+        landmarksMatched: 58,
+        poseAlignment: 'Good',
+        lightingQuality: 'Suboptimal'
+      },
+      
+      databaseCheck: {
+        status: 'NO_MATCHING_ALERT',
+        referenceRecord: 'SIM-REF-3091',
+        notice: 'No watchlist alert (Simulated Data).'
+      },
+      
+      documentStatus: 'WARNING_EXPIRED',
+      overallRiskScore: 54,
+      riskLevel: 'medium',
+      
+      riskContributors: [
+        { category: 'Expiry Proximity', percentage: 65, weight: 0.40, description: 'Expires within 45 days', level: 'medium' },
+        { category: 'Face Match Signal', percentage: 40, weight: 0.35, description: 'Moderate face similarity (78.4%)', level: 'medium' },
+        { category: 'Physical Wear Anomaly', percentage: 35, weight: 0.25, description: 'Slight microprint wear detected', level: 'low' }
+      ],
+      
+      recommendation: 'additional_verification',
+      recommendationTitle: 'ADDITIONAL VERIFICATION RECOMMENDED',
+      recommendationDetails: 'Document is authentic but approaching expiry date with minor physical wear. Confirm onward travel ticket and officer query.',
+      auditHash: '0x3a4b5c6d7e8f90123456789abcdef0123456789a',
+      blockchainLogged: true
+    }
+  },
+
+  low_risk: {
+    id: 'low_risk',
+    name: 'Low Risk Verified (Scenario 1)',
+    label: 'LOW RISK (12/100)',
+    description: 'Fully verified genuine travel document with high face similarity match.',
+    result: {
+      screeningId: 'SCR-2026-1029',
+      timestamp: '2026-09-06 15:50:00',
+      checkpoint: 'Petrapole Border Checkpoint (ICP Petrapole)',
+      officerId: 'UFS-OFF-1029',
+      documentType: 'passport',
+      documentTypeLabel: 'Indian Passport',
+      documentImage: DEMO_DOCUMENTS.lowRiskPassport,
+      verificationImage: DEMO_DOCUMENTS.verificationPerson,
+      
+      ocr: {
+        status: 'passed',
+        confidence: 99.1,
+        fields: {
+          fullName: 'VERMA ANANYA SURESH',
+          passportNumber: 'K1093847',
+          nationality: 'INDIAN',
+          dateOfBirth: '04/11/1995',
+          dateOfExpiry: '18/10/2033',
+          gender: 'F',
+          issuingAuthority: 'RPO MUMBAI',
+          mrzLine1: 'P<INDVERMA<<ANANYA<SURESH<<<<<<<<<<<<<<<<<<',
+          mrzLine2: 'K1093847<8IND9511046F33101859103847120<<<<<<90'
+        }
+      },
+      
+      validation: {
+        status: 'passed',
+        passedCount: 11,
+        warningCount: 0,
+        failedCount: 0,
+        checks: [
+          { id: 'v1', ruleName: 'Required Fields', category: 'Completeness', status: 'passed', details: 'All mandatory fields extracted cleanly' },
+          { id: 'v2', ruleName: 'MRZ Checksum', category: 'Checksum', status: 'passed', details: 'All MRZ check digits verified' },
+          { id: 'v3', ruleName: 'Expiry Check', category: 'Validity', status: 'passed', details: 'Valid through 18 Oct 2033' }
+        ]
+      },
+      
+      tampering: {
+        riskScore: 6,
+        status: 'clear',
+        suspiciousRegionsCount: 0,
+        detectedSignals: []
+      },
+      
+      faceVerification: {
+        similarityScore: 96.5,
+        signal: 'HIGH_SIMILARITY',
+        faceDetectedInDocument: true,
+        faceDetectedInVerification: true,
+        imageQualityScore: 98.0,
+        landmarksMatched: 68,
+        poseAlignment: 'Good',
+        lightingQuality: 'Optimal'
+      },
+      
+      databaseCheck: {
+        status: 'NO_MATCHING_ALERT',
+        referenceRecord: 'SIM-REF-1002',
+        notice: 'Clear record status (Simulated Data).'
+      },
+      
+      documentStatus: 'VALID',
+      overallRiskScore: 12,
+      riskLevel: 'low',
+      
+      riskContributors: [
+        { category: 'Tampering Signal', percentage: 6, weight: 0.40, description: 'No tampering indicators detected', level: 'low' },
+        { category: 'Face Match Signal', percentage: 3, weight: 0.35, description: 'High facial match (96.5%)', level: 'low' },
+        { category: 'Validation Checks', percentage: 0, weight: 0.25, description: 'All rule checks passed', level: 'low' }
+      ],
+      
+      recommendation: 'clear',
+      recommendationTitle: 'NO ADDITIONAL SCREENING SIGNAL DETECTED',
+      recommendationDetails: 'Document validation, face verification, and forensic checks satisfy all standard security requirements.',
+      auditHash: '0x10293847566574839201abcef987654321010293',
+      blockchainLogged: true
+    }
+  }
+};
+
+window.RECENT_SCREENINGS_FEED = [
+  { screeningId: 'SCR-1024', documentType: 'Passport', riskScore: 86, riskLevel: 'high', mainSignal: 'Photo Replacement Alert', time: '15:42', status: 'Manual Review' },
+  { screeningId: 'SCR-1023', documentType: 'Visa', riskScore: 12, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '15:38', status: 'Cleared' },
+  { screeningId: 'SCR-1022', documentType: 'National ID', riskScore: 54, riskLevel: 'medium', mainSignal: 'Expiry Warning (<45 days)', time: '15:25', status: 'Addl Verification' },
+  { screeningId: 'SCR-1021', documentType: 'Passport', riskScore: 14, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '15:10', status: 'Cleared' },
+  { screeningId: 'SCR-1020', documentType: 'Travel Permit', riskScore: 89, riskLevel: 'high', mainSignal: 'Date Tampering Anomaly', time: '14:52', status: 'Manual Review' },
+  { screeningId: 'SCR-1019', documentType: 'Driving Licence', riskScore: 18, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '14:40', status: 'Cleared' },
+  { screeningId: 'SCR-1018', documentType: 'Passport', riskScore: 78, riskLevel: 'high', mainSignal: 'Face Mismatch (42%)', time: '14:15', status: 'Manual Review' }
+];
+
+window.BORDER_CHECKPOINTS = [
+  { id: 'attari', name: 'ICP Attari-Wagah', state: 'Punjab', lat: 31.6047, lng: 74.6033, activeOfficers: 42, status: 'OPERATIONAL' },
+  { id: 'raxaul', name: 'ICP Raxaul', state: 'Bihar', lat: 26.9787, lng: 84.8510, activeOfficers: 28, status: 'OPERATIONAL' },
+  { id: 'petrapole', name: 'ICP Petrapole', state: 'West Bengal', lat: 23.0384, lng: 88.8954, activeOfficers: 35, status: 'OPERATIONAL' },
+  { id: 'banbasa', name: 'Banbasa Border', state: 'Uttarakhand', lat: 28.9954, lng: 80.0543, activeOfficers: 19, status: 'OPERATIONAL' },
+  { id: 'moreh', name: 'ICP Moreh', state: 'Manipur', lat: 24.2404, lng: 94.3057, activeOfficers: 24, status: 'OPERATIONAL' }
+];
+
+  </script>
+
+  <!-- Main app (JSX, transpiled live in-browser by Babel) -->
+  <script type="text/babel">
+// BHARAT BORDER INTELLIGENCE - Master React Application Entry
+// FICTIONAL DEMO PROTOTYPE — Union Frontier Security Directorate (not a real government agency)
+
+const { useState, useEffect, useRef } = React;
+
+// Main Master Application Component
+function App() {
+  // Navigation Modes: 'landing' | 'login' | 'app'
+  const [viewMode, setViewMode] = useState('landing');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  
+  // Scenario & Data State
+  const [activeScenario, setActiveScenario] = useState('high_risk');
+  const [screeningResult, setScreeningResult] = useState(window.DEMO_SCENARIOS.high_risk.result);
+  
+  // Pipeline State
+  const [pipelineProgress, setPipelineProgress] = useState(0);
+  const [currentStageIndex, setCurrentStageIndex] = useState(0);
+  const [isScanning, setIsScanning] = useState(false);
+
+  // Selected Document Type for New Screening
+  const [selectedDocType, setSelectedDocType] = useState('passport');
+  const [uploadedDocImage, setUploadedDocImage] = useState(null);
+
+  // Handle Scenario Switch
+  const handleScenarioChange = (scenarioKey) => {
+    setActiveScenario(scenarioKey);
+    const newResult = JSON.parse(JSON.stringify(window.DEMO_SCENARIOS[scenarioKey].result));
+    setScreeningResult(newResult);
+    if (newResult.documentImage) {
+      setUploadedDocImage(newResult.documentImage);
+    }
+  };
+
+  // Navigate to Login from Landing
+  const handleGoToLogin = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setIsTransitioning(false);
+      setViewMode('login');
+    }, 300);
+  };
+
+  // Direct Officer Login Handler
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+    setViewMode('app');
+    setCurrentPage('dashboard');
+  };
+
+  // Logout Handler
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setViewMode('landing');
+    setCurrentPage('dashboard');
+  };
+
+  // Run AI Pipeline Animation
+  const startPipeline = () => {
+    setCurrentPage('analysis');
+    setIsScanning(true);
+    setPipelineProgress(0);
+    setCurrentStageIndex(0);
+
+    const stages = [
+      'OCR EXTRACTION',
+      'DOCUMENT VALIDATION',
+      'TAMPERING & FORENSIC DETECTION',
+      'FACE VERIFICATION',
+      'EXPLAINABLE RISK ASSESSMENT'
+    ];
+
+    let step = 0;
+    const interval = setInterval(() => {
+      step++;
+      setCurrentStageIndex(step);
+      setPipelineProgress(Math.min(100, Math.round((step / stages.length) * 100)));
+
+      if (step >= stages.length) {
+        clearInterval(interval);
+        setIsScanning(false);
+      }
+    }, 800);
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-slate-900 font-sans flex flex-col selection:bg-blue-900 selection:text-white relative overflow-x-hidden">
+      
+      {/* Background Animated India Border Canvas */}
+      <IndiaCanvasBackground isCinematic={viewMode === 'landing'} isTransitioning={isTransitioning} />
+
+      {/* VIEW MODE 1: LANDING EXPERIENCE */}
+      {viewMode === 'landing' && (
+        <CinematicLandingPage 
+          onGoToLogin={handleGoToLogin} 
+          isTransitioning={isTransitioning}
+        />
+      )}
+
+      {/* VIEW MODE 2: OFFICER LOGIN SCREEN */}
+      {viewMode === 'login' && (
+        <LoginPage 
+          onLoginSuccess={handleLoginSuccess} 
+          onBackToLanding={() => setViewMode('landing')}
+        />
+      )}
+
+      {/* VIEW MODE 3: MAIN WORKSTATION PLATFORM */}
+      {viewMode === 'app' && isAuthenticated && (
+        <>
+          {/* Top Compact Header Navigation */}
+          <Header 
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            activeScenario={activeScenario}
+            onScenarioChange={handleScenarioChange}
+            onLogout={handleLogout}
+          />
+
+          {/* Main Workspace Layout */}
+          <div className="flex-1 flex relative z-10">
+            {/* Structured Navigation Sidebar */}
+            <Sidebar 
+              currentPage={currentPage} 
+              setCurrentPage={setCurrentPage} 
+            />
+
+            {/* View Containers */}
+            <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
+              {currentPage === 'dashboard' && (
+                <DashboardPage 
+                  setCurrentPage={setCurrentPage}
+                  screeningResult={screeningResult}
+                  activeScenario={activeScenario}
+                  onScenarioChange={handleScenarioChange}
+                />
+              )}
+
+              {currentPage === 'active_screening' && (
+                <ActiveScreeningPage 
+                  screeningResult={screeningResult}
+                  setCurrentPage={setCurrentPage}
+                />
+              )}
+
+              {currentPage === 'new_screening' && (
+                <NewScreeningPage 
+                  selectedDocType={selectedDocType}
+                  setSelectedDocType={setSelectedDocType}
+                  uploadedDocImage={uploadedDocImage}
+                  setUploadedDocImage={setUploadedDocImage}
+                  onStartPipeline={startPipeline}
+                  activeScenario={activeScenario}
+                  onScenarioChange={handleScenarioChange}
+                />
+              )}
+
+              {currentPage === 'analysis' && (
+                <AIAnalysisPage 
+                  progress={pipelineProgress}
+                  currentStageIndex={currentStageIndex}
+                  isScanning={isScanning}
+                  screeningResult={screeningResult}
+                  onComplete={() => setCurrentPage('result')}
+                />
+              )}
+
+              {currentPage === 'result' && (
+                <VerificationResultPage 
+                  result={screeningResult}
+                  setCurrentPage={setCurrentPage}
+                />
+              )}
+
+              {currentPage === 'forensics' && (
+                <ForensicsPage 
+                  result={screeningResult}
+                />
+              )}
+
+              {currentPage === 'face_verification' && (
+                <FaceVerificationPage 
+                  result={screeningResult}
+                />
+              )}
+
+              {currentPage === 'history' && (
+                <ScreeningHistoryPage 
+                  setCurrentPage={setCurrentPage}
+                />
+              )}
+
+              {currentPage === 'analytics' && (
+                <AnalyticsPage />
+              )}
+
+              {currentPage === 'report' && (
+                <DetailedReportPage 
+                  result={screeningResult}
+                />
+              )}
+
+              {currentPage === 'system_status' && (
+                <SystemStatusPage />
+              )}
+            </main>
+          </div>
+
+          {/* Footer Operational Status Bar */}
+          <footer className="bg-white/95 border-t border-slate-200 px-6 py-2 text-xs font-mono text-slate-500 flex flex-wrap justify-between items-center z-20 backdrop-blur">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-emerald-700 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                SYSTEM OPERATIONAL
+              </span>
+              <span>|</span>
+              <span>BBI • SECURE SCREENING PLATFORM</span>
+              <span>|</span>
+              <span>CHECKPOINT: ICP ATTARI-WAGAH</span>
+            </div>
+            <div className="flex items-center gap-4 text-slate-500">
+              <span>ENCRYPTED WORKSTATION</span>
+              <span>|</span>
+              <span className="text-amber-700 font-semibold">SIMULATION MODE</span>
+            </div>
+          </footer>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// CANVAS BACKGROUND (India Border Network)
+// ----------------------------------------------------
+function IndiaCanvasBackground({ isCinematic, isTransitioning }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animId;
+    let scanY = 0;
+    let scanDirection = 1;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const nodes = [
+      { name: 'Attari-Wagah', x: 0.32, y: 0.22 },
+      { name: 'Raxaul', x: 0.58, y: 0.32 },
+      { name: 'Banbasa', x: 0.44, y: 0.25 },
+      { name: 'Petrapole', x: 0.70, y: 0.46 },
+      { name: 'Moreh', x: 0.84, y: 0.38 }
+    ];
+
+    const indiaOutline = [
+      { x: 0.30, y: 0.15 }, { x: 0.38, y: 0.10 }, { x: 0.45, y: 0.12 },
+      { x: 0.52, y: 0.22 }, { x: 0.68, y: 0.24 }, { x: 0.82, y: 0.22 },
+      { x: 0.88, y: 0.34 }, { x: 0.78, y: 0.46 }, { x: 0.65, y: 0.50 },
+      { x: 0.52, y: 0.65 }, { x: 0.48, y: 0.82 }, { x: 0.42, y: 0.88 },
+      { x: 0.38, y: 0.75 }, { x: 0.28, y: 0.55 }, { x: 0.22, y: 0.38 },
+      { x: 0.26, y: 0.22 }
+    ];
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Grid
+      ctx.strokeStyle = isCinematic ? 'rgba(10, 49, 97, 0.08)' : 'rgba(10, 49, 97, 0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 80) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 80) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // India Vector Silhouette
+      ctx.beginPath();
+      indiaOutline.forEach((pt, idx) => {
+        const px = pt.x * w;
+        const py = pt.y * h;
+        if (idx === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.closePath();
+      ctx.fillStyle = isCinematic ? 'rgba(10, 49, 97, 0.05)' : 'rgba(10, 49, 97, 0.03)';
+      ctx.fill();
+      ctx.strokeStyle = isCinematic ? 'rgba(200, 151, 58, 0.25)' : 'rgba(200, 151, 58, 0.1)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Scan beam
+      scanY += 1.2 * scanDirection;
+      if (scanY > h || scanY < 0) scanDirection *= -1;
+      
+      const scanGrad = ctx.createLinearGradient(0, scanY - 20, 0, scanY + 20);
+      scanGrad.addColorStop(0, 'rgba(10, 49, 97, 0)');
+      scanGrad.addColorStop(0.5, isCinematic ? 'rgba(10, 49, 97, 0.08)' : 'rgba(10, 49, 97, 0.04)');
+      scanGrad.addColorStop(1, 'rgba(10, 49, 97, 0)');
+      ctx.fillStyle = scanGrad;
+      ctx.fillRect(0, scanY - 20, w, 40);
+
+      // Connections
+      nodes.forEach((n1, i) => {
+        nodes.forEach((n2, j) => {
+          if (i < j) {
+            ctx.beginPath();
+            ctx.moveTo(n1.x * w, n1.y * h);
+            ctx.lineTo(n2.x * w, n2.y * h);
+            ctx.strokeStyle = isCinematic ? 'rgba(200, 151, 58, 0.2)' : 'rgba(10, 49, 97, 0.06)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 6]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        });
+      });
+
+      // Nodes
+      const pulse = (Math.sin(Date.now() * 0.003) + 1) * 0.5;
+      nodes.forEach((n) => {
+        const nx = n.x * w;
+        const ny = n.y * h;
+
+        ctx.beginPath();
+        ctx.arc(nx, ny, 5 + pulse * 5, 0, Math.PI * 2);
+        ctx.fillStyle = isCinematic ? 'rgba(10, 49, 97, 0.12)' : 'rgba(10, 49, 97, 0.08)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(nx, ny, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#0a3161';
+        ctx.fill();
+      });
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animId);
+    };
+  }, [isCinematic, isTransitioning]);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className={`fixed inset-0 pointer-events-none z-0 transition-opacity duration-700 ${
+        isCinematic ? 'opacity-90' : 'opacity-60'
+      }`}
+    />
+  );
+}
+
+// ----------------------------------------------------
+// AGENCY EMBLEM (fictional shield/star mark — used in place of any
+// real government crest; sized via the `size` prop)
+// ----------------------------------------------------
+function AgencyEmblem({ size = 36 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 48 48"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="Union Frontier Security Directorate emblem"
+    >
+      <path
+        d="M24 3 L42 9 V22 C42 33 35 41 24 45 C13 41 6 33 6 22 V9 Z"
+        fill="#0a3161"
+        stroke="#c8973a"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M24 7 L38 12 V22 C38 31 32.5 37.5 24 41 C15.5 37.5 10 31 10 22 V12 Z"
+        fill="none"
+        stroke="#c8973a"
+        strokeWidth="0.75"
+        opacity="0.6"
+      />
+      <path
+        d="M24 14 L26.4 20.1 L33 20.6 L27.9 24.7 L29.6 31 L24 27.4 L18.4 31 L20.1 24.7 L15 20.6 L21.6 20.1 Z"
+        fill="#c8973a"
+      />
+    </svg>
+  );
+}
+
+// ----------------------------------------------------
+// 1. LANDING PAGE (Officer Access Portal Entry)
+// ----------------------------------------------------
+function CinematicLandingPage({ onGoToLogin, isTransitioning }) {
+  return (
+    <div className={`min-h-screen flex flex-col justify-between p-6 md:p-12 relative z-10 transition-all duration-500 ${
+      isTransitioning ? 'scale-95 opacity-0 filter blur-lg' : 'scale-100 opacity-100'
+    }`}>
+      {/* Top Bar */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <AgencyEmblem size={38} />
+          <span className="text-xs font-mono tracking-widest text-slate-600 font-bold uppercase">
+            BHARAT BORDER INTELLIGENCE
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-700 bg-white/95 px-3 py-1 rounded-full border border-slate-200 backdrop-blur">
+          <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+          <span>● SECURE NETWORK ONLINE</span>
+        </div>
+      </div>
+
+      {/* Main Center Content */}
+      <div className="max-w-3xl my-auto space-y-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/95 border border-slate-200 backdrop-blur">
+          <span className="w-2 h-2 rounded-full bg-blue-900 animate-ping"></span>
+          <span className="text-[11px] font-mono font-bold tracking-widest text-blue-800 uppercase">
+            AI-ASSISTED BORDER SECURITY PLATFORM
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-tight animate-fade-in-blur">
+            BHARAT BORDER <br />
+            <span className="text-[#0a3161]">
+              INTELLIGENCE
+            </span>
+          </h1>
+          
+          <p className="text-sm md:text-base font-mono text-slate-500 max-w-xl animate-letter-expand">
+            AI-POWERED IDENTITY & DOCUMENT SCREENING
+          </p>
+        </div>
+
+        <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-sans max-w-lg">
+          AI-assisted decision-support platform for authorized border security personnel. Multi-layered digital forensics, 1:1 facial verification, and explainable risk analysis.
+        </p>
+
+        {/* Primary Single CTA: OFFICER LOGIN */}
+        <div className="pt-4 flex items-center gap-4">
+          <button
+            onClick={onGoToLogin}
+            className="group relative inline-flex items-center gap-3 bg-[#0a3161] hover:bg-[#0d3d78] text-white font-bold px-8 py-4 rounded-xl text-sm shadow-lg tracking-wider transition-all transform hover:scale-[1.02] border-b-4 border-[#c8973a]"
+          >
+            <span>🔒 OFFICER LOGIN</span>
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex flex-wrap justify-between items-center text-[11px] font-mono text-slate-500 border-t border-slate-200 pt-4">
+        <div>AUTHORIZED PERSONNEL ONLY • SECURE SYSTEM • BBI</div>
+        <div className="flex gap-4">
+          <span>ICP ATTARI-WAGAH</span>
+          <span>•</span>
+          <span>ICP RAXAUL</span>
+          <span>•</span>
+          <span>ICP PETRAPOLE</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// 2. OFFICER LOGIN PAGE
+// ----------------------------------------------------
+function LoginPage({ onLoginSuccess, onBackToLanding }) {
+  const [officerId, setOfficerId] = useState('UFS-OFF-9042');
+  const [password, setPassword] = useState('••••••••••••');
+  const [remember, setRemember] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyStep, setVerifyStep] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const executeLoginFlow = () => {
+    setErrorMsg('');
+    if (!officerId.trim() || !password.trim()) {
+      setErrorMsg('Unable to verify officer credentials.');
+      return;
+    }
+
+    setIsVerifying(true);
+    setVerifyStep('Verifying officer credentials...');
+
+    setTimeout(() => {
+      setVerifyStep('Secure session established.');
+      setTimeout(() => {
+        setIsVerifying(false);
+        onLoginSuccess();
+      }, 500);
+    }, 700);
+  };
+
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+    executeLoginFlow();
+  };
+
+  const handleDemoAccess = () => {
+    setOfficerId('DEMO-OFFICER-01');
+    setPassword('demo123');
+    executeLoginFlow();
+  };
+
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center p-4 relative z-10">
+      <div className="w-full max-w-md bg-white/95 border border-slate-200 rounded-2xl p-8 shadow-2xl space-y-6 relative overflow-hidden backdrop-blur">
+        
+        <button 
+          onClick={onBackToLanding}
+          className="text-xs font-mono text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-2 transition"
+        >
+          ← Back to Landing Page
+        </button>
+
+        {/* Portal Header */}
+        <div className="text-center space-y-2">
+          <div className="mx-auto w-16 h-16 flex items-center justify-center">
+            <AgencyEmblem size={60} />
+          </div>
+
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-wide">BHARAT BORDER INTELLIGENCE</h2>
+          <div className="text-xs font-mono font-bold text-blue-800 tracking-widest uppercase">
+            OFFICER WORKSTATION
+          </div>
+          <p className="text-xs text-slate-500 font-mono">
+            Secure Access Portal
+          </p>
+        </div>
+
+        {/* Form or Verification Loading Overlay */}
+        {isVerifying ? (
+          <div className="py-10 text-center space-y-4 font-mono">
+            <div className="w-10 h-10 border-2 border-blue-800 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="text-sm text-blue-800 font-bold animate-pulse">{verifyStep}</div>
+            <div className="text-[11px] text-slate-500">Establishing encrypted workstation session...</div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {errorMsg && (
+              <div className="bg-amber-50 border border-amber-300 text-amber-700 text-xs font-mono p-3 rounded-lg text-center">
+                ⚠ {errorMsg}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-mono font-bold text-slate-600 uppercase mb-1">
+                OFFICER ID
+              </label>
+              <input 
+                type="text" 
+                value={officerId}
+                onChange={(e) => setOfficerId(e.target.value)}
+                placeholder="e.g. UFS-OFF-9042"
+                className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:border-blue-800 transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-mono font-bold text-slate-600 uppercase mb-1">
+                PASSWORD
+              </label>
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:border-blue-800 transition"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <input 
+                type="checkbox" 
+                id="remember"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="w-4 h-4 rounded accent-blue-900 bg-white border-slate-300"
+              />
+              <label htmlFor="remember" className="text-xs font-mono text-slate-500 cursor-pointer">
+                Remember this workstation
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#0a3161] hover:bg-[#0d3d78] text-white font-bold py-3 rounded-xl text-sm tracking-wider shadow-lg transition-all flex items-center justify-center gap-2 border-b-4 border-[#c8973a]"
+            >
+              🔒 SECURE LOGIN →
+            </button>
+          </form>
+        )}
+
+        {/* Quick Demo Access Option & Footer status */}
+        {!isVerifying && (
+          <div className="pt-3 border-t border-slate-200 text-center space-y-3">
+            <button
+              type="button"
+              onClick={handleDemoAccess}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-amber-700 font-semibold py-2.5 rounded-lg text-xs border border-amber-400/60 transition-all flex items-center justify-center gap-2 font-mono"
+            >
+              ⚡ DEMO OFFICER ACCESS (SIMULATION MODE)
+            </button>
+
+            <div className="text-[10px] font-mono text-slate-500 space-y-1">
+              <p className="text-emerald-700 font-semibold">● SECURE CONNECTION</p>
+              <p>Authorized personnel only.</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// HEADER COMPONENT (Officer Workstation Header)
+// ----------------------------------------------------
+function Header({ currentPage, setCurrentPage, activeScenario, onScenarioChange, onLogout }) {
+  return (
+    <header className="bg-white/95 border-b border-slate-200 sticky top-0 z-30 backdrop-blur px-6 py-2.5 shadow">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+        
+        {/* Brand & Workstation Officer Session Info */}
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('dashboard')}>
+          <AgencyEmblem size={34} />
+
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-bold text-sm text-slate-900 tracking-wide">BHARAT BORDER INTELLIGENCE</h1>
+              <span className="text-[11px] font-mono text-emerald-700 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                SYSTEM ONLINE
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-mono">
+              OFFICER WORKSTATION | Officer: Insp. R. S. Verma (Demo Officer) | Checkpoint: ICP Attari-Wagah
+            </p>
+          </div>
+        </div>
+
+        {/* Header Quick Controls & Logout */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setCurrentPage('new_screening')}
+            className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-3 py-1.5 rounded-md text-xs transition flex items-center gap-1 shadow-sm"
+          >
+            <span>＋</span> New Screening
+          </button>
+
+          <button 
+            onClick={onLogout}
+            className="text-xs text-slate-500 hover:text-slate-900 px-2.5 py-1.5 rounded-md border border-slate-200 hover:border-slate-300 bg-white transition flex items-center gap-1 font-mono"
+            title="End Session & Return to Login"
+          >
+            🔒 Logout
+          </button>
+        </div>
+
+      </div>
+    </header>
+  );
+}
+
+// ----------------------------------------------------
+// SIDEBAR COMPONENT (Structured Navigation Hierarchy)
+// ----------------------------------------------------
+function Sidebar({ currentPage, setCurrentPage }) {
+  const sections = [
+    {
+      title: 'WORKSPACE',
+      items: [
+        { id: 'dashboard', label: 'Dashboard', icon: '⌂' },
+        { id: 'new_screening', label: 'New Screening', icon: '＋' }
+      ]
+    },
+    {
+      title: 'SCREENING',
+      items: [
+        { id: 'active_screening', label: 'Active Screening', icon: '◉' },
+        { id: 'history', label: 'Screening History', icon: '▣' }
+      ]
+    },
+    {
+      title: 'VERIFICATION',
+      items: [
+        { id: 'forensics', label: 'Document Forensics', icon: '◇' },
+        { id: 'face_verification', label: 'Face Verification', icon: '♙' }
+      ]
+    },
+    {
+      title: 'REPORTING',
+      items: [
+        { id: 'report', label: 'Official Reports', icon: '▤' },
+        { id: 'analytics', label: 'Analytics', icon: '◌' }
+      ]
+    },
+    {
+      title: 'SYSTEM',
+      items: [
+        { id: 'system_status', label: 'System Status', icon: '⚙' }
+      ]
+    }
+  ];
+
+  return (
+    <aside className="w-56 bg-white/95 border-r border-slate-200 p-3.5 hidden md:flex flex-col justify-between shrink-0">
+      <div className="space-y-4">
+        {sections.map((sec, idx) => (
+          <div key={idx} className="space-y-1">
+            <div className="px-2.5 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
+              {sec.title}
+            </div>
+
+            {sec.items.map((item) => {
+              const isActive = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setCurrentPage(item.id)}
+                  className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-900 font-semibold border-l-2 border-blue-900'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                  }`}
+                >
+                  <span className="text-sm">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Officer Card */}
+      <div className="bg-white/95 p-2.5 rounded-lg border border-slate-200 space-y-1">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-[10px] font-bold text-slate-600">
+            OFF
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-slate-800">INSP. R. S. VERMA</div>
+            <div className="text-[9px] font-mono text-slate-500">UFS-9042</div>
+          </div>
+        </div>
+        <div className="text-[9px] font-mono text-emerald-700 bg-emerald-50/40 p-0.5 rounded text-center border border-emerald-200/50">
+          DUTY: ON SCREENING
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+// ----------------------------------------------------
+// DASHBOARD PAGE (Today's Work Overview)
+// ----------------------------------------------------
+function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScenarioChange }) {
+  const isHigh = screeningResult.riskLevel === 'high';
+  const isMed = screeningResult.riskLevel === 'medium';
+  const recentFeed = window.RECENT_SCREENINGS_FEED.slice(0, 4);
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto">
+      
+      {/* 1. CURRENT SCREENING CASE CARD */}
+      <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-md space-y-4">
+        <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold text-slate-500 uppercase">CURRENT SCREENING CASE</span>
+            <span className="text-xs text-emerald-700 font-mono">● Active</span>
+          </div>
+
+          <button 
+            onClick={() => setCurrentPage('active_screening')}
+            className="text-xs font-bold text-blue-800 hover:underline flex items-center gap-1"
+          >
+            OPEN CASE →
+          </button>
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-1">
+            <div className="text-lg font-bold text-slate-900 flex items-center gap-3">
+              <span>{screeningResult.screeningId}</span>
+              <span>—</span>
+              <span className="text-slate-600">{screeningResult.documentTypeLabel}</span>
+            </div>
+            <div className="text-xs text-slate-500 font-mono">
+              Status: AI Screening Complete | {screeningResult.timestamp}
+            </div>
+          </div>
+
+          {/* Specific Status Badge */}
+          <div className="flex items-center gap-3">
+            <span className={`px-3 py-1 rounded-md text-xs font-bold font-mono ${
+              isHigh ? 'bg-red-50 text-red-700 border border-red-200' :
+              isMed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+              'bg-emerald-50 text-emerald-700 border border-emerald-200'
+            }`}>
+              {isHigh ? '🔴 HIGH RISK (86/100)' : isMed ? '⚠ MEDIUM RISK (54/100)' : '✓ LOW RISK (12/100)'}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage('active_screening')}
+              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-md text-xs shadow transition"
+            >
+              Open Active Case
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. TODAY'S WORK — 3 COMPACT INDICATORS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+          <div className="text-xs text-slate-500 font-semibold">Screened Today</div>
+          <div className="text-2xl font-bold text-slate-900 font-mono">1,248</div>
+          <div className="text-[10px] text-slate-500">Normal Checkpoint Flow</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+          <div className="text-xs text-amber-700 font-semibold">Needs Review</div>
+          <div className="text-2xl font-bold text-amber-700 font-mono">37</div>
+          <div className="text-[10px] text-slate-500">Pending Officer Decision</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+          <div className="text-xs text-red-600 font-semibold">High Risk Cases</div>
+          <div className="text-2xl font-bold text-red-600 font-mono">12</div>
+          <div className="text-[10px] text-slate-500">Flagged Anomalies</div>
+        </div>
+      </div>
+
+      {/* 3. RECENT ACTIVITY — LATEST 4-5 CASES */}
+      <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+        <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">RECENT SCREENING ACTIVITY</h3>
+          <button 
+            onClick={() => setCurrentPage('history')}
+            className="text-xs text-blue-800 font-mono hover:underline"
+          >
+            VIEW HISTORY →
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs font-mono">
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-500 uppercase">
+                <th className="pb-2 px-2">TIME</th>
+                <th className="pb-2 px-2">CASE ID</th>
+                <th className="pb-2 px-2">DOCUMENT</th>
+                <th className="pb-2 px-2">STATUS</th>
+                <th className="pb-2 px-2 text-right">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {recentFeed.map((row, idx) => (
+                <tr key={idx} className="hover:bg-slate-100 transition">
+                  <td className="py-2.5 px-2 text-slate-500">{row.time}</td>
+                  <td className="py-2.5 px-2 font-bold text-slate-800">{row.screeningId}</td>
+                  <td className="py-2.5 px-2 text-slate-600">{row.documentType}</td>
+                  <td className="py-2.5 px-2">
+                    <span className={`px-2 py-0.5 rounded font-bold ${
+                      row.riskLevel === 'high' ? 'text-red-600' :
+                      row.riskLevel === 'medium' ? 'text-amber-700' :
+                      'text-emerald-700'
+                    }`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-2 text-right">
+                    <button onClick={() => setCurrentPage('result')} className="text-blue-800 hover:underline">
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// ACTIVE SCREENING PAGE (Officer Main Working Area)
+// ----------------------------------------------------
+function ActiveScreeningPage({ screeningResult, setCurrentPage }) {
+  const isHigh = screeningResult.riskLevel === 'high';
+  const isMed = screeningResult.riskLevel === 'medium';
+  const isLow = screeningResult.riskLevel === 'low';
+
+  const docPassed = screeningResult.tampering.riskScore < 30;
+  const facePassed = screeningResult.faceVerification.similarityScore >= 75;
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Header Banner */}
+      <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="text-xs font-mono text-slate-500 font-bold uppercase">ACTIVE PASSENGER WORKSTATION</div>
+          <h2 className="text-xl font-bold text-slate-900 mt-0.5">
+            Case #{screeningResult.screeningId} — {screeningResult.documentTypeLabel}
+          </h2>
+        </div>
+
+        {/* Risk Badge */}
+        <span className={`px-3 py-1 rounded-md text-xs font-bold font-mono ${
+          isHigh ? 'bg-red-50 text-red-700 border border-red-200' :
+          isMed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+          'bg-emerald-50 text-emerald-700 border border-emerald-200'
+        }`}>
+          {isHigh ? '🔴 HIGH RISK (86/100)' : isMed ? '⚠ MEDIUM RISK (54/100)' : '✓ LOW RISK (12/100)'}
+        </span>
+      </div>
+
+      {/* Main Working Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Col 1: Document */}
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3">
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">DOCUMENT IMAGE</div>
+          <div className="w-full h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
+            <img src={screeningResult.documentImage} alt="Document" className="max-h-full object-contain" />
+          </div>
+          <div className="text-[11px] font-mono text-slate-500 space-y-1">
+            <div>Passport: <strong>{screeningResult.passportNumber || 'Z9482103'}</strong></div>
+            <div>Expiry: <strong>Valid (2031)</strong></div>
+          </div>
+        </div>
+
+        {/* Col 2: Identity Face Comparison */}
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3">
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">IDENTITY MATCH</div>
+          <div className="grid grid-cols-2 gap-2 h-44">
+            <div className="bg-slate-50 rounded p-1 flex items-center justify-center border border-slate-200">
+              <img src={screeningResult.documentImage} alt="Doc Photo" className="max-h-full object-contain" />
+            </div>
+            <div className="bg-slate-50 rounded p-1 flex items-center justify-center border border-slate-200">
+              <img src={screeningResult.verificationImage} alt="Live Capture" className="max-h-full object-contain" />
+            </div>
+          </div>
+          <div className="text-center pt-2">
+            <span className={`px-3 py-1 rounded text-xs font-mono font-bold ${
+              facePassed ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              Similarity: {screeningResult.faceVerification.similarityScore}%
+            </span>
+          </div>
+        </div>
+
+        {/* Col 3: Checklist & Decision */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="text-xs font-mono font-bold text-slate-600 uppercase">AUTOMATED AUDIT CHECKLIST</div>
+            
+            <div className="space-y-2 text-xs font-mono">
+              <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                <span className="text-slate-500">Document Integrity:</span>
+                <span className={docPassed ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
+                  {docPassed ? '✓ Passed' : '✕ Anomaly'}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                <span className="text-slate-500">Biometric Face Match:</span>
+                <span className={facePassed ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
+                  {facePassed ? '✓ Matched' : '✕ Mismatch'}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                <span className="text-slate-500">Expiry Validation:</span>
+                <span className="text-emerald-700 font-bold">✓ Valid Expiry</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-slate-500">Watchlist Check:</span>
+                <span className="text-emerald-700 font-bold">✓ Clear</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setCurrentPage('result')}
+            className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg text-xs shadow transition"
+          >
+            COMPLETE SCREENING →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// NEW SCREENING PAGE (3-Step Simple Workflow)
+// ----------------------------------------------------
+function NewScreeningPage({ selectedDocType, setSelectedDocType, uploadedDocImage, setUploadedDocImage, onStartPipeline, activeScenario, onScenarioChange }) {
+  const docTypes = [
+    { id: 'passport', label: 'Passport', icon: '📖' },
+    { id: 'visa', label: 'Travel Visa', icon: '📑' },
+    { id: 'national_id', label: 'National ID', icon: '🪪' },
+    { id: 'driving_licence', label: 'Driving Licence', icon: '💳' },
+    { id: 'travel_permit', label: 'Travel Permit', icon: '📝' }
+  ];
+
+  return (
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">NEW BORDER SCREENING</h2>
+          <p className="text-xs text-slate-500">Verify a passenger document and identity.</p>
+        </div>
+
+        {/* Sample Screening Cases Controls */}
+        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+          <span className="text-[10px] font-mono text-amber-700 font-bold uppercase">SAMPLE SCREENING CASES:</span>
+          <button onClick={() => onScenarioChange('low_risk')} className="text-xs bg-slate-100 hover:bg-slate-200 text-emerald-700 px-2 py-0.5 rounded font-mono">Low Risk Case</button>
+          <button onClick={() => onScenarioChange('medium_risk')} className="text-xs bg-slate-100 hover:bg-slate-200 text-amber-700 px-2 py-0.5 rounded font-mono">Med Risk Case</button>
+          <button onClick={() => onScenarioChange('high_risk')} className="text-xs bg-slate-100 hover:bg-slate-200 text-red-600 px-2 py-0.5 rounded font-mono">High Risk Case</button>
+        </div>
+      </div>
+
+      {/* 3-Step Workflow Container */}
+      <div className="space-y-6">
+        
+        {/* Step 1: Document */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 1 — DOCUMENT SELECTION & UPLOAD</div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {docTypes.map((dt) => (
+              <button
+                key={dt.id}
+                onClick={() => setSelectedDocType(dt.id)}
+                className={`p-3 rounded-lg border text-center transition ${
+                  selectedDocType === dt.id
+                    ? 'bg-blue-900/20 border-blue-800 text-blue-800 font-bold'
+                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
+                }`}
+              >
+                <div className="text-xl mb-1">{dt.icon}</div>
+                <div className="text-xs font-mono">{dt.label}</div>
+              </button>
+            ))}
+          </div>
+
+          <div className="w-full h-40 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
+            <img src={uploadedDocImage || window.DEMO_DOCUMENTS.highRiskPassport} alt="Document Preview" className="max-h-full object-contain" />
+          </div>
+          <div className="text-[11px] font-mono text-slate-500 text-center">Supported formats: JPG / PNG / PDF (Demo Sample Document Active)</div>
+        </div>
+
+        {/* Step 2: Identity Face */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 2 — IDENTITY FACE CAPTURE</div>
+          <div className="w-full h-36 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
+            <img src={window.DEMO_DOCUMENTS.verificationPerson} alt="Camera Preview" className="max-h-full object-contain" />
+          </div>
+          <div className="text-[11px] font-mono text-emerald-700 text-center">✓ Camera Feed Active (CAM-04)</div>
+        </div>
+
+        {/* Step 3: Screening CTA */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl text-center space-y-3">
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 3 — AI SCREENING ANALYSIS</div>
+          <button
+            onClick={onStartPipeline}
+            className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow transition"
+          >
+            START AI SCREENING →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// AI ANALYSIS PAGE (Live Pipeline Scanner)
+// ----------------------------------------------------
+function AIAnalysisPage({ progress, currentStageIndex, isScanning, screeningResult, onComplete }) {
+  const stages = [
+    { num: '01', name: 'OCR EXTRACTION', desc: 'Extracting field attributes & MRZ text' },
+    { num: '02', name: 'DOCUMENT VALIDATION', desc: 'Running checksum rules & expiry format' },
+    { num: '03', name: 'TAMPERING DETECTION', desc: 'Analyzing laminate & font anomalies' },
+    { num: '04', name: 'FACE VERIFICATION', desc: 'Performing 1:1 landmark comparison' },
+    { num: '05', name: 'RISK ASSESSMENT', desc: 'Synthesizing explainable risk signals' }
+  ];
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-2">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-bold text-slate-900">AI SCREENING IN PROGRESS</h2>
+          <span className="text-lg font-mono font-bold text-blue-800">{progress}%</span>
+        </div>
+
+        <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-200">
+          <div className="h-full bg-gradient-to-r from-blue-900 to-emerald-500 transition-all duration-300" style={{ width: `${progress}%` }}></div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3 relative overflow-hidden">
+          <div className="text-xs font-mono text-slate-600">DOCUMENT SCANNER</div>
+          <div className="relative w-full h-64 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-3">
+            <img src={screeningResult.documentImage} alt="Scanning" className="max-h-full object-contain" />
+            {isScanning && <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-800 to-transparent shadow animate-scan"></div>}
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">AI MODULE STAGES</div>
+          <div className="space-y-2.5">
+            {stages.map((stg, idx) => {
+              const isDone = idx < currentStageIndex;
+              const isCurrent = idx === currentStageIndex;
+
+              return (
+                <div key={idx} className={`p-3 rounded-lg border text-xs font-mono transition ${
+                  isDone ? 'bg-emerald-50/30 border-emerald-200/60 text-emerald-700' :
+                  isCurrent ? 'bg-blue-50/30 border-blue-800/80 text-blue-700' :
+                  'bg-slate-50 border-slate-200 text-slate-500'
+                }`}>
+                  <div className="flex justify-between font-bold">
+                    <span>{stg.num} {stg.name}</span>
+                    <span>{isDone ? '✓ COMPLETE' : isCurrent ? '⟳ ANALYZING...' : '○ QUEUED'}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {!isScanning && (
+            <button onClick={onComplete} className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 rounded text-xs shadow transition mt-2">
+              VIEW FINAL SCREENING RESULT →
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// SCREENING RESULT PAGE (Clean Calm Decision Screen)
+// ----------------------------------------------------
+function VerificationResultPage({ result, setCurrentPage }) {
+  const isHigh = result.riskLevel === 'high';
+  const isMed = result.riskLevel === 'medium';
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Top Banner */}
+      <div className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center">
+        <div>
+          <div className="text-xs font-mono text-slate-500">Case #{result.screeningId} | {result.documentTypeLabel}</div>
+          <h2 className="text-lg font-bold text-slate-900 mt-0.5">AI SCREENING COMPLETE</h2>
+        </div>
+
+        {/* Status Badge */}
+        <span className={`px-4 py-1.5 rounded-lg text-sm font-bold font-mono ${
+          isHigh ? 'bg-red-50 text-red-700 border border-red-200' :
+          isMed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+          'bg-emerald-50 text-emerald-700 border border-emerald-200'
+        }`}>
+          {isHigh ? '🔴 SECONDARY INSPECTION' : isMed ? '⚠ MANUAL REVIEW' : '✓ CLEAR FOR ENTRY'}
+        </span>
+      </div>
+
+      {/* WHY Section (2-4 Concise Reasons) */}
+      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
+        <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">WHY THIS RESULT?</h3>
+        
+        <div className="space-y-2 text-xs font-mono">
+          <div className="flex items-center gap-2 text-slate-600">
+            <span className="text-emerald-700 font-bold">✓</span>
+            <span>Required passport fields present and extracted cleanly.</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-slate-600">
+            <span className={result.faceVerification.similarityScore >= 75 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
+              {result.faceVerification.similarityScore >= 75 ? '✓' : '⚠'}
+            </span>
+            <span>Biometric Face Similarity Score: <strong>{result.faceVerification.similarityScore}%</strong> ({result.faceVerification.signal})</span>
+          </div>
+
+          {result.tampering.detectedSignals.map((sig, i) => (
+            <div key={i} className="flex items-center gap-2 text-red-600">
+              <span className="text-red-600 font-bold">⚠</span>
+              <span>{sig.title} — {sig.description}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recommended Action Card */}
+      <div className="bg-white border border-slate-200 p-6 rounded-xl space-y-4">
+        <div className="text-xs font-mono font-bold text-slate-500 uppercase">RECOMMENDED ACTION</div>
+
+        <div className="flex flex-wrap gap-3">
+          {isHigh ? (
+            <>
+              <button onClick={() => setCurrentPage('forensics')} className="bg-red-600 hover:bg-red-500 text-white font-bold px-5 py-2.5 rounded text-xs transition">
+                OPEN FORENSIC ANALYSIS
+              </button>
+              <button onClick={() => setCurrentPage('face_verification')} className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2.5 rounded text-xs border border-slate-300 transition">
+                VIEW FACE MATCH
+              </button>
+            </>
+          ) : isMed ? (
+            <button onClick={() => setCurrentPage('forensics')} className="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-5 py-2.5 rounded text-xs transition">
+              REVIEW CASE
+            </button>
+          ) : (
+            <button onClick={() => setCurrentPage('report')} className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded text-xs transition">
+              CLEAR CASE
+            </button>
+          )}
+
+          <button onClick={() => setCurrentPage('report')} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-4 py-2.5 rounded text-xs border border-slate-300 transition">
+            GENERATE REPORT
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// DOCUMENT FORENSICS PAGE (Progressive Disclosure Investigation)
+// ----------------------------------------------------
+function ForensicsPage({ result }) {
+  const [showOverlay, setShowOverlay] = useState(true);
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const signals = result.tampering.detectedSignals;
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">DOCUMENT FORENSICS</h2>
+          <p className="text-xs text-slate-500">Deep-dive physical laminate & text font anomaly investigation.</p>
+        </div>
+
+        <button
+          onClick={() => setShowOverlay(!showOverlay)}
+          className="px-3 py-1 rounded text-xs font-mono bg-slate-100 text-slate-600 hover:bg-slate-100 transition"
+        >
+          {showOverlay ? 'Hide Overlays' : 'Show Overlays'}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Document Canvas */}
+        <div className="md:col-span-2 bg-white border border-slate-200 p-4 rounded-xl space-y-3">
+          <div className="relative w-full h-[380px] bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-3">
+            <img src={result.documentImage} alt="Forensics" className="max-h-full object-contain" />
+            {showOverlay && signals.map((sig, i) => (
+              <div 
+                key={i}
+                className="absolute border-2 border-red-600 bg-red-500/10 rounded"
+                style={{
+                  left: `${sig.locationBoundingBox?.x || 10}%`,
+                  top: `${sig.locationBoundingBox?.y || 20}%`,
+                  width: `${sig.locationBoundingBox?.width || 25}%`,
+                  height: `${sig.locationBoundingBox?.height || 40}%`
+                }}
+              >
+                <div className="absolute -top-5 left-0 bg-red-600 text-white font-mono text-[9px] px-1 rounded">
+                  ⚠ {sig.title}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Collapsible Anomaly Details (Progressive Disclosure) */}
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3">
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">DETECTED ANOMALIES ({signals.length})</div>
+
+          <div className="space-y-2">
+            {signals.map((sig, i) => {
+              const isExpanded = expandedIndex === i;
+              return (
+                <div key={i} className="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
+                  <button
+                    onClick={() => setExpandedIndex(isExpanded ? null : i)}
+                    className="w-full text-left p-3 flex justify-between items-center hover:bg-slate-50 transition text-xs font-mono"
+                  >
+                    <span className="font-bold text-red-600">⚠ {sig.title}</span>
+                    <span className="text-[10px] text-slate-500">{isExpanded ? '▲' : '▼'}</span>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="p-3 border-t border-slate-200 text-[11px] font-mono text-slate-500 space-y-1.5 bg-slate-50">
+                      <div><strong>Confidence:</strong> {sig.confidence}%</div>
+                      <div><strong>Details:</strong> {sig.description}</div>
+                      <div><strong>Location:</strong> Region {sig.locationBoundingBox?.x}% x {sig.locationBoundingBox?.y}%</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {signals.length === 0 && (
+              <div className="text-xs font-mono text-emerald-700 bg-emerald-50/30 p-3 rounded border border-emerald-200/50 text-center">
+                ✓ No anomaly signals detected.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// FACE VERIFICATION PAGE
+// ----------------------------------------------------
+function FaceVerificationPage({ result }) {
+  const fv = result.faceVerification;
+  const isMatch = fv.similarityScore >= 75;
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl">
+        <h2 className="text-lg font-bold text-slate-900">FACE VERIFICATION</h2>
+        <p className="text-xs text-slate-500 font-mono">1:1 Biometric portrait similarity comparison.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl text-center space-y-2">
+          <div className="text-xs font-mono text-slate-500">DOCUMENT PHOTO</div>
+          <div className="h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
+            <img src={result.documentImage} alt="Doc Photo" className="max-h-full object-contain" />
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl text-center space-y-2">
+          <div className="text-xs font-mono text-slate-500">LIVE CAPTURE</div>
+          <div className="h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
+            <img src={result.verificationImage} alt="Live Capture" className="max-h-full object-contain" />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 p-5 rounded-xl text-center space-y-3">
+        <div className="text-xs font-mono text-slate-500 uppercase">MATCH RESULT</div>
+        
+        <span className={`inline-block px-4 py-1.5 rounded-lg text-sm font-bold font-mono ${
+          isMatch ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
+        }`}>
+          {isMatch ? '✓ MATCH CONFIRMED' : '✕ LOW SIMILARITY MISMATCH'} ({fv.similarityScore}%)
+        </span>
+
+        <div className="grid grid-cols-4 gap-2 border-t border-slate-200 pt-3 text-xs font-mono text-slate-500">
+          <div>Face Detected: <strong className="text-emerald-700">✓</strong></div>
+          <div>Image Quality: <strong className="text-emerald-700">✓</strong></div>
+          <div>Landmarks: <strong className="text-slate-900">{fv.landmarksMatched}/68</strong></div>
+          <div>Pose: <strong className="text-slate-900">{fv.poseAlignment}</strong></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// SCREENING HISTORY PAGE
+// ----------------------------------------------------
+function ScreeningHistoryPage({ setCurrentPage }) {
+  const [filter, setFilter] = useState('all');
+  const history = window.RECENT_SCREENINGS_FEED;
+
+  const filteredHistory = history.filter(item => {
+    if (filter === 'clear') return item.riskLevel === 'low';
+    if (filter === 'review') return item.riskLevel === 'medium';
+    if (filter === 'high') return item.riskLevel === 'high';
+    return true;
+  });
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">SCREENING HISTORY</h2>
+          <p className="text-xs text-slate-500 font-mono">Searchable audit record of processed checkpoint cases.</p>
+        </div>
+
+        {/* Filter buttons */}
+        <div className="flex gap-1.5 bg-slate-50 p-1 rounded-lg border border-slate-200 text-xs font-mono">
+          {['all', 'clear', 'review', 'high'].map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1 rounded transition capitalize ${
+                filter === f ? 'bg-slate-100 text-blue-800 font-bold' : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl p-4 overflow-x-auto">
+        <table className="w-full text-left text-xs font-mono">
+          <thead>
+            <tr className="border-b border-slate-200 text-slate-500 uppercase">
+              <th className="pb-2 px-2">CASE ID</th>
+              <th className="pb-2 px-2">TIME</th>
+              <th className="pb-2 px-2">DOCUMENT</th>
+              <th className="pb-2 px-2">RISK SCORE</th>
+              <th className="pb-2 px-2">STATUS</th>
+              <th className="pb-2 px-2 text-right">ACTION</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {filteredHistory.map((row, idx) => (
+              <tr key={idx} className="hover:bg-slate-100 transition">
+                <td className="py-2.5 px-2 font-bold text-slate-800">{row.screeningId}</td>
+                <td className="py-2.5 px-2 text-slate-500">{row.time}</td>
+                <td className="py-2.5 px-2 text-slate-600">{row.documentType}</td>
+                <td className="py-2.5 px-2 font-bold text-slate-900">{row.riskScore}</td>
+                <td className="py-2.5 px-2">
+                  <span className={`px-2 py-0.5 rounded font-bold ${
+                    row.riskLevel === 'high' ? 'text-red-600' :
+                    row.riskLevel === 'medium' ? 'text-amber-700' :
+                    'text-emerald-700'
+                  }`}>
+                    {row.status}
+                  </span>
+                </td>
+                <td className="py-2.5 px-2 text-right">
+                  <button onClick={() => setCurrentPage('result')} className="text-blue-800 hover:underline">
+                    Open Case
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// OFFICIAL REPORTS PAGE
+// ----------------------------------------------------
+function DetailedReportPage({ result }) {
+  return (
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200">
+        <h2 className="text-lg font-bold text-slate-900">OFFICIAL SCREENING REPORT GENERATOR</h2>
+        <button onClick={() => window.print()} className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded text-xs transition">
+          🖨 PRINT REPORT PDF
+        </button>
+      </div>
+
+      <div className="bg-white text-slate-900 p-8 rounded-xl shadow-2xl space-y-6 font-sans border-t-8 border-blue-900 relative">
+        <div className="absolute top-3 right-3 text-[10px] font-mono font-bold text-amber-700 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded">
+          SIMULATED DOCUMENT — DEMO ONLY
+        </div>
+        <div className="border-b-2 border-slate-300 pb-4 text-center space-y-1">
+          <div className="flex justify-center mb-1"><AgencyEmblem size={44} /></div>
+          <div className="font-bold text-xs tracking-widest text-slate-600 uppercase">UNION FRONTIER SECURITY DIRECTORATE</div>
+          <div className="font-extrabold text-xl tracking-wide text-slate-900">DEPARTMENT OF BORDER SCREENING</div>
+          <div className="font-bold text-sm text-slate-700">FRONTIER SCREENING DIVISION</div>
+          <div className="text-[11px] font-mono text-slate-500">BHARAT BORDER INTELLIGENCE AUDIT RECORD (SIMULATION)</div>
+        </div>
+
+        <div className="grid grid-cols-2 text-xs font-mono bg-slate-100 p-4 rounded border border-slate-300 gap-2">
+          <div><strong>REPORT ID:</strong> {result.screeningId}</div>
+          <div><strong>DATE & TIME:</strong> {result.timestamp}</div>
+          <div><strong>CHECKPOINT:</strong> {result.checkpoint}</div>
+          <div><strong>OFFICER ID:</strong> {result.officerId}</div>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="font-bold text-sm text-slate-900 border-b pb-1">1. EXTRACTED DOCUMENT INFORMATION</h3>
+          <div className="grid grid-cols-2 text-xs gap-2 font-mono">
+            <div>NAME: <strong>{result.ocr.fields.fullName}</strong></div>
+            <div>PASSPORT NO.: <strong>{result.ocr.fields.passportNumber}</strong></div>
+            <div>NATIONALITY: <strong>{result.ocr.fields.nationality}</strong></div>
+            <div>EXPIRY DATE: <strong>{result.ocr.fields.dateOfExpiry}</strong></div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="font-bold text-sm text-slate-900 border-b pb-1">2. AI RISK ASSESSMENT & FINDINGS</h3>
+          <div className="text-xs font-mono space-y-1">
+            <div>OVERALL RISK SCORE: <strong>{result.overallRiskScore} / 100 ({result.riskLevel.toUpperCase()})</strong></div>
+            <div>TAMPERING ANOMALIES DETECTED: <strong>{result.tampering.detectedSignals.length}</strong></div>
+            <div>FACE SIMILARITY MATCH: <strong>{result.faceVerification.similarityScore}% ({result.faceVerification.signal})</strong></div>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t flex justify-between items-end text-xs font-mono">
+          <div>
+            <div>BLOCKCHAIN LOG HASH:</div>
+            <div className="text-[9px] text-slate-500 break-all max-w-xs">{result.auditHash}</div>
+          </div>
+
+          <div className="text-center border-t border-slate-400 pt-2 px-8">
+            <div className="font-bold">INSP. R. S. VERMA</div>
+            <div className="text-slate-500 text-[10px]">AUTHORIZED BORDER OFFICER SIGNATURE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// ANALYTICS PAGE (Where detailed BI charts reside)
+// ----------------------------------------------------
+function AnalyticsPage() {
+  const kpis = window.INITIAL_KPI_STATS;
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-1">
+        <h2 className="text-lg font-bold text-slate-900">ANALYTICS & STATISTICAL INTELLIGENCE</h2>
+        <p className="text-xs text-slate-500 font-mono">Aggregated screening metrics, temporal trends, and risk distribution.</p>
+      </div>
+
+      {/* KPI Indicators */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+          <div className="text-xs font-mono text-slate-500 font-semibold">TOTAL SCREENINGS</div>
+          <div className="text-2xl font-bold text-slate-900 font-mono">{kpis.totalScreenings}</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+          <div className="text-xs font-mono text-emerald-700 font-semibold">LOW RISK</div>
+          <div className="text-2xl font-bold text-emerald-700 font-mono">{kpis.lowRiskCount}</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+          <div className="text-xs font-mono text-amber-700 font-semibold">MEDIUM RISK</div>
+          <div className="text-2xl font-bold text-amber-700 font-mono">{kpis.mediumRiskCount}</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+          <div className="text-xs font-mono text-red-600 font-semibold">HIGH RISK</div>
+          <div className="text-2xl font-bold text-red-600 font-mono">{kpis.highRiskCount}</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+          <div className="text-xs font-mono text-blue-800 font-semibold">MANUAL REVIEWS</div>
+          <div className="text-2xl font-bold text-blue-800 font-mono">{kpis.manualReviewCount}</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Donut Chart */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
+          <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">RISK DISTRIBUTION</h3>
+          <div className="flex items-center justify-center py-4">
+            <div className="relative w-36 h-36 rounded-full border-8 border-slate-200 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path className="text-emerald-500 stroke-current" strokeWidth="3.8" strokeDasharray="75, 100" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className="text-amber-500 stroke-current" strokeWidth="3.8" strokeDasharray="17, 100" strokeDashoffset="-75" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className="text-red-500 stroke-current" strokeWidth="3.8" strokeDasharray="8, 100" strokeDashoffset="-92" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div className="absolute text-center">
+                <div className="text-lg font-bold font-mono text-slate-900">1,248</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Volume Trend Bar Chart */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
+          <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">SCREENING VOLUME TREND</h3>
+          <div className="h-36 flex items-end justify-between gap-2 pt-4 px-2">
+            {[42, 65, 89, 120, 145, 132, 98, 110, 85].map((val, idx) => (
+              <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+                <div className="w-full bg-blue-900 rounded-t" style={{ height: `${(val / 150) * 100}%` }}></div>
+                <span className="text-[9px] font-mono text-slate-500">{String(8 + idx).padStart(2, '0')}:00</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Document Type Distribution */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
+          <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">DOCUMENT TYPES</h3>
+          <div className="space-y-2 pt-1 text-xs font-mono">
+            {[
+              { label: 'Indian Passport', count: 580, pct: 46.5 },
+              { label: 'Travel Visa', count: 320, pct: 25.6 },
+              { label: 'National ID', count: 180, pct: 14.4 },
+              { label: 'Driving Licence', count: 110, pct: 8.8 }
+            ].map((doc, i) => (
+              <div key={i} className="space-y-1">
+                <div className="flex justify-between text-slate-600">
+                  <span>{doc.label}</span>
+                  <span>{doc.count} ({doc.pct}%)</span>
+                </div>
+                <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden">
+                  <div className="h-full bg-sky-500" style={{ width: `${doc.pct}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// SYSTEM STATUS PAGE (Health Dashboard)
+// ----------------------------------------------------
+function SystemStatusPage() {
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-1">
+        <h2 className="text-lg font-bold text-slate-900">SYSTEM STATUS & HEALTH</h2>
+        <p className="text-xs text-slate-500 font-mono">Technical service health, latency, and audit trail network.</p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {[
+          { name: 'AI Engine', status: 'Online', latency: '42ms' },
+          { name: 'OCR Engine', status: 'Online', latency: '120ms' },
+          { name: 'Face Match', status: 'Online', latency: '85ms' },
+          { name: 'Database', status: 'Online', latency: '15ms' },
+          { name: 'Camera', status: 'Connected', latency: '0ms' }
+        ].map((svc, i) => (
+          <div key={i} className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+            <div className="text-xs font-mono font-bold text-slate-600">{svc.name}</div>
+            <div className="text-xs font-bold text-emerald-700">● {svc.status}</div>
+            <div className="text-[10px] font-mono text-slate-500">Latency: {svc.latency}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
+        <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">PROTOTYPE BLOCKCHAIN AUDIT LEDGER</h3>
+        <p className="text-xs text-slate-500 font-mono">
+          Cryptographically signed screening event payloads logged to immutable distributed ledger.
+        </p>
+        <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-xs text-amber-700">
+          Hash: 0x8f3c92a1b4e5780d32fa19c42b87e6321f90ab82c14de378 (Hyperledger Fabric testnet)
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Render Master Application
+const rootElement = document.getElementById('root');
+ReactDOM.createRoot(rootElement).render(<App />);
+
+  </script>
+
+  <script type="text/babel">
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
