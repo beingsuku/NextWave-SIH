@@ -1,0 +1,224 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  OFFICER
+  SUPERVISOR
+}
+
+enum ScreeningStatus {
+  CREATED
+  PROCESSING
+  COMPLETED
+  MANUAL_REVIEW
+  FAILED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum DocumentType {
+  PASSPORT
+  VISA
+  NATIONAL_ID
+  DRIVING_LICENCE
+  TRAVEL_PERMIT
+}
+
+model Officer {
+  id              String       @id @default(uuid())
+  officerId       String       @unique
+  name            String
+  email           String       @unique
+  passwordHash    String
+  role            Role         @default(OFFICER)
+  checkpoint      String?
+  active          Boolean      @default(true)
+
+  screenings      Screening[]
+  auditLogs       AuditLog[]
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Screening {
+  id                String             @id @default(uuid())
+  screeningId       String             @unique
+
+  officerId         String
+  officer            Officer           @relation(fields: [officerId], references: [id])
+
+  documentType      DocumentType
+  status            ScreeningStatus    @default(CREATED)
+
+  riskScore         Float?
+  riskLevel         RiskLevel?
+  recommendation    String?
+  recommendationDetails String?
+
+  startedAt         DateTime           @default(now())
+  completedAt       DateTime?
+
+  document          Document?
+  ocrResult         OCRResult?
+  mrzResult         MRZResult?
+  forensicResult    ForensicResult?
+  faceVerification  FaceVerification?
+  riskAssessment    RiskAssessment?
+
+  auditLogs         AuditLog[]
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([officerId])
+  @@index([riskLevel])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Document {
+  id             String      @id @default(uuid())
+  screeningId    String      @unique
+
+  screening      Screening   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+
+  originalName   String
+  storedName     String
+  path           String
+  mimeType       String
+  size           Int
+
+  sha256         String?
+
+  createdAt      DateTime    @default(now())
+}
+
+model OCRResult {
+  id                String      @id @default(uuid())
+  screeningId       String      @unique
+
+  screening         Screening   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+
+  confidence        Float?
+
+  fullName          String?
+  documentNumber    String?
+  nationality       String?
+  dateOfBirth       String?
+  dateOfExpiry      String?
+  gender            String?
+  issuingAuthority  String?
+
+  mrzLine1          String?
+  mrzLine2          String?
+
+  rawText           String?
+
+  createdAt         DateTime    @default(now())
+}
+
+model MRZResult {
+  id                  String      @id @default(uuid())
+  screeningId         String      @unique
+
+  screening           Screening   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+
+  valid               Boolean     @default(false)
+  passportChecksum    Boolean?
+  birthDateChecksum   Boolean?
+  expiryChecksum      Boolean?
+  consistency         Boolean?
+
+  details             Json?
+
+  createdAt           DateTime    @default(now())
+}
+
+model ForensicResult {
+  id                    String      @id @default(uuid())
+  screeningId           String      @unique
+
+  screening             Screening   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+
+  riskScore             Float      @default(0)
+  suspiciousRegions     Int        @default(0)
+
+  signals               Json?
+
+  createdAt             DateTime    @default(now())
+}
+
+model FaceVerification {
+  id                    String      @id @default(uuid())
+  screeningId           String      @unique
+
+  screening             Screening   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+
+  similarityScore       Float?
+  imageQualityScore     Float?
+  faceDetectedDocument  Boolean     @default(false)
+  faceDetectedLive      Boolean     @default(false)
+
+  signal                String?
+  landmarksMatched      Int?
+  poseAlignment         String?
+  lightingQuality       String?
+
+  createdAt             DateTime    @default(now())
+}
+
+model RiskAssessment {
+  id                    String      @id @default(uuid())
+  screeningId           String      @unique
+
+  screening             Screening   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+
+  overallScore          Float
+  riskLevel             RiskLevel
+
+  tamperingScore        Float?
+  faceScore             Float?
+  mrzScore              Float?
+  validityScore         Float?
+
+  contributors          Json?
+  explanation           Json?
+
+  createdAt             DateTime     @default(now())
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+
+  officerId      String?
+  officer        Officer?     @relation(fields: [officerId], references: [id])
+
+  screeningId    String?
+  screening      Screening?   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+
+  action         String
+  details        Json?
+
+  ipAddress      String?
+  userAgent      String?
+
+  hash           String?
+
+  createdAt      DateTime     @default(now())
+
+  @@index([screeningId])
+  @@index([officerId])
+  @@index([createdAt])
+}
