@@ -152,7 +152,47 @@ window.DEMO_DOCUMENTS = {
   `)
 };
 
-// Sample Screening Cases for demonstration
+// Initial simulated blockchain audit ledger
+window.INITIAL_BLOCKCHAIN_LEDGER = [
+  {
+    blockNumber: 'BLOCK #0001',
+    screeningId: 'SCR-2026-1029',
+    docType: 'Indian Passport (Low Risk)',
+    verdict: 'CLEARED',
+    compositeScore: 94,
+    prevHash: '0000000000000000000000000000000000000000',
+    currentHash: 'a82f91c4d7e6321f90ab82c14de3780d32fa19c4',
+    timestamp: '2026-09-06 15:50:00 UTC',
+    checkpoint: 'SSB-DEMO-03 (ICP Petrapole)',
+    officerId: 'UFS-OFF-1029'
+  },
+  {
+    blockNumber: 'BLOCK #0002',
+    screeningId: 'SCR-2026-5120',
+    docType: 'Indian Passport (Med Risk)',
+    verdict: 'FLAGGED',
+    compositeScore: 72,
+    prevHash: 'a82f91c4d7e6321f90ab82c14de3780d32fa19c4',
+    currentHash: '7f81bc42e9103847566574839201abcef9876543',
+    timestamp: '2026-09-06 14:18:05 UTC',
+    checkpoint: 'SSB-DEMO-02 (ICP Raxaul)',
+    officerId: 'UFS-OFF-4109'
+  },
+  {
+    blockNumber: 'BLOCK #0003',
+    screeningId: 'SCR-2026-8942',
+    docType: 'Indian Passport (High Risk)',
+    verdict: 'FLAGGED',
+    compositeScore: 48,
+    prevHash: '7f81bc42e9103847566574839201abcef9876543',
+    currentHash: '8f3c92a1b4e5780d32fa19c42b87e6321f90ab82c',
+    timestamp: '2026-09-06 15:42:19 UTC',
+    checkpoint: 'SSB-DEMO-01 (ICP Attari-Wagah)',
+    officerId: 'UFS-OFF-9042'
+  }
+];
+
+// Sample Screening Cases for demonstration with DocShield 4-Layer Forensics
 window.DEMO_SCENARIOS = {
   high_risk: {
     id: 'high_risk',
@@ -169,6 +209,54 @@ window.DEMO_SCENARIOS = {
       documentImage: DEMO_DOCUMENTS.highRiskPassport,
       verificationImage: DEMO_DOCUMENTS.verificationPerson,
       
+      // Enhanced Verdict & Confidence Score
+      compositeConfidenceScore: 48,
+      verdictText: 'FLAGGED FOR MANUAL REVIEW',
+      verdictSubtitle: 'Signs of tampering detected',
+      verdictStatus: 'flagged', // 'passed' | 'flagged'
+
+      // DocShield 4-Layer Analysis
+      docshieldLayers: {
+        photoTamper: {
+          name: 'Photo Tamper Detection',
+          score: 38,
+          status: 'TAMPERED',
+          explanation: 'Localized compression inconsistency detected around photo region',
+          details: 'ELA variance detected at photo insertion border; potential photo replacement.'
+        },
+        fontConsistency: {
+          name: 'Font & Text Consistency',
+          score: 41,
+          status: 'TAMPERED',
+          explanation: 'Inconsistent font rendering, kerning anomalies, or altered stroke weight detected',
+          details: 'DOB font character thickness (+28%) deviates from standard passport print matrix.'
+        },
+        stampAlignment: {
+          name: 'Stamp & Seal Alignment',
+          score: 55,
+          status: 'WARNING',
+          explanation: 'Seal geometry, placement angle, or border alignment mismatch with verified template',
+          details: 'Stamp rotational skew of 3.4° detected against official emblem baseline.'
+        },
+        metadataIntegrity: {
+          name: 'Metadata Integrity',
+          score: 35,
+          status: 'TAMPERED',
+          explanation: 'Digital tampering artifacts or secondary edit signature found in document metadata',
+          details: 'EXIF parsing reveals Adobe Photoshop editing signature and altered timestamp.'
+        }
+      },
+
+      // Blockchain Simulated Audit Entry
+      auditBlock: {
+        blockNumber: 'BLOCK #0003',
+        prevHash: '7f81bc42e9103847566574839201abcef9876543',
+        currentHash: '8f3c92a1b4e5780d32fa19c42b87e6321f90ab82c',
+        timestamp: '2026-09-06 15:42:19 UTC',
+        verdict: 'FLAGGED',
+        checkpoint: 'SSB-DEMO-01'
+      },
+
       ocr: {
         status: 'passed',
         confidence: 96.2,
@@ -277,6 +365,55 @@ window.DEMO_SCENARIOS = {
       documentImage: DEMO_DOCUMENTS.highRiskPassport,
       verificationImage: DEMO_DOCUMENTS.verificationPerson,
       
+      // Enhanced Verdict & Confidence Score
+      compositeConfidenceScore: 72,
+      verdictText: 'FLAGGED FOR MANUAL REVIEW',
+      verdictSubtitle: 'Approaching expiry with minor physical microprint wear',
+      verdictStatus: 'flagged',
+
+      // DocShield 4-Layer Analysis
+      docshieldLayers: {
+        photoTamper: {
+          name: 'Photo Tamper Detection',
+          score: 88,
+          status: 'passed',
+          explanation: 'No portrait alteration or laminate edge tampering detected',
+          details: 'Laminate surface reflection and edge continuity normal.'
+        },
+        fontConsistency: {
+          name: 'Font & Text Consistency',
+          score: 82,
+          status: 'passed',
+          explanation: 'Font metrics and character kerning within normal manufacturing tolerances',
+          details: 'Typography stroke consistency 94.2% match.'
+        },
+        stampAlignment: {
+          name: 'Stamp & Seal Alignment',
+          score: 68,
+          status: 'warning',
+          explanation: 'Slight ink abrasion near stamp edge; potential physical document wear',
+          details: 'Microprint abrasion detected; template geometry intact.'
+        },
+        metadataIntegrity: {
+          name: 'Metadata Integrity',
+          score: 85,
+          status: 'passed',
+          explanation: 'Document structure metadata consistent with official issuing profile',
+          details: 'No unauthorized modification signatures found.'
+        }
+      },
+
+      // Blockchain Simulated Audit Entry
+      auditBlock: {
+        blockNumber: 'BLOCK #0002',
+        prevHash: 'a82f91c4d7e6321f90ab82c14de3780d32fa19c4',
+        currentHash: '7f81bc42e9103847566574839201abcef9876543',
+        timestamp: '2026-09-06 14:18:05 UTC',
+        verdict: 'FLAGGED',
+        checkpoint: 'SSB-DEMO-02 (ICP Raxaul)',
+        officerId: 'UFS-OFF-4109'
+      },
+
       ocr: {
         status: 'passed',
         confidence: 94.5,
@@ -369,6 +506,54 @@ window.DEMO_SCENARIOS = {
       documentImage: DEMO_DOCUMENTS.lowRiskPassport,
       verificationImage: DEMO_DOCUMENTS.verificationPerson,
       
+      // Enhanced Verdict & Confidence Score
+      compositeConfidenceScore: 94,
+      verdictText: 'PASSED SCREENING',
+      verdictSubtitle: 'Document appears authentic',
+      verdictStatus: 'passed',
+
+      // DocShield 4-Layer Analysis
+      docshieldLayers: {
+        photoTamper: {
+          name: 'Photo Tamper Detection',
+          score: 94,
+          status: 'AUTHENTIC',
+          explanation: 'No compression or edge artifacts found around photo region',
+          details: 'Seamless laminate boundary, zero compression anomaly detected.'
+        },
+        fontConsistency: {
+          name: 'Font & Text Consistency',
+          score: 96,
+          status: 'AUTHENTIC',
+          explanation: 'Font, kerning and stroke weight consistent across all fields',
+          details: 'Standard ICAO 9303 OCR-B typography profile 99.4% match.'
+        },
+        stampAlignment: {
+          name: 'Stamp & Seal Alignment',
+          score: 91,
+          status: 'AUTHENTIC',
+          explanation: 'Seal geometry and placement match verified template',
+          details: 'Position precision: ±0.2mm, circularity ratio: 0.99.'
+        },
+        metadataIntegrity: {
+          name: 'Metadata Integrity',
+          score: 95,
+          status: 'AUTHENTIC',
+          explanation: 'No secondary edit signature found in document metadata',
+          details: 'Original camera/scanner color quantization profile intact.'
+        }
+      },
+
+      // Blockchain Simulated Audit Entry
+      auditBlock: {
+        blockNumber: 'BLOCK #0001',
+        prevHash: '0000000000000000000000000000000000000000',
+        currentHash: 'a82f91c4d7e6321f90ab82c14de3780d32fa19c4',
+        timestamp: '2026-09-06 15:50:00 UTC',
+        verdict: 'CLEARED',
+        checkpoint: 'SSB-DEMO-01'
+      },
+
       ocr: {
         status: 'passed',
         confidence: 99.1,
@@ -441,13 +626,13 @@ window.DEMO_SCENARIOS = {
 };
 
 window.RECENT_SCREENINGS_FEED = [
-  { screeningId: 'SCR-1024', documentType: 'Passport', riskScore: 86, riskLevel: 'high', mainSignal: 'Photo Replacement Alert', time: '15:42', status: 'Manual Review' },
-  { screeningId: 'SCR-1023', documentType: 'Visa', riskScore: 12, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '15:38', status: 'Cleared' },
-  { screeningId: 'SCR-1022', documentType: 'National ID', riskScore: 54, riskLevel: 'medium', mainSignal: 'Expiry Warning (<45 days)', time: '15:25', status: 'Addl Verification' },
-  { screeningId: 'SCR-1021', documentType: 'Passport', riskScore: 14, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '15:10', status: 'Cleared' },
-  { screeningId: 'SCR-1020', documentType: 'Travel Permit', riskScore: 89, riskLevel: 'high', mainSignal: 'Date Tampering Anomaly', time: '14:52', status: 'Manual Review' },
-  { screeningId: 'SCR-1019', documentType: 'Driving Licence', riskScore: 18, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '14:40', status: 'Cleared' },
-  { screeningId: 'SCR-1018', documentType: 'Passport', riskScore: 78, riskLevel: 'high', mainSignal: 'Face Mismatch (42%)', time: '14:15', status: 'Manual Review' }
+  { screeningId: 'SCR-1024', documentType: 'Passport', compositeScore: 48, riskScore: 86, riskLevel: 'high', mainSignal: 'Photo Replacement Alert', time: '15:42', status: 'Manual Review', blockNumber: 'BLOCK #0003' },
+  { screeningId: 'SCR-1023', documentType: 'Visa', compositeScore: 95, riskScore: 12, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '15:38', status: 'Cleared', blockNumber: 'BLOCK #0001' },
+  { screeningId: 'SCR-1022', documentType: 'National ID', compositeScore: 72, riskScore: 54, riskLevel: 'medium', mainSignal: 'Expiry Warning (<45 days)', time: '15:25', status: 'Addl Verification', blockNumber: 'BLOCK #0002' },
+  { screeningId: 'SCR-1021', documentType: 'Passport', compositeScore: 94, riskScore: 14, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '15:10', status: 'Cleared', blockNumber: 'BLOCK #0001' },
+  { screeningId: 'SCR-1020', documentType: 'Travel Permit', compositeScore: 44, riskScore: 89, riskLevel: 'high', mainSignal: 'Date Tampering Anomaly', time: '14:52', status: 'Manual Review', blockNumber: 'BLOCK #0003' },
+  { screeningId: 'SCR-1019', documentType: 'Driving Licence', compositeScore: 92, riskScore: 18, riskLevel: 'low', mainSignal: 'Verified Genuine', time: '14:40', status: 'Cleared', blockNumber: 'BLOCK #0001' },
+  { screeningId: 'SCR-1018', documentType: 'Passport', compositeScore: 49, riskScore: 78, riskLevel: 'high', mainSignal: 'Face Mismatch (42%)', time: '14:15', status: 'Manual Review', blockNumber: 'BLOCK #0003' }
 ];
 
 window.BORDER_CHECKPOINTS = [
@@ -479,14 +664,19 @@ function App() {
   const [activeScenario, setActiveScenario] = useState('high_risk');
   const [screeningResult, setScreeningResult] = useState(window.DEMO_SCENARIOS.high_risk.result);
   
+  // Simulated Blockchain Ledger State
+  const [blockchainLedger, setBlockchainLedger] = useState(window.INITIAL_BLOCKCHAIN_LEDGER);
+
   // Pipeline State
   const [pipelineProgress, setPipelineProgress] = useState(0);
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
+  const [activeScanLog, setActiveScanLog] = useState('Initializing DocShield forensic engine...');
 
-  // Selected Document Type for New Screening
+  // Selected Document Type & Custom Upload State
   const [selectedDocType, setSelectedDocType] = useState('passport');
   const [uploadedDocImage, setUploadedDocImage] = useState(null);
+  const [uploadedFileName, setUploadedFileName] = useState('');
 
   // Handle Scenario Switch
   const handleScenarioChange = (scenarioKey) => {
@@ -495,6 +685,7 @@ function App() {
     setScreeningResult(newResult);
     if (newResult.documentImage) {
       setUploadedDocImage(newResult.documentImage);
+      setUploadedFileName('');
     }
   };
 
@@ -521,32 +712,60 @@ function App() {
     setCurrentPage('dashboard');
   };
 
-  // Run AI Pipeline Animation
+  // Run AI Pipeline with DocShield Multi-Layer Scanning Stages
   const startPipeline = () => {
     setCurrentPage('analysis');
     setIsScanning(true);
     setPipelineProgress(0);
     setCurrentStageIndex(0);
 
-    const stages = [
-      'OCR EXTRACTION',
-      'DOCUMENT VALIDATION',
-      'TAMPERING & FORENSIC DETECTION',
-      'FACE VERIFICATION',
-      'EXPLAINABLE RISK ASSESSMENT'
+    const scanLogs = [
+      'DOCUMENT SCAN INITIALIZED — Ingesting document & calibrating optical sensors...',
+      'PHOTO FORENSICS — Scanning photo boundary, ELA & laminate integrity...',
+      'TEXT / FONT ANALYSIS — Checking typography, kerning & stroke consistency...',
+      'STAMP / SEAL ANALYSIS — Checking seal geometry & template alignment...',
+      'METADATA ANALYSIS — Scanning EXIF signatures & structural integrity...',
+      'COMPOSITE RISK CALCULATION — Aggregating multi-layer risk signals...',
+      'VERDICT GENERATED — Minting cryptographic simulated blockchain audit block...'
     ];
 
     let step = 0;
     const interval = setInterval(() => {
       step++;
       setCurrentStageIndex(step);
-      setPipelineProgress(Math.min(100, Math.round((step / stages.length) * 100)));
+      setActiveScanLog(scanLogs[Math.min(step, scanLogs.length - 1)]);
+      setPipelineProgress(Math.min(100, Math.round((step / (scanLogs.length - 1)) * 100)));
 
-      if (step >= stages.length) {
+      if (step >= scanLogs.length - 1) {
         clearInterval(interval);
         setIsScanning(false);
+
+        // Generate simulated blockchain block for this completed screening
+        const blockNum = `BLOCK #${String(blockchainLedger.length + 1).padStart(4, '0')}`;
+        const prevBlock = blockchainLedger[blockchainLedger.length - 1];
+        const randomHex = Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+        
+        const newBlock = {
+          blockNumber: blockNum,
+          screeningId: screeningResult.screeningId,
+          docType: screeningResult.documentTypeLabel,
+          verdict: screeningResult.verdictStatus === 'passed' ? 'CLEARED' : 'FLAGGED',
+          compositeScore: screeningResult.compositeConfidenceScore || 94,
+          prevHash: prevBlock ? prevBlock.currentHash : '0000000000000000000000000000000000000000',
+          currentHash: randomHex,
+          timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC',
+          checkpoint: 'SSB-DEMO-01 (ICP Attari-Wagah)',
+          officerId: 'UFS-OFF-9042'
+        };
+
+        setBlockchainLedger(prev => [...prev, newBlock]);
+        setScreeningResult(prev => ({
+          ...prev,
+          auditBlock: newBlock,
+          auditHash: `0x${randomHex}`
+        }));
       }
-    }, 800);
+    }, 650);
   };
 
   return (
@@ -599,6 +818,7 @@ function App() {
                   screeningResult={screeningResult}
                   activeScenario={activeScenario}
                   onScenarioChange={handleScenarioChange}
+                  blockchainLedger={blockchainLedger}
                 />
               )}
 
@@ -615,9 +835,12 @@ function App() {
                   setSelectedDocType={setSelectedDocType}
                   uploadedDocImage={uploadedDocImage}
                   setUploadedDocImage={setUploadedDocImage}
+                  uploadedFileName={uploadedFileName}
+                  setUploadedFileName={setUploadedFileName}
                   onStartPipeline={startPipeline}
                   activeScenario={activeScenario}
                   onScenarioChange={handleScenarioChange}
+                  setScreeningResult={setScreeningResult}
                 />
               )}
 
@@ -626,6 +849,7 @@ function App() {
                   progress={pipelineProgress}
                   currentStageIndex={currentStageIndex}
                   isScanning={isScanning}
+                  activeScanLog={activeScanLog}
                   screeningResult={screeningResult}
                   onComplete={() => setCurrentPage('result')}
                 />
@@ -653,6 +877,7 @@ function App() {
               {currentPage === 'history' && (
                 <ScreeningHistoryPage 
                   setCurrentPage={setCurrentPage}
+                  blockchainLedger={blockchainLedger}
                 />
               )}
 
@@ -667,7 +892,9 @@ function App() {
               )}
 
               {currentPage === 'system_status' && (
-                <SystemStatusPage />
+                <SystemStatusPage 
+                  blockchainLedger={blockchainLedger}
+                />
               )}
             </main>
           </div>
@@ -682,12 +909,12 @@ function App() {
               <span>|</span>
               <span>BBI • SECURE SCREENING PLATFORM</span>
               <span>|</span>
-              <span>CHECKPOINT: ICP ATTARI-WAGAH</span>
+              <span>DOCSHIELD MULTI-LAYER FORENSICS ACTIVE</span>
             </div>
             <div className="flex items-center gap-4 text-slate-500">
               <span>ENCRYPTED WORKSTATION</span>
               <span>|</span>
-              <span className="text-amber-700 font-semibold">SIMULATION MODE</span>
+              <span className="text-amber-700 font-semibold">SIMULATION MODE (PROTOTYPE)</span>
             </div>
           </footer>
         </>
@@ -1233,7 +1460,7 @@ function Sidebar({ currentPage, setCurrentPage }) {
 // ----------------------------------------------------
 // DASHBOARD PAGE (Today's Work Overview)
 // ----------------------------------------------------
-function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScenarioChange }) {
+function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScenarioChange, blockchainLedger }) {
   const isHigh = screeningResult.riskLevel === 'high';
   const isMed = screeningResult.riskLevel === 'medium';
   const recentFeed = window.RECENT_SCREENINGS_FEED.slice(0, 4);
@@ -1265,7 +1492,7 @@ function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScen
               <span className="text-slate-600">{screeningResult.documentTypeLabel}</span>
             </div>
             <div className="text-xs text-slate-500 font-mono">
-              Status: AI Screening Complete | {screeningResult.timestamp}
+              Status: AI & DocShield Multi-Layer Analysis Ready | {screeningResult.timestamp}
             </div>
           </div>
 
@@ -1276,7 +1503,7 @@ function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScen
               isMed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
               'bg-emerald-50 text-emerald-700 border border-emerald-200'
             }`}>
-              {isHigh ? '🔴 HIGH RISK (86/100)' : isMed ? '⚠ MEDIUM RISK (54/100)' : '✓ LOW RISK (12/100)'}
+              {isHigh ? '🔴 FLAGGED (48% CONFIDENCE)' : isMed ? '⚠ MANUAL REVIEW (72% CONFIDENCE)' : '✓ PASSED (94% CONFIDENCE)'}
             </span>
 
             <button
@@ -1310,15 +1537,18 @@ function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScen
         </div>
       </div>
 
-      {/* 3. RECENT ACTIVITY — LATEST 4-5 CASES */}
+      {/* 3. RECENT ACTIVITY — LATEST 4-5 CASES WITH BLOCKCHAIN BLOCK # */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-          <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">RECENT SCREENING ACTIVITY</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">RECENT SCREENING ACTIVITY & AUDIT BLOCKS</h3>
+            <span className="text-[10px] font-mono text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-300">SIMULATED LEDGER</span>
+          </div>
           <button 
             onClick={() => setCurrentPage('history')}
             className="text-xs text-blue-800 font-mono hover:underline"
           >
-            VIEW HISTORY →
+            VIEW FULL AUDIT TRAIL →
           </button>
         </div>
 
@@ -1329,6 +1559,8 @@ function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScen
                 <th className="pb-2 px-2">TIME</th>
                 <th className="pb-2 px-2">CASE ID</th>
                 <th className="pb-2 px-2">DOCUMENT</th>
+                <th className="pb-2 px-2">CONFIDENCE</th>
+                <th className="pb-2 px-2">AUDIT BLOCK</th>
                 <th className="pb-2 px-2">STATUS</th>
                 <th className="pb-2 px-2 text-right">ACTION</th>
               </tr>
@@ -1339,11 +1571,13 @@ function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScen
                   <td className="py-2.5 px-2 text-slate-500">{row.time}</td>
                   <td className="py-2.5 px-2 font-bold text-slate-800">{row.screeningId}</td>
                   <td className="py-2.5 px-2 text-slate-600">{row.documentType}</td>
+                  <td className="py-2.5 px-2 font-bold text-slate-900">{row.compositeScore}%</td>
+                  <td className="py-2.5 px-2 text-amber-700 font-bold">{row.blockNumber}</td>
                   <td className="py-2.5 px-2">
                     <span className={`px-2 py-0.5 rounded font-bold ${
-                      row.riskLevel === 'high' ? 'text-red-600' :
-                      row.riskLevel === 'medium' ? 'text-amber-700' :
-                      'text-emerald-700'
+                      row.riskLevel === 'high' ? 'text-red-600 bg-red-50 border border-red-200' :
+                      row.riskLevel === 'medium' ? 'text-amber-700 bg-amber-50 border border-amber-200' :
+                      'text-emerald-700 bg-emerald-50 border border-emerald-200'
                     }`}>
                       {row.status}
                     </span>
@@ -1369,10 +1603,10 @@ function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScen
 function ActiveScreeningPage({ screeningResult, setCurrentPage }) {
   const isHigh = screeningResult.riskLevel === 'high';
   const isMed = screeningResult.riskLevel === 'medium';
-  const isLow = screeningResult.riskLevel === 'low';
 
   const docPassed = screeningResult.tampering.riskScore < 30;
   const facePassed = screeningResult.faceVerification.similarityScore >= 75;
+  const layers = screeningResult.docshieldLayers || window.DEMO_SCENARIOS.high_risk.result.docshieldLayers;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -1391,7 +1625,7 @@ function ActiveScreeningPage({ screeningResult, setCurrentPage }) {
           isMed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
           'bg-emerald-50 text-emerald-700 border border-emerald-200'
         }`}>
-          {isHigh ? '🔴 HIGH RISK (86/100)' : isMed ? '⚠ MEDIUM RISK (54/100)' : '✓ LOW RISK (12/100)'}
+          {screeningResult.verdictText || (isHigh ? '🔴 FLAGGED FOR MANUAL REVIEW' : '✓ PASSED SCREENING')}
         </span>
       </div>
 
@@ -1400,13 +1634,13 @@ function ActiveScreeningPage({ screeningResult, setCurrentPage }) {
         
         {/* Col 1: Document */}
         <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3">
-          <div className="text-xs font-mono font-bold text-slate-600 uppercase">DOCUMENT IMAGE</div>
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">DOCUMENT PREVIEW</div>
           <div className="w-full h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
             <img src={screeningResult.documentImage} alt="Document" className="max-h-full object-contain" />
           </div>
           <div className="text-[11px] font-mono text-slate-500 space-y-1">
-            <div>Passport: <strong>{screeningResult.passportNumber || 'Z9482103'}</strong></div>
-            <div>Expiry: <strong>Valid (2031)</strong></div>
+            <div>Document No: <strong>{screeningResult.ocr?.fields?.passportNumber || 'Z9482103'}</strong></div>
+            <div>Name: <strong>{screeningResult.ocr?.fields?.fullName || 'SHARMA VIKRAM RAJESH'}</strong></div>
           </div>
         </div>
 
@@ -1425,7 +1659,7 @@ function ActiveScreeningPage({ screeningResult, setCurrentPage }) {
             <span className={`px-3 py-1 rounded text-xs font-mono font-bold ${
               facePassed ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
             }`}>
-              Similarity: {screeningResult.faceVerification.similarityScore}%
+              Face Match: {screeningResult.faceVerification.similarityScore}%
             </span>
           </div>
         </div>
@@ -1433,31 +1667,35 @@ function ActiveScreeningPage({ screeningResult, setCurrentPage }) {
         {/* Col 3: Checklist & Decision */}
         <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
-            <div className="text-xs font-mono font-bold text-slate-600 uppercase">AUTOMATED AUDIT CHECKLIST</div>
+            <div className="text-xs font-mono font-bold text-slate-600 uppercase">DOCSHIELD LAYER CHECKLIST</div>
             
             <div className="space-y-2 text-xs font-mono">
               <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                <span className="text-slate-500">Document Integrity:</span>
-                <span className={docPassed ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
-                  {docPassed ? '✓ Passed' : '✕ Anomaly'}
+                <span className="text-slate-500">Photo Tamper:</span>
+                <span className={layers.photoTamper.score >= 70 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
+                  {layers.photoTamper.score}% ({layers.photoTamper.score >= 70 ? '✓ Authentic' : '✕ Anomaly'})
                 </span>
               </div>
 
               <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                <span className="text-slate-500">Biometric Face Match:</span>
-                <span className={facePassed ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
-                  {facePassed ? '✓ Matched' : '✕ Mismatch'}
+                <span className="text-slate-500">Font Consistency:</span>
+                <span className={layers.fontConsistency.score >= 70 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
+                  {layers.fontConsistency.score}% ({layers.fontConsistency.score >= 70 ? '✓ Matched' : '✕ Anomaly'})
                 </span>
               </div>
 
               <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                <span className="text-slate-500">Expiry Validation:</span>
-                <span className="text-emerald-700 font-bold">✓ Valid Expiry</span>
+                <span className="text-slate-500">Stamp/Seal Alignment:</span>
+                <span className={layers.stampAlignment.score >= 70 ? 'text-emerald-700 font-bold' : 'text-amber-700 font-bold'}>
+                  {layers.stampAlignment.score}% ({layers.stampAlignment.score >= 70 ? '✓ Aligned' : '⚠ Warning'})
+                </span>
               </div>
 
               <div className="flex justify-between">
-                <span className="text-slate-500">Watchlist Check:</span>
-                <span className="text-emerald-700 font-bold">✓ Clear</span>
+                <span className="text-slate-500">Metadata Integrity:</span>
+                <span className={layers.metadataIntegrity.score >= 70 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
+                  {layers.metadataIntegrity.score}% ({layers.metadataIntegrity.score >= 70 ? '✓ Clean' : '✕ Edited'})
+                </span>
               </div>
             </div>
           </div>
@@ -1466,7 +1704,7 @@ function ActiveScreeningPage({ screeningResult, setCurrentPage }) {
             onClick={() => setCurrentPage('result')}
             className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg text-xs shadow transition"
           >
-            COMPLETE SCREENING →
+            VIEW FULL SCREENING RESULT →
           </button>
         </div>
       </div>
@@ -1475,9 +1713,11 @@ function ActiveScreeningPage({ screeningResult, setCurrentPage }) {
 }
 
 // ----------------------------------------------------
-// NEW SCREENING PAGE (3-Step Simple Workflow)
+// NEW SCREENING PAGE (Preserves Existing 3-Step Flow & Upload Bar)
 // ----------------------------------------------------
-function NewScreeningPage({ selectedDocType, setSelectedDocType, uploadedDocImage, setUploadedDocImage, onStartPipeline, activeScenario, onScenarioChange }) {
+function NewScreeningPage({ selectedDocType, setSelectedDocType, uploadedDocImage, setUploadedDocImage, uploadedFileName, setUploadedFileName, onStartPipeline, activeScenario, onScenarioChange, setScreeningResult }) {
+  const fileInputRef = useRef(null);
+
   const docTypes = [
     { id: 'passport', label: 'Passport', icon: '📖' },
     { id: 'visa', label: 'Travel Visa', icon: '📑' },
@@ -1486,29 +1726,151 @@ function NewScreeningPage({ selectedDocType, setSelectedDocType, uploadedDocImag
     { id: 'travel_permit', label: 'Travel Permit', icon: '📝' }
   ];
 
+  // Handle local file selection via existing upload bar
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadedFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        setUploadedDocImage(dataUrl);
+
+        // Enhance custom document state for screening
+        setScreeningResult({
+          screeningId: `SCR-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+          timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+          checkpoint: 'Attari Border Checkpoint (ICP Attari-Wagah)',
+          officerId: 'UFS-OFF-9042',
+          documentType: selectedDocType,
+          documentTypeLabel: docTypes.find(d => d.id === selectedDocType)?.label || 'Uploaded Document',
+          documentImage: dataUrl,
+          verificationImage: window.DEMO_DOCUMENTS.verificationPerson,
+          
+          compositeConfidenceScore: 92,
+          verdictText: 'PASSED SCREENING',
+          verdictSubtitle: 'Document appears authentic',
+          verdictStatus: 'passed',
+          
+          docshieldLayers: {
+            photoTamper: {
+              name: 'Photo Tamper Detection',
+              score: 93,
+              status: 'passed',
+              explanation: 'No compression or edge artifacts found around photo region',
+              details: 'Laminate boundary and photo resolution pass standard integrity check.'
+            },
+            fontConsistency: {
+              name: 'Font & Text Consistency',
+              score: 95,
+              status: 'passed',
+              explanation: 'Font, kerning and stroke weight consistent across all fields',
+              details: 'OCR-B typography stroke thickness within 0.03mm tolerance.'
+            },
+            stampAlignment: {
+              name: 'Stamp & Seal Alignment',
+              score: 91,
+              status: 'passed',
+              explanation: 'Seal geometry and placement match verified template',
+              details: 'Template stamp alignment confirmed with zero rotational drift.'
+            },
+            metadataIntegrity: {
+              name: 'Metadata Integrity',
+              score: 94,
+              status: 'passed',
+              explanation: 'No secondary edit signature found in document metadata',
+              details: 'Clean file header with no image modification history.'
+            }
+          },
+
+          ocr: {
+            status: 'passed',
+            confidence: 97.4,
+            fields: {
+              fullName: 'UPLOADED PASSENGER DOCUMENT',
+              passportNumber: `DOC-${Math.floor(1000000 + Math.random() * 9000000)}`,
+              nationality: 'INDIAN',
+              dateOfBirth: '15/05/1992',
+              dateOfExpiry: '20/12/2032',
+              gender: 'M',
+              issuingAuthority: 'RPO PASSPORT SEVA'
+            }
+          },
+          validation: {
+            status: 'passed',
+            passedCount: 10,
+            warningCount: 0,
+            failedCount: 0,
+            checks: [
+              { id: 'v1', ruleName: 'Required Fields', category: 'Completeness', status: 'passed', details: 'All mandatory fields extracted' },
+              { id: 'v2', ruleName: 'Format Standard', category: 'Syntax', status: 'passed', details: 'Structure satisfies standard rules' }
+            ]
+          },
+          tampering: {
+            riskScore: 8,
+            status: 'clear',
+            suspiciousRegionsCount: 0,
+            detectedSignals: []
+          },
+          faceVerification: {
+            similarityScore: 94.2,
+            signal: 'HIGH_SIMILARITY',
+            faceDetectedInDocument: true,
+            faceDetectedInVerification: true,
+            imageQualityScore: 96.0,
+            landmarksMatched: 64,
+            poseAlignment: 'Good',
+            lightingQuality: 'Optimal'
+          },
+          databaseCheck: {
+            status: 'NO_MATCHING_ALERT',
+            referenceRecord: 'SIM-REF-UPLOAD',
+            notice: 'No active watchlist alert detected (Simulated Data).'
+          },
+          documentStatus: 'VALID',
+          overallRiskScore: 10,
+          riskLevel: 'low',
+          recommendation: 'clear',
+          recommendationTitle: 'NO ADDITIONAL SCREENING SIGNAL DETECTED',
+          recommendationDetails: 'Document validation, face verification, and multi-layer forensic checks satisfy all standard security requirements.',
+          auditHash: '0x' + Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+          blockchainLogged: true
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-lg font-bold text-slate-900">NEW BORDER SCREENING</h2>
-          <p className="text-xs text-slate-500">Verify a passenger document and identity.</p>
+          <p className="text-xs text-slate-500">Upload or select a passenger document for DocShield multi-layer screening.</p>
         </div>
 
         {/* Sample Screening Cases Controls */}
-        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-          <span className="text-[10px] font-mono text-amber-700 font-bold uppercase">SAMPLE SCREENING CASES:</span>
-          <button onClick={() => onScenarioChange('low_risk')} className="text-xs bg-slate-100 hover:bg-slate-200 text-emerald-700 px-2 py-0.5 rounded font-mono">Low Risk Case</button>
-          <button onClick={() => onScenarioChange('medium_risk')} className="text-xs bg-slate-100 hover:bg-slate-200 text-amber-700 px-2 py-0.5 rounded font-mono">Med Risk Case</button>
-          <button onClick={() => onScenarioChange('high_risk')} className="text-xs bg-slate-100 hover:bg-slate-200 text-red-600 px-2 py-0.5 rounded font-mono">High Risk Case</button>
+        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap">
+          <span className="text-[10px] font-mono text-amber-700 font-bold uppercase">SAMPLE CASES:</span>
+          <button onClick={() => onScenarioChange('low_risk')} className={`text-xs px-2 py-0.5 rounded font-mono transition ${activeScenario === 'low_risk' && !uploadedFileName ? 'bg-emerald-100 text-emerald-800 font-bold border border-emerald-300' : 'bg-slate-100 hover:bg-slate-200 text-emerald-700'}`}>Low Risk</button>
+          <button onClick={() => onScenarioChange('medium_risk')} className={`text-xs px-2 py-0.5 rounded font-mono transition ${activeScenario === 'medium_risk' && !uploadedFileName ? 'bg-amber-100 text-amber-800 font-bold border border-amber-300' : 'bg-slate-100 hover:bg-slate-200 text-amber-700'}`}>Med Risk</button>
+          <button onClick={() => onScenarioChange('high_risk')} className={`text-xs px-2 py-0.5 rounded font-mono transition ${activeScenario === 'high_risk' && !uploadedFileName ? 'bg-red-100 text-red-800 font-bold border border-red-300' : 'bg-slate-100 hover:bg-slate-200 text-red-600'}`}>High Risk</button>
         </div>
       </div>
 
       {/* 3-Step Workflow Container */}
       <div className="space-y-6">
         
-        {/* Step 1: Document */}
+        {/* Step 1: Document Selection & Upload Bar */}
         <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
-          <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 1 — DOCUMENT SELECTION & UPLOAD</div>
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 1 — DOCUMENT SELECTION & UPLOAD</div>
+            {uploadedFileName && (
+              <span className="text-[11px] font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-semibold">
+                Uploaded: {uploadedFileName}
+              </span>
+            )}
+          </div>
           
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {docTypes.map((dt) => (
@@ -1527,10 +1889,32 @@ function NewScreeningPage({ selectedDocType, setSelectedDocType, uploadedDocImag
             ))}
           </div>
 
-          <div className="w-full h-40 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
-            <img src={uploadedDocImage || window.DEMO_DOCUMENTS.highRiskPassport} alt="Document Preview" className="max-h-full object-contain" />
+          {/* Existing Document Preview & Active Upload Dropzone */}
+          <div 
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full h-48 bg-slate-50 rounded-lg overflow-hidden border-2 border-dashed border-slate-300 hover:border-blue-800 flex flex-col items-center justify-center p-3 cursor-pointer transition relative group"
+          >
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              accept="image/*,.pdf" 
+              className="hidden" 
+            />
+            
+            <img 
+              src={uploadedDocImage || window.DEMO_DOCUMENTS.highRiskPassport} 
+              alt="Document Preview" 
+              className="max-h-36 object-contain transition group-hover:opacity-75" 
+            />
+
+            <div className="absolute bottom-2 inset-x-0 text-center">
+              <span className="text-[11px] font-mono bg-white/90 text-slate-700 px-3 py-1 rounded shadow-sm border border-slate-200 font-medium group-hover:text-blue-900">
+                📁 Click to choose or drop document file to replace preview (JPG / PNG / PDF)
+              </span>
+            </div>
           </div>
-          <div className="text-[11px] font-mono text-slate-500 text-center">Supported formats: JPG / PNG / PDF (Demo Sample Document Active)</div>
+          <div className="text-[11px] font-mono text-slate-500 text-center">Supported formats: JPG / PNG / PDF • Ready for DocShield Multi-Layer Analysis</div>
         </div>
 
         {/* Step 2: Identity Face */}
@@ -1539,15 +1923,15 @@ function NewScreeningPage({ selectedDocType, setSelectedDocType, uploadedDocImag
           <div className="w-full h-36 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
             <img src={window.DEMO_DOCUMENTS.verificationPerson} alt="Camera Preview" className="max-h-full object-contain" />
           </div>
-          <div className="text-[11px] font-mono text-emerald-700 text-center">✓ Camera Feed Active (CAM-04)</div>
+          <div className="text-[11px] font-mono text-emerald-700 text-center">✓ Camera Feed Active (CAM-04 Live)</div>
         </div>
 
         {/* Step 3: Screening CTA */}
         <div className="bg-white border border-slate-200 p-5 rounded-xl text-center space-y-3">
-          <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 3 — AI SCREENING ANALYSIS</div>
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 3 — AI & DOCSHIELD FORENSIC SCREENING</div>
           <button
             onClick={onStartPipeline}
-            className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow transition"
+            className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition transform hover:scale-[1.01]"
           >
             START AI SCREENING →
           </button>
@@ -1558,64 +1942,142 @@ function NewScreeningPage({ selectedDocType, setSelectedDocType, uploadedDocImag
 }
 
 // ----------------------------------------------------
-// AI ANALYSIS PAGE (Live Pipeline Scanner)
+// AI ANALYSIS PAGE (Professional Live Pipeline Scanner)
 // ----------------------------------------------------
-function AIAnalysisPage({ progress, currentStageIndex, isScanning, screeningResult, onComplete }) {
+function AIAnalysisPage({ progress, currentStageIndex, isScanning, activeScanLog, screeningResult, onComplete }) {
   const stages = [
-    { num: '01', name: 'OCR EXTRACTION', desc: 'Extracting field attributes & MRZ text' },
-    { num: '02', name: 'DOCUMENT VALIDATION', desc: 'Running checksum rules & expiry format' },
-    { num: '03', name: 'TAMPERING DETECTION', desc: 'Analyzing laminate & font anomalies' },
-    { num: '04', name: 'FACE VERIFICATION', desc: 'Performing 1:1 landmark comparison' },
-    { num: '05', name: 'RISK ASSESSMENT', desc: 'Synthesizing explainable risk signals' }
+    { num: '01', name: 'DOCUMENT SCAN INITIALIZED', desc: 'Ingesting document & optical MRZ extraction' },
+    { num: '02', name: 'PHOTO FORENSICS', desc: 'Scanning photo boundary, ELA & laminate integrity' },
+    { num: '03', name: 'TEXT / FONT ANALYSIS', desc: 'Analyzing kerning, glyph stroke & ink distribution' },
+    { num: '04', name: 'STAMP / SEAL ANALYSIS', desc: 'Checking seal geometry & template placement' },
+    { num: '05', name: 'METADATA ANALYSIS', desc: 'Scanning EXIF signatures & file structure' },
+    { num: '06', name: 'COMPOSITE RISK CALCULATION', desc: 'Aggregating multi-layer risk signals' },
+    { num: '07', name: 'VERDICT GENERATED', desc: 'Minting cryptographic simulated audit block' }
   ];
+
+  const layers = screeningResult.docshieldLayers || window.DEMO_SCENARIOS.high_risk.result.docshieldLayers;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-2">
+      {/* Progress Header */}
+      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-900">AI SCREENING IN PROGRESS</h2>
-          <span className="text-lg font-mono font-bold text-blue-800">{progress}%</span>
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">DOCSHIELD AI SCREENING IN PROGRESS</h2>
+            <div className="text-xs font-mono text-blue-800 font-semibold animate-pulse mt-0.5">
+              ⟳ {activeScanLog}
+            </div>
+          </div>
+          <span className="text-xl font-mono font-bold text-blue-900">{progress}%</span>
         </div>
 
-        <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-200">
-          <div className="h-full bg-gradient-to-r from-blue-900 to-emerald-500 transition-all duration-300" style={{ width: `${progress}%` }}></div>
+        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+          <div className="h-full bg-gradient-to-r from-blue-900 via-sky-600 to-emerald-500 transition-all duration-300" style={{ width: `${progress}%` }}></div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Document Scanner with Active Laser Animation */}
         <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3 relative overflow-hidden">
-          <div className="text-xs font-mono text-slate-600">DOCUMENT SCANNER</div>
-          <div className="relative w-full h-64 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-3">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-mono font-bold text-slate-600 uppercase">DOCUMENT SCANNER</span>
+            <span className="text-[10px] font-mono text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              {isScanning ? '● SCANNING ACTIVE' : '✓ SCAN COMPLETE'}
+            </span>
+          </div>
+
+          <div className="relative w-full h-64 bg-slate-900 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center p-3">
             <img src={screeningResult.documentImage} alt="Scanning" className="max-h-full object-contain" />
-            {isScanning && <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-800 to-transparent shadow animate-scan"></div>}
+            
+            {isScanning && (
+              <>
+                <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_#38bdf8] animate-scan"></div>
+                <div className="absolute top-2 left-2 font-mono text-[9px] text-cyan-400 bg-slate-950/80 px-2 py-0.5 rounded border border-cyan-800">
+                  SCANNING: LAYER {Math.min(currentStageIndex + 1, 8)}/8
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* DocShield 4-Layer Progress Meters Preview */}
+          <div className="pt-2 border-t border-slate-200 space-y-2">
+            <div className="text-[11px] font-mono font-bold text-slate-600 uppercase">DOCSHIELD ANALYSIS LAYERS</div>
+            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <div className="flex justify-between text-slate-500 text-[10px]">
+                  <span>Photo Tamper</span>
+                  <span className="font-bold text-slate-800">{currentStageIndex >= 2 ? `${layers.photoTamper.score}%` : '...'}</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                  <div className={`h-full ${layers.photoTamper.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: currentStageIndex >= 2 ? `${layers.photoTamper.score}%` : '0%' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <div className="flex justify-between text-slate-500 text-[10px]">
+                  <span>Font Consistency</span>
+                  <span className="font-bold text-slate-800">{currentStageIndex >= 3 ? `${layers.fontConsistency.score}%` : '...'}</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                  <div className={`h-full ${layers.fontConsistency.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: currentStageIndex >= 3 ? `${layers.fontConsistency.score}%` : '0%' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <div className="flex justify-between text-slate-500 text-[10px]">
+                  <span>Stamp Alignment</span>
+                  <span className="font-bold text-slate-800">{currentStageIndex >= 4 ? `${layers.stampAlignment.score}%` : '...'}</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                  <div className={`h-full ${layers.stampAlignment.score >= 70 ? 'bg-emerald-600' : 'bg-amber-600'}`} style={{ width: currentStageIndex >= 4 ? `${layers.stampAlignment.score}%` : '0%' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <div className="flex justify-between text-slate-500 text-[10px]">
+                  <span>Metadata Integrity</span>
+                  <span className="font-bold text-slate-800">{currentStageIndex >= 5 ? `${layers.metadataIntegrity.score}%` : '...'}</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                  <div className={`h-full ${layers.metadataIntegrity.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: currentStageIndex >= 5 ? `${layers.metadataIntegrity.score}%` : '0%' }}></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
-          <div className="text-xs font-mono font-bold text-slate-600 uppercase">AI MODULE STAGES</div>
-          <div className="space-y-2.5">
-            {stages.map((stg, idx) => {
-              const isDone = idx < currentStageIndex;
-              const isCurrent = idx === currentStageIndex;
+        {/* AI Stages Breakdown */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3 flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="text-xs font-mono font-bold text-slate-600 uppercase">PIPELINE EXECUTION QUEUE</div>
+            <div className="space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
+              {stages.map((stg, idx) => {
+                const isDone = idx < currentStageIndex;
+                const isCurrent = idx === currentStageIndex;
 
-              return (
-                <div key={idx} className={`p-3 rounded-lg border text-xs font-mono transition ${
-                  isDone ? 'bg-emerald-50/30 border-emerald-200/60 text-emerald-700' :
-                  isCurrent ? 'bg-blue-50/30 border-blue-800/80 text-blue-700' :
-                  'bg-slate-50 border-slate-200 text-slate-500'
-                }`}>
-                  <div className="flex justify-between font-bold">
-                    <span>{stg.num} {stg.name}</span>
-                    <span>{isDone ? '✓ COMPLETE' : isCurrent ? '⟳ ANALYZING...' : '○ QUEUED'}</span>
+                return (
+                  <div key={idx} className={`p-2 rounded-lg border text-xs font-mono transition ${
+                    isDone ? 'bg-emerald-50/40 border-emerald-200 text-emerald-800' :
+                    isCurrent ? 'bg-blue-50 border-blue-800 text-blue-900 font-semibold' :
+                    'bg-slate-50 border-slate-200 text-slate-500'
+                  }`}>
+                    <div className="flex justify-between items-center">
+                      <span>{stg.num} {stg.name}</span>
+                      <span className="text-[11px] font-bold">{isDone ? '✓ COMPLETE' : isCurrent ? '⟳ SCANNING...' : '○ QUEUED'}</span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {!isScanning && (
-            <button onClick={onComplete} className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 rounded text-xs shadow transition mt-2">
-              VIEW FINAL SCREENING RESULT →
+            <button 
+              onClick={onComplete} 
+              className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 rounded-lg text-xs shadow-md transition transform hover:scale-[1.01] mt-2"
+            >
+              VIEW FINAL SCREENING RESULT & AUDIT TRAIL →
             </button>
           )}
         </div>
@@ -1625,86 +2087,254 @@ function AIAnalysisPage({ progress, currentStageIndex, isScanning, screeningResu
 }
 
 // ----------------------------------------------------
-// SCREENING RESULT PAGE (Clean Calm Decision Screen)
+// SCREENING RESULT PAGE (Enhanced Verdict & DocShield Multi-Layer Analysis)
 // ----------------------------------------------------
 function VerificationResultPage({ result, setCurrentPage }) {
   const isHigh = result.riskLevel === 'high';
   const isMed = result.riskLevel === 'medium';
+  const isPassed = result.verdictStatus === 'passed';
+  
+  const layers = result.docshieldLayers || window.DEMO_SCENARIOS.high_risk.result.docshieldLayers;
+  const auditBlock = result.auditBlock || window.DEMO_SCENARIOS.high_risk.result.auditBlock;
+  const compositeScore = result.compositeConfidenceScore || (isPassed ? 94 : isMed ? 72 : 48);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Top Banner */}
-      <div className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center">
-        <div>
-          <div className="text-xs font-mono text-slate-500">Case #{result.screeningId} | {result.documentTypeLabel}</div>
-          <h2 className="text-lg font-bold text-slate-900 mt-0.5">AI SCREENING COMPLETE</h2>
+      
+      {/* 1. Enhanced Verdict Banner */}
+      <div className={`p-6 rounded-xl border flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${
+        isPassed 
+          ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+          : 'bg-red-50 border-red-300 text-red-950'
+      }`}>
+        <div className="space-y-1">
+          <div className="text-xs font-mono font-bold uppercase tracking-wider text-slate-600">
+            CASE #{result.screeningId} • {result.documentTypeLabel}
+          </div>
+          <h2 className="text-2xl font-black tracking-tight">
+            {isPassed ? '✓ PASSED SCREENING' : '🔴 FLAGGED FOR MANUAL REVIEW'}
+          </h2>
+          <p className="text-xs font-mono font-medium text-slate-700">
+            {isPassed ? 'Document appears authentic' : 'Signs of tampering detected'}
+          </p>
         </div>
 
-        {/* Status Badge */}
-        <span className={`px-4 py-1.5 rounded-lg text-sm font-bold font-mono ${
-          isHigh ? 'bg-red-50 text-red-700 border border-red-200' :
-          isMed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-          'bg-emerald-50 text-emerald-700 border border-emerald-200'
-        }`}>
-          {isHigh ? '🔴 SECONDARY INSPECTION' : isMed ? '⚠ MANUAL REVIEW' : '✓ CLEAR FOR ENTRY'}
-        </span>
+        {/* Composite Confidence Score Metric Badge */}
+        <div className="bg-white/90 border border-slate-200 p-3.5 rounded-xl text-center shadow-sm shrink-0 min-w-[200px]">
+          <div className="text-[11px] font-mono text-slate-500 font-bold uppercase">COMPOSITE CONFIDENCE SCORE</div>
+          <div className={`text-3xl font-black font-mono mt-0.5 ${
+            compositeScore >= 80 ? 'text-emerald-700' : compositeScore >= 60 ? 'text-amber-700' : 'text-red-600'
+          }`}>
+            {compositeScore}%
+          </div>
+          <div className="w-full h-1.5 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
+            <div 
+              className={`h-full ${compositeScore >= 80 ? 'bg-emerald-600' : compositeScore >= 60 ? 'bg-amber-600' : 'bg-red-600'}`} 
+              style={{ width: `${compositeScore}%` }}
+            ></div>
+          </div>
+        </div>
       </div>
 
-      {/* WHY Section (2-4 Concise Reasons) */}
-      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
-        <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">WHY THIS RESULT?</h3>
-        
-        <div className="space-y-2 text-xs font-mono">
-          <div className="flex items-center gap-2 text-slate-600">
-            <span className="text-emerald-700 font-bold">✓</span>
-            <span>Required passport fields present and extracted cleanly.</span>
+      {/* 2. DOCSHIELD MULTI-LAYER DOCUMENT ANALYSIS CARD */}
+      <div className="bg-white border border-slate-200 p-6 rounded-xl space-y-4 shadow-sm">
+        <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+          <div>
+            <h3 className="text-sm font-mono font-bold text-slate-900 uppercase">DOCSHIELD MULTI-LAYER DOCUMENT ANALYSIS</h3>
+            <p className="text-xs text-slate-500 font-mono">Granular verification across 4 digital forensics layers.</p>
           </div>
+          <span className="text-[10px] font-mono font-bold text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200">
+            4 FORENSIC LAYERS
+          </span>
+        </div>
 
-          <div className="flex items-center gap-2 text-slate-600">
-            <span className={result.faceVerification.similarityScore >= 75 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
-              {result.faceVerification.similarityScore >= 75 ? '✓' : '⚠'}
-            </span>
-            <span>Biometric Face Similarity Score: <strong>{result.faceVerification.similarityScore}%</strong> ({result.faceVerification.signal})</span>
-          </div>
-
-          {result.tampering.detectedSignals.map((sig, i) => (
-            <div key={i} className="flex items-center gap-2 text-red-600">
-              <span className="text-red-600 font-bold">⚠</span>
-              <span>{sig.title} — {sig.description}</span>
+        {/* 4 DocShield Layers Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          {/* Layer 1: Photo Tamper Detection */}
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-xs font-mono text-slate-800">Photo Tamper Detection</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm font-black text-slate-900">{layers.photoTamper.score}%</span>
+                <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${
+                  layers.photoTamper.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
+                }`}>
+                  {layers.photoTamper.status || (layers.photoTamper.score >= 70 ? 'AUTHENTIC' : 'TAMPERED')}
+                </span>
+              </div>
             </div>
-          ))}
+            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className={`h-full ${layers.photoTamper.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: `${layers.photoTamper.score}%` }}></div>
+            </div>
+            <p className="text-xs text-slate-600 font-mono leading-relaxed">
+              "{layers.photoTamper.explanation}"
+            </p>
+            <div className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-200">
+              Details: {layers.photoTamper.details}
+            </div>
+          </div>
+
+          {/* Layer 2: Font & Text Consistency */}
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-xs font-mono text-slate-800">Font & Text Consistency</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm font-black text-slate-900">{layers.fontConsistency.score}%</span>
+                <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${
+                  layers.fontConsistency.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
+                }`}>
+                  {layers.fontConsistency.status || (layers.fontConsistency.score >= 70 ? 'AUTHENTIC' : 'TAMPERED')}
+                </span>
+              </div>
+            </div>
+            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className={`h-full ${layers.fontConsistency.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: `${layers.fontConsistency.score}%` }}></div>
+            </div>
+            <p className="text-xs text-slate-600 font-mono leading-relaxed">
+              "{layers.fontConsistency.explanation}"
+            </p>
+            <div className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-200">
+              Details: {layers.fontConsistency.details}
+            </div>
+          </div>
+
+          {/* Layer 3: Stamp & Seal Alignment */}
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-xs font-mono text-slate-800">Stamp & Seal Alignment</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm font-black text-slate-900">{layers.stampAlignment.score}%</span>
+                <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${
+                  layers.stampAlignment.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-amber-700 bg-amber-100 border border-amber-300'
+                }`}>
+                  {layers.stampAlignment.status || (layers.stampAlignment.score >= 70 ? 'AUTHENTIC' : 'WARNING')}
+                </span>
+              </div>
+            </div>
+            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className={`h-full ${layers.stampAlignment.score >= 70 ? 'bg-emerald-600' : 'bg-amber-600'}`} style={{ width: `${layers.stampAlignment.score}%` }}></div>
+            </div>
+            <p className="text-xs text-slate-600 font-mono leading-relaxed">
+              "{layers.stampAlignment.explanation}"
+            </p>
+            <div className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-200">
+              Details: {layers.stampAlignment.details}
+            </div>
+          </div>
+
+          {/* Layer 4: Metadata Integrity */}
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-xs font-mono text-slate-800">Metadata Integrity</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm font-black text-slate-900">{layers.metadataIntegrity.score}%</span>
+                <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${
+                  layers.metadataIntegrity.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
+                }`}>
+                  {layers.metadataIntegrity.status || (layers.metadataIntegrity.score >= 70 ? 'AUTHENTIC' : 'TAMPERED')}
+                </span>
+              </div>
+            </div>
+            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className={`h-full ${layers.metadataIntegrity.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: `${layers.metadataIntegrity.score}%` }}></div>
+            </div>
+            <p className="text-xs text-slate-600 font-mono leading-relaxed">
+              "{layers.metadataIntegrity.explanation}"
+            </p>
+            <div className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-200">
+              Details: {layers.metadataIntegrity.details}
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Recommended Action Card */}
+      {/* 3. SIMULATED BLOCKCHAIN AUDIT TRAIL ENTRY */}
+      <div className="bg-slate-900 text-slate-100 p-6 rounded-xl space-y-3 font-mono border border-slate-800 shadow-md">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">SIMULATED BLOCKCHAIN AUDIT TRAIL</span>
+          </div>
+          <span className="text-[10px] bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded border border-amber-400/40">
+            DEMO / PROTOTYPE
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 font-bold">{auditBlock.blockNumber}</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-slate-400">VERDICT:</span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                auditBlock.verdict === 'CLEARED' ? 'bg-emerald-900/80 text-emerald-300 border border-emerald-700' : 'bg-red-900/80 text-red-300 border border-red-700'
+              }`}>
+                {auditBlock.verdict}
+              </span>
+            </div>
+            <div>
+              <div className="text-slate-400 uppercase text-[10px]">PREVIOUS HASH:</div>
+              <div className="text-slate-300 text-[11px] break-all select-all font-mono">{auditBlock.prevHash}</div>
+            </div>
+            <div>
+              <div className="text-slate-400 uppercase text-[10px]">CURRENT HASH:</div>
+              <div className="text-cyan-300 text-[11px] font-bold break-all select-all font-mono">{auditBlock.currentHash}</div>
+            </div>
+          </div>
+
+          <div className="space-y-2 md:text-right">
+            <div>
+              <div className="text-slate-400 uppercase text-[10px]">TIMESTAMP:</div>
+              <div className="text-slate-300 text-[11px]">{auditBlock.timestamp}</div>
+            </div>
+            <div>
+              <div className="text-slate-400 uppercase text-[10px]">CHECKPOINT:</div>
+              <div className="text-amber-400 font-bold text-xs">{auditBlock.checkpoint}</div>
+            </div>
+            <div className="text-[10px] text-slate-500">
+              Chained to immutable prototype ledger
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Action Decision Card */}
       <div className="bg-white border border-slate-200 p-6 rounded-xl space-y-4">
-        <div className="text-xs font-mono font-bold text-slate-500 uppercase">RECOMMENDED ACTION</div>
+        <div className="text-xs font-mono font-bold text-slate-500 uppercase">OFFICER DECISION & NAVIGATION</div>
 
         <div className="flex flex-wrap gap-3">
-          {isHigh ? (
-            <>
-              <button onClick={() => setCurrentPage('forensics')} className="bg-red-600 hover:bg-red-500 text-white font-bold px-5 py-2.5 rounded text-xs transition">
-                OPEN FORENSIC ANALYSIS
-              </button>
-              <button onClick={() => setCurrentPage('face_verification')} className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2.5 rounded text-xs border border-slate-300 transition">
-                VIEW FACE MATCH
-              </button>
-            </>
-          ) : isMed ? (
-            <button onClick={() => setCurrentPage('forensics')} className="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-5 py-2.5 rounded text-xs transition">
-              REVIEW CASE
-            </button>
-          ) : (
-            <button onClick={() => setCurrentPage('report')} className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded text-xs transition">
-              CLEAR CASE
-            </button>
-          )}
+          <button 
+            onClick={() => setCurrentPage('forensics')} 
+            className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition shadow-sm"
+          >
+            OPEN FORENSIC ANALYSIS →
+          </button>
 
-          <button onClick={() => setCurrentPage('report')} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-4 py-2.5 rounded text-xs border border-slate-300 transition">
-            GENERATE REPORT
+          <button 
+            onClick={() => setCurrentPage('face_verification')} 
+            className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2.5 rounded-lg text-xs border border-slate-300 transition"
+          >
+            VIEW FACE MATCH
+          </button>
+
+          <button 
+            onClick={() => setCurrentPage('report')} 
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-lg text-xs border border-slate-300 transition"
+          >
+            GENERATE OFFICIAL REPORT
+          </button>
+
+          <button 
+            onClick={() => setCurrentPage('new_screening')} 
+            className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition ml-auto"
+          >
+            ＋ NEW SCREENING
           </button>
         </div>
       </div>
+
     </div>
   );
 }
@@ -1715,33 +2345,44 @@ function VerificationResultPage({ result, setCurrentPage }) {
 function ForensicsPage({ result }) {
   const [showOverlay, setShowOverlay] = useState(true);
   const [expandedIndex, setExpandedIndex] = useState(null);
+
   const signals = result.tampering.detectedSignals;
+  const layers = result.docshieldLayers || window.DEMO_SCENARIOS.high_risk.result.docshieldLayers;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center">
+      <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">DOCUMENT FORENSICS</h2>
-          <p className="text-xs text-slate-500">Deep-dive physical laminate & text font anomaly investigation.</p>
+          <h2 className="text-lg font-bold text-slate-900">DOCUMENT FORENSICS & LAYER BREAKDOWN</h2>
+          <p className="text-xs text-slate-500 font-mono">Deep-dive physical laminate, font glyph, and metadata integrity inspection.</p>
         </div>
 
-        <button
-          onClick={() => setShowOverlay(!showOverlay)}
-          className="px-3 py-1 rounded text-xs font-mono bg-slate-100 text-slate-600 hover:bg-slate-100 transition"
-        >
-          {showOverlay ? 'Hide Overlays' : 'Show Overlays'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowOverlay(!showOverlay)}
+            className="px-3 py-1.5 rounded text-xs font-mono bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition"
+          >
+            {showOverlay ? '👁 Hide Overlays' : '👁 Show Overlays'}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
         {/* Document Canvas */}
         <div className="md:col-span-2 bg-white border border-slate-200 p-4 rounded-xl space-y-3">
-          <div className="relative w-full h-[380px] bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-3">
+          <div className="flex justify-between items-center text-xs font-mono text-slate-600">
+            <span>FORENSIC VISUAL INSPECTION</span>
+            <span>Case #{result.screeningId}</span>
+          </div>
+
+          <div className="relative w-full h-[380px] bg-slate-900 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center p-3">
             <img src={result.documentImage} alt="Forensics" className="max-h-full object-contain" />
+            
             {showOverlay && signals.map((sig, i) => (
               <div 
                 key={i}
-                className="absolute border-2 border-red-600 bg-red-500/10 rounded"
+                className="absolute border-2 border-red-500 bg-red-500/15 rounded transition-all"
                 style={{
                   left: `${sig.locationBoundingBox?.x || 10}%`,
                   top: `${sig.locationBoundingBox?.y || 20}%`,
@@ -1749,17 +2390,37 @@ function ForensicsPage({ result }) {
                   height: `${sig.locationBoundingBox?.height || 40}%`
                 }}
               >
-                <div className="absolute -top-5 left-0 bg-red-600 text-white font-mono text-[9px] px-1 rounded">
-                  ⚠ {sig.title}
+                <div className="absolute -top-6 left-0 bg-red-600 text-white font-mono text-[9px] px-1.5 py-0.5 rounded shadow">
+                  ⚠ {sig.title} ({sig.confidence}%)
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* DocShield 4-Layer Indicators Bar */}
+          <div className="grid grid-cols-4 gap-2 pt-2 text-center text-xs font-mono">
+            <div className="bg-slate-50 p-2 rounded border border-slate-200">
+              <div className="text-[10px] text-slate-500">Photo Tamper</div>
+              <div className={`font-bold ${layers.photoTamper.score >= 70 ? 'text-emerald-700' : 'text-red-600'}`}>{layers.photoTamper.score}%</div>
+            </div>
+            <div className="bg-slate-50 p-2 rounded border border-slate-200">
+              <div className="text-[10px] text-slate-500">Font Consistency</div>
+              <div className={`font-bold ${layers.fontConsistency.score >= 70 ? 'text-emerald-700' : 'text-red-600'}`}>{layers.fontConsistency.score}%</div>
+            </div>
+            <div className="bg-slate-50 p-2 rounded border border-slate-200">
+              <div className="text-[10px] text-slate-500">Stamp Alignment</div>
+              <div className={`font-bold ${layers.stampAlignment.score >= 70 ? 'text-emerald-700' : 'text-amber-700'}`}>{layers.stampAlignment.score}%</div>
+            </div>
+            <div className="bg-slate-50 p-2 rounded border border-slate-200">
+              <div className="text-[10px] text-slate-500">Metadata</div>
+              <div className={`font-bold ${layers.metadataIntegrity.score >= 70 ? 'text-emerald-700' : 'text-red-600'}`}>{layers.metadataIntegrity.score}%</div>
+            </div>
           </div>
         </div>
 
         {/* Collapsible Anomaly Details (Progressive Disclosure) */}
         <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3">
-          <div className="text-xs font-mono font-bold text-slate-600 uppercase">DETECTED ANOMALIES ({signals.length})</div>
+          <div className="text-xs font-mono font-bold text-slate-600 uppercase">DETECTED FORENSIC ANOMALIES ({signals.length})</div>
 
           <div className="space-y-2">
             {signals.map((sig, i) => {
@@ -1768,14 +2429,14 @@ function ForensicsPage({ result }) {
                 <div key={i} className="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
                   <button
                     onClick={() => setExpandedIndex(isExpanded ? null : i)}
-                    className="w-full text-left p-3 flex justify-between items-center hover:bg-slate-50 transition text-xs font-mono"
+                    className="w-full text-left p-3 flex justify-between items-center hover:bg-slate-100 transition text-xs font-mono"
                   >
                     <span className="font-bold text-red-600">⚠ {sig.title}</span>
                     <span className="text-[10px] text-slate-500">{isExpanded ? '▲' : '▼'}</span>
                   </button>
 
                   {isExpanded && (
-                    <div className="p-3 border-t border-slate-200 text-[11px] font-mono text-slate-500 space-y-1.5 bg-slate-50">
+                    <div className="p-3 border-t border-slate-200 text-[11px] font-mono text-slate-600 space-y-1.5 bg-white">
                       <div><strong>Confidence:</strong> {sig.confidence}%</div>
                       <div><strong>Details:</strong> {sig.description}</div>
                       <div><strong>Location:</strong> Region {sig.locationBoundingBox?.x}% x {sig.locationBoundingBox?.y}%</div>
@@ -1786,8 +2447,8 @@ function ForensicsPage({ result }) {
             })}
 
             {signals.length === 0 && (
-              <div className="text-xs font-mono text-emerald-700 bg-emerald-50/30 p-3 rounded border border-emerald-200/50 text-center">
-                ✓ No anomaly signals detected.
+              <div className="text-xs font-mono text-emerald-700 bg-emerald-50/50 p-4 rounded-lg border border-emerald-200 text-center">
+                ✓ No physical or laminate anomaly signals detected.
               </div>
             )}
           </div>
@@ -1807,20 +2468,20 @@ function FaceVerificationPage({ result }) {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="bg-white border border-slate-200 p-5 rounded-xl">
-        <h2 className="text-lg font-bold text-slate-900">FACE VERIFICATION</h2>
-        <p className="text-xs text-slate-500 font-mono">1:1 Biometric portrait similarity comparison.</p>
+        <h2 className="text-lg font-bold text-slate-900">1:1 BIOMETRIC FACE VERIFICATION</h2>
+        <p className="text-xs text-slate-500 font-mono">Facial landmark comparison between physical document portrait and live officer camera.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white border border-slate-200 p-4 rounded-xl text-center space-y-2">
-          <div className="text-xs font-mono text-slate-500">DOCUMENT PHOTO</div>
+          <div className="text-xs font-mono text-slate-500 uppercase font-bold">EXTRACTED DOCUMENT PHOTO</div>
           <div className="h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
             <img src={result.documentImage} alt="Doc Photo" className="max-h-full object-contain" />
           </div>
         </div>
 
         <div className="bg-white border border-slate-200 p-4 rounded-xl text-center space-y-2">
-          <div className="text-xs font-mono text-slate-500">LIVE CAPTURE</div>
+          <div className="text-xs font-mono text-slate-500 uppercase font-bold">LIVE CAMERA CAPTURE (CAM-04)</div>
           <div className="h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
             <img src={result.verificationImage} alt="Live Capture" className="max-h-full object-contain" />
           </div>
@@ -1828,19 +2489,19 @@ function FaceVerificationPage({ result }) {
       </div>
 
       <div className="bg-white border border-slate-200 p-5 rounded-xl text-center space-y-3">
-        <div className="text-xs font-mono text-slate-500 uppercase">MATCH RESULT</div>
+        <div className="text-xs font-mono text-slate-500 uppercase font-bold">BIOMETRIC SIMILARITY RESULT</div>
         
-        <span className={`inline-block px-4 py-1.5 rounded-lg text-sm font-bold font-mono ${
+        <span className={`inline-block px-5 py-2 rounded-lg text-base font-bold font-mono ${
           isMatch ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
           {isMatch ? '✓ MATCH CONFIRMED' : '✕ LOW SIMILARITY MISMATCH'} ({fv.similarityScore}%)
         </span>
 
-        <div className="grid grid-cols-4 gap-2 border-t border-slate-200 pt-3 text-xs font-mono text-slate-500">
-          <div>Face Detected: <strong className="text-emerald-700">✓</strong></div>
-          <div>Image Quality: <strong className="text-emerald-700">✓</strong></div>
-          <div>Landmarks: <strong className="text-slate-900">{fv.landmarksMatched}/68</strong></div>
-          <div>Pose: <strong className="text-slate-900">{fv.poseAlignment}</strong></div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border-t border-slate-200 pt-3 text-xs font-mono text-slate-500">
+          <div>Face Detected: <strong className="text-emerald-700">✓ YES</strong></div>
+          <div>Image Quality: <strong className="text-emerald-700">✓ OPTIMAL</strong></div>
+          <div>Landmarks Matched: <strong className="text-slate-900">{fv.landmarksMatched}/68</strong></div>
+          <div>Pose Alignment: <strong className="text-slate-900">{fv.poseAlignment}</strong></div>
         </div>
       </div>
     </div>
@@ -1848,10 +2509,12 @@ function FaceVerificationPage({ result }) {
 }
 
 // ----------------------------------------------------
-// SCREENING HISTORY PAGE
+// SCREENING HISTORY PAGE (With Simulated Blockchain Ledger)
 // ----------------------------------------------------
-function ScreeningHistoryPage({ setCurrentPage }) {
+function ScreeningHistoryPage({ setCurrentPage, blockchainLedger }) {
   const [filter, setFilter] = useState('all');
+  const [viewTab, setViewTab] = useState('cases'); // 'cases' | 'blockchain'
+
   const history = window.RECENT_SCREENINGS_FEED;
 
   const filteredHistory = history.filter(item => {
@@ -1865,64 +2528,136 @@ function ScreeningHistoryPage({ setCurrentPage }) {
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">SCREENING HISTORY</h2>
-          <p className="text-xs text-slate-500 font-mono">Searchable audit record of processed checkpoint cases.</p>
+          <h2 className="text-lg font-bold text-slate-900">SCREENING HISTORY & AUDIT TRAIL</h2>
+          <p className="text-xs text-slate-500 font-mono">Searchable audit record of processed checkpoint cases and simulated blockchain blocks.</p>
         </div>
 
-        {/* Filter buttons */}
-        <div className="flex gap-1.5 bg-slate-50 p-1 rounded-lg border border-slate-200 text-xs font-mono">
-          {['all', 'clear', 'review', 'high'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1 rounded transition capitalize ${
-                filter === f ? 'bg-slate-100 text-blue-800 font-bold' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
+        {/* View mode toggle */}
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setViewTab('cases')}
+            className={`px-3 py-1.5 rounded text-xs font-mono font-bold transition ${
+              viewTab === 'cases' ? 'bg-blue-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            Screening Cases
+          </button>
+          <button 
+            onClick={() => setViewTab('blockchain')}
+            className={`px-3 py-1.5 rounded text-xs font-mono font-bold transition flex items-center gap-1 ${
+              viewTab === 'blockchain' ? 'bg-blue-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <span>⚡ Blockchain Ledger</span>
+          </button>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-4 overflow-x-auto">
-        <table className="w-full text-left text-xs font-mono">
-          <thead>
-            <tr className="border-b border-slate-200 text-slate-500 uppercase">
-              <th className="pb-2 px-2">CASE ID</th>
-              <th className="pb-2 px-2">TIME</th>
-              <th className="pb-2 px-2">DOCUMENT</th>
-              <th className="pb-2 px-2">RISK SCORE</th>
-              <th className="pb-2 px-2">STATUS</th>
-              <th className="pb-2 px-2 text-right">ACTION</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {filteredHistory.map((row, idx) => (
-              <tr key={idx} className="hover:bg-slate-100 transition">
-                <td className="py-2.5 px-2 font-bold text-slate-800">{row.screeningId}</td>
-                <td className="py-2.5 px-2 text-slate-500">{row.time}</td>
-                <td className="py-2.5 px-2 text-slate-600">{row.documentType}</td>
-                <td className="py-2.5 px-2 font-bold text-slate-900">{row.riskScore}</td>
-                <td className="py-2.5 px-2">
-                  <span className={`px-2 py-0.5 rounded font-bold ${
-                    row.riskLevel === 'high' ? 'text-red-600' :
-                    row.riskLevel === 'medium' ? 'text-amber-700' :
-                    'text-emerald-700'
-                  }`}>
-                    {row.status}
-                  </span>
-                </td>
-                <td className="py-2.5 px-2 text-right">
-                  <button onClick={() => setCurrentPage('result')} className="text-blue-800 hover:underline">
-                    Open Case
-                  </button>
-                </td>
+      {viewTab === 'cases' ? (
+        <div className="bg-white border border-slate-200 rounded-xl p-4 overflow-x-auto space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-mono font-bold text-slate-600 uppercase">CASE RECORDS</span>
+            {/* Filter buttons */}
+            <div className="flex gap-1.5 bg-slate-50 p-1 rounded-lg border border-slate-200 text-xs font-mono">
+              {['all', 'clear', 'review', 'high'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-3 py-1 rounded transition capitalize ${
+                    filter === f ? 'bg-white text-blue-900 font-bold shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <table className="w-full text-left text-xs font-mono">
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-500 uppercase">
+                <th className="pb-2 px-2">CASE ID</th>
+                <th className="pb-2 px-2">TIME</th>
+                <th className="pb-2 px-2">DOCUMENT</th>
+                <th className="pb-2 px-2">CONFIDENCE</th>
+                <th className="pb-2 px-2">AUDIT BLOCK</th>
+                <th className="pb-2 px-2">STATUS</th>
+                <th className="pb-2 px-2 text-right">ACTION</th>
               </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {filteredHistory.map((row, idx) => (
+                <tr key={idx} className="hover:bg-slate-100 transition">
+                  <td className="py-2.5 px-2 font-bold text-slate-800">{row.screeningId}</td>
+                  <td className="py-2.5 px-2 text-slate-500">{row.time}</td>
+                  <td className="py-2.5 px-2 text-slate-600">{row.documentType}</td>
+                  <td className="py-2.5 px-2 font-bold text-slate-900">{row.compositeScore}%</td>
+                  <td className="py-2.5 px-2 text-amber-700 font-bold">{row.blockNumber}</td>
+                  <td className="py-2.5 px-2">
+                    <span className={`px-2 py-0.5 rounded font-bold ${
+                      row.riskLevel === 'high' ? 'text-red-600 bg-red-50' :
+                      row.riskLevel === 'medium' ? 'text-amber-700 bg-amber-50' :
+                      'text-emerald-700 bg-emerald-50'
+                    }`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-2 text-right">
+                    <button onClick={() => setCurrentPage('result')} className="text-blue-800 hover:underline">
+                      Open Case
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="bg-slate-900 text-slate-100 rounded-xl p-6 font-mono space-y-4 border border-slate-800">
+          <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+            <div>
+              <h3 className="text-sm font-bold text-cyan-400">DISTRIBUTED BLOCKCHAIN AUDIT LEDGER (SIMULATION)</h3>
+              <p className="text-xs text-slate-400">Cryptographically chained immutable blocks for verified screenings.</p>
+            </div>
+            <span className="text-xs text-emerald-400 font-bold">● CHAIN INTEGRITY VERIFIED</span>
+          </div>
+
+          <div className="space-y-3">
+            {blockchainLedger.map((block, idx) => (
+              <div key={idx} className="p-4 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-xs">
+                <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-amber-400 font-bold text-sm">{block.blockNumber}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      block.verdict === 'CLEARED' ? 'bg-emerald-900/60 text-emerald-300' : 'bg-red-900/60 text-red-300'
+                    }`}>
+                      {block.verdict}
+                    </span>
+                    <span className="text-slate-400">({block.screeningId})</span>
+                  </div>
+                  <span className="text-slate-400 text-[11px]">{block.timestamp}</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                  <div>
+                    <span className="text-slate-500">prev: </span>
+                    <span className="text-slate-400 break-all">{block.prevHash}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">hash: </span>
+                    <span className="text-cyan-300 font-bold break-all">{block.currentHash}</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between text-[10px] text-slate-500 pt-1">
+                  <span>Checkpoint: {block.checkpoint}</span>
+                  <span>Officer: {block.officerId}</span>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1931,6 +2666,9 @@ function ScreeningHistoryPage({ setCurrentPage }) {
 // OFFICIAL REPORTS PAGE
 // ----------------------------------------------------
 function DetailedReportPage({ result }) {
+  const layers = result.docshieldLayers || window.DEMO_SCENARIOS.high_risk.result.docshieldLayers;
+  const auditBlock = result.auditBlock || window.DEMO_SCENARIOS.high_risk.result.auditBlock;
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200">
@@ -1942,8 +2680,9 @@ function DetailedReportPage({ result }) {
 
       <div className="bg-white text-slate-900 p-8 rounded-xl shadow-2xl space-y-6 font-sans border-t-8 border-blue-900 relative">
         <div className="absolute top-3 right-3 text-[10px] font-mono font-bold text-amber-700 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded">
-          SIMULATED DOCUMENT — DEMO ONLY
+          SIMULATED DOCUMENT — DEMO PROTOTYPE
         </div>
+        
         <div className="border-b-2 border-slate-300 pb-4 text-center space-y-1">
           <div className="flex justify-center mb-1"><AgencyEmblem size={44} /></div>
           <div className="font-bold text-xs tracking-widest text-slate-600 uppercase">UNION FRONTIER SECURITY DIRECTORATE</div>
@@ -1962,26 +2701,49 @@ function DetailedReportPage({ result }) {
         <div className="space-y-2">
           <h3 className="font-bold text-sm text-slate-900 border-b pb-1">1. EXTRACTED DOCUMENT INFORMATION</h3>
           <div className="grid grid-cols-2 text-xs gap-2 font-mono">
-            <div>NAME: <strong>{result.ocr.fields.fullName}</strong></div>
-            <div>PASSPORT NO.: <strong>{result.ocr.fields.passportNumber}</strong></div>
-            <div>NATIONALITY: <strong>{result.ocr.fields.nationality}</strong></div>
-            <div>EXPIRY DATE: <strong>{result.ocr.fields.dateOfExpiry}</strong></div>
+            <div>NAME: <strong>{result.ocr?.fields?.fullName}</strong></div>
+            <div>PASSPORT NO.: <strong>{result.ocr?.fields?.passportNumber}</strong></div>
+            <div>NATIONALITY: <strong>{result.ocr?.fields?.nationality}</strong></div>
+            <div>EXPIRY DATE: <strong>{result.ocr?.fields?.dateOfExpiry}</strong></div>
+          </div>
+        </div>
+
+        {/* DocShield 4-Layer Breakdown */}
+        <div className="space-y-2">
+          <h3 className="font-bold text-sm text-slate-900 border-b pb-1">2. DOCSHIELD MULTI-LAYER FORENSIC FINDINGS</h3>
+          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div className="p-2 border rounded bg-slate-50">
+              PHOTO TAMPER: <strong>{layers.photoTamper.score}%</strong> ({layers.photoTamper.status.toUpperCase()})
+              <div className="text-[10px] text-slate-500">{layers.photoTamper.explanation}</div>
+            </div>
+            <div className="p-2 border rounded bg-slate-50">
+              FONT CONSISTENCY: <strong>{layers.fontConsistency.score}%</strong> ({layers.fontConsistency.status.toUpperCase()})
+              <div className="text-[10px] text-slate-500">{layers.fontConsistency.explanation}</div>
+            </div>
+            <div className="p-2 border rounded bg-slate-50">
+              STAMP ALIGNMENT: <strong>{layers.stampAlignment.score}%</strong> ({layers.stampAlignment.status.toUpperCase()})
+              <div className="text-[10px] text-slate-500">{layers.stampAlignment.explanation}</div>
+            </div>
+            <div className="p-2 border rounded bg-slate-50">
+              METADATA INTEGRITY: <strong>{layers.metadataIntegrity.score}%</strong> ({layers.metadataIntegrity.status.toUpperCase()})
+              <div className="text-[10px] text-slate-500">{layers.metadataIntegrity.explanation}</div>
+            </div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <h3 className="font-bold text-sm text-slate-900 border-b pb-1">2. AI RISK ASSESSMENT & FINDINGS</h3>
+          <h3 className="font-bold text-sm text-slate-900 border-b pb-1">3. OVERALL VERDICT & RISK ASSESSMENT</h3>
           <div className="text-xs font-mono space-y-1">
-            <div>OVERALL RISK SCORE: <strong>{result.overallRiskScore} / 100 ({result.riskLevel.toUpperCase()})</strong></div>
-            <div>TAMPERING ANOMALIES DETECTED: <strong>{result.tampering.detectedSignals.length}</strong></div>
-            <div>FACE SIMILARITY MATCH: <strong>{result.faceVerification.similarityScore}% ({result.faceVerification.signal})</strong></div>
+            <div>COMPOSITE CONFIDENCE SCORE: <strong>{result.compositeConfidenceScore || 94}%</strong></div>
+            <div>FINAL VERDICT: <strong>{result.verdictText || 'PASSED SCREENING'}</strong></div>
+            <div>FACE SIMILARITY MATCH: <strong>{result.faceVerification?.similarityScore}% ({result.faceVerification?.signal})</strong></div>
           </div>
         </div>
 
         <div className="pt-8 border-t flex justify-between items-end text-xs font-mono">
           <div>
-            <div>BLOCKCHAIN LOG HASH:</div>
-            <div className="text-[9px] text-slate-500 break-all max-w-xs">{result.auditHash}</div>
+            <div className="text-amber-700 font-bold">{auditBlock.blockNumber} — BLOCKCHAIN LOG HASH:</div>
+            <div className="text-[9px] text-slate-500 break-all max-w-xs">{auditBlock.currentHash}</div>
           </div>
 
           <div className="text-center border-t border-slate-400 pt-2 px-8">
@@ -2094,23 +2856,23 @@ function AnalyticsPage() {
 }
 
 // ----------------------------------------------------
-// SYSTEM STATUS PAGE (Health Dashboard)
+// SYSTEM STATUS PAGE (Health & Blockchain Explorer)
 // ----------------------------------------------------
-function SystemStatusPage() {
+function SystemStatusPage({ blockchainLedger = [] }) {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-1">
         <h2 className="text-lg font-bold text-slate-900">SYSTEM STATUS & HEALTH</h2>
-        <p className="text-xs text-slate-500 font-mono">Technical service health, latency, and audit trail network.</p>
+        <p className="text-xs text-slate-500 font-mono">Technical service health, latency, and simulated blockchain audit trail network.</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { name: 'AI Engine', status: 'Online', latency: '42ms' },
+          { name: 'DocShield Engine', status: 'Online', latency: '38ms' },
           { name: 'OCR Engine', status: 'Online', latency: '120ms' },
           { name: 'Face Match', status: 'Online', latency: '85ms' },
-          { name: 'Database', status: 'Online', latency: '15ms' },
-          { name: 'Camera', status: 'Connected', latency: '0ms' }
+          { name: 'Audit Ledger', status: 'Online', latency: '12ms' },
+          { name: 'Camera Feed', status: 'Connected', latency: '0ms' }
         ].map((svc, i) => (
           <div key={i} className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
             <div className="text-xs font-mono font-bold text-slate-600">{svc.name}</div>
@@ -2120,28 +2882,42 @@ function SystemStatusPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
-        <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">PROTOTYPE BLOCKCHAIN AUDIT LEDGER</h3>
-        <p className="text-xs text-slate-500 font-mono">
-          Cryptographically signed screening event payloads logged to immutable distributed ledger.
+      {/* Simulated Blockchain Ledger Card */}
+      <div className="bg-slate-900 text-slate-100 p-5 rounded-xl space-y-3 font-mono border border-slate-800">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 className="text-xs font-bold text-cyan-400 uppercase">SIMULATED BLOCKCHAIN AUDIT LEDGER (PROTOTYPE)</h3>
+          <span className="text-[10px] bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded border border-amber-400/40">
+            {blockchainLedger.length} BLOCKS MINED
+          </span>
+        </div>
+
+        <p className="text-xs text-slate-400">
+          Cryptographically signed screening event payloads logged to immutable simulated distributed ledger.
         </p>
-        <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-xs text-amber-700">
-          Hash: 0x8f3c92a1b4e5780d32fa19c42b87e6321f90ab82c14de378 (Hyperledger Fabric testnet)
+
+        <div className="space-y-2 pt-1">
+          {blockchainLedger.slice(-3).map((b, idx) => (
+            <div key={idx} className="bg-slate-950 p-2.5 rounded border border-slate-800 text-xs flex justify-between items-center">
+              <div>
+                <span className="text-amber-400 font-bold">{b.blockNumber}</span> — <span className="text-slate-300">{b.docType}</span>
+                <div className="text-[10px] text-slate-500 break-all">hash: {b.currentHash}</div>
+              </div>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                b.verdict === 'CLEARED' ? 'bg-emerald-900/60 text-emerald-300' : 'bg-red-900/60 text-red-300'
+              }`}>
+                {b.verdict}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-// Render Master Application
+// Render Master Application cleanly to #root
 const rootElement = document.getElementById('root');
 ReactDOM.createRoot(rootElement).render(<App />);
-
-  </script>
-
-  <script type="text/babel">
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
   </script>
 </body>
 </html>
