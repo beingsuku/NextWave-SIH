@@ -394,7 +394,10 @@ async function createScreening(req, res) {
           mrzResult: true,
           forensicResult: true,
           faceVerification: true,
-          riskAssessment: true
+          riskAssessment: true,
+          officer: {
+            select: { officerId: true, name: true, checkpoint: true }
+          }
         }
       });
 
