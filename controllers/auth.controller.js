@@ -1,5 +1,6 @@
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const { prisma } = require("../config/db");
 
 async function login(req, res) {
@@ -9,39 +10,39 @@ async function login(req, res) {
     if (!officerId || !password) {
       return res.status(400).json({
         success: false,
-        message: "Officer ID and password are required"
+        message: "officerId and password are required"
       });
     }
 
-    // Look up officer in DB
     const officer = await prisma.officer.findUnique({
       where: { officerId }
     });
 
-    if (!officer) {
+    if (!officer || !officer.active) {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials"
       });
     }
 
-    // Compare password
-    const valid = await bcrypt.compare(password, officer.passwordHash);
+    const passwordMatches = await bcrypt.compare(
+      password,
+      officer.passwordHash
+    );
 
-    if (!valid) {
+    if (!passwordMatches) {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials"
       });
     }
 
-    // Generate JWT
     const token = jwt.sign(
       {
         id: officer.id,
         officerId: officer.officerId,
-        name: officer.name,
-        role: officer.role
+        role: officer.role,
+        checkpoint: officer.checkpoint
       },
       process.env.JWT_SECRET,
       { expiresIn: "8h" }
@@ -49,18 +50,21 @@ async function login(req, res) {
 
     return res.json({
       success: true,
-      token,
-      officer: {
-        id: officer.id,
-        officerId: officer.officerId,
-        name: officer.name,
-        role: officer.role,
-        checkpoint: officer.checkpoint
+      data: {
+        token,
+        officer: {
+          id: officer.id,
+          officerId: officer.officerId,
+          name: officer.name,
+          email: officer.email,
+          role: officer.role,
+          checkpoint: officer.checkpoint
+        }
       }
     });
-
   } catch (error) {
     console.error("LOGIN ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: "Login failed"
@@ -68,16 +72,47 @@ async function login(req, res) {
   }
 }
 
-function me(req, res) {
-  // req.user is set by the authenticate middleware
-  return res.json({
-    success: true,
-    officer: req.user
-  });
+async function me(req, res) {
+  try {
+    const officer = await prisma.officer.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        officerId: true,
+        name: true,
+        email: true,
+        role: true,
+        checkpoint: true,
+        active: true
+      }
+    });
+
+    if (!officer) {
+      return res.status(404).json({
+        success: false,
+        message: "Officer not found"
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: officer
+    });
+  } catch (error) {
+    console.error("ME ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Could not retrieve profile"
+    });
+  }
 }
 
-function logout(req, res) {
-  // JWT is stateless — client should discard the token
+async function logout(req, res) {
+  // JWTs are stateless here — there is no server-side session to destroy.
+  // The client is responsible for discarding the token. If you need real
+  // revocation later, add a token-blacklist table and check it in
+  // middleware/auth.js.
   return res.json({
     success: true,
     message: "Logged out"

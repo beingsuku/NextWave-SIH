@@ -23,9 +23,12 @@ async function health(req, res) {
     services: {
       api: "ONLINE",
       database,
-      ocr: "ONLINE",
-      forensics: "ONLINE",
-      faceVerification: "ONLINE",
+      // These three are prototype stubs (see services/*.service.js) —
+      // they run without crashing but return no real analysis yet.
+      // Reporting them as "ONLINE" would be misleading.
+      ocr: "PROTOTYPE_STUB",
+      forensics: "PROTOTYPE_STUB",
+      faceVerification: "PROTOTYPE_STUB",
       riskEngine: "ONLINE"
     }
   });
