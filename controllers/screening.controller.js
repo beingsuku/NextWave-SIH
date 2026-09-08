@@ -532,10 +532,12 @@ async function getScreenings(req, res) {
 async function getScreening(req, res) {
   try {
     const screening =
-      await prisma.screening.findUnique({
+      await prisma.screening.findFirst({
         where: {
-          screeningId:
-            req.params.id
+          OR: [
+            { screeningId: req.params.id },
+            { id: req.params.id }
+          ]
         },
 
         include: {

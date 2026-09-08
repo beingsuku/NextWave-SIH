@@ -5,14 +5,25 @@ const {
 async function getReport(req, res) {
   try {
     const screening =
-      await prisma.screening.findUnique({
+      await prisma.screening.findFirst({
         where: {
-          screeningId:
-            req.params.id
+          OR: [
+            { screeningId: req.params.id },
+            { id: req.params.id }
+          ]
         },
 
         include: {
-          officer: true,
+          officer: {
+            select: {
+              id: true,
+              officerId: true,
+              name: true,
+              email: true,
+              role: true,
+              checkpoint: true
+            }
+          },
           document: true,
           ocrResult: true,
           mrzResult: true,

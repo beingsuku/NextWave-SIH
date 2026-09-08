@@ -38,6 +38,28 @@ async function getKPIs(req, res) {
       })
     ]);
 
+    // Calculate actual average screening duration for completed screenings
+    const recentCompleted = await prisma.screening.findMany({
+      where: {
+        completedAt: { not: null }
+      },
+      select: {
+        startedAt: true,
+        completedAt: true
+      },
+      take: 100,
+      orderBy: { completedAt: "desc" }
+    });
+
+    let averageScreeningTimeSec = 0;
+    if (recentCompleted.length > 0) {
+      const totalSeconds = recentCompleted.reduce((acc, curr) => {
+        const diffSec = (new Date(curr.completedAt).getTime() - new Date(curr.startedAt).getTime()) / 1000;
+        return acc + Math.max(diffSec, 0);
+      }, 0);
+      averageScreeningTimeSec = Number((totalSeconds / recentCompleted.length).toFixed(1));
+    }
+
     res.json({
       success: true,
 
@@ -48,7 +70,7 @@ async function getKPIs(req, res) {
         highRisk: high,
         manualReview,
 
-        averageScreeningTimeSec: 0
+        averageScreeningTimeSec
       }
     });
 
