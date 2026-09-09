@@ -12,6 +12,43 @@ import sys
 import warnings
 import os
 
+# Optional top‑level imports for IDE/static analysis. They are wrapped in try/except so the script
+# still runs even if the packages are not installed. This prevents IDE "unresolved import" warnings.
+try:
+    import torch  # noqa: F401
+except ImportError:  # pragma: no cover
+    torch = None
+
+try:
+    import onnxruntime  # noqa: F401
+except ImportError:  # pragma: no cover
+    onnxruntime = None
+
+try:
+    import paddle  # noqa: F401
+except ImportError:  # pragma: no cover
+    paddle = None
+
+try:
+    from paddleocr import PaddleOCR  # noqa: F401
+except ImportError:  # pragma: no cover
+    PaddleOCR = None
+
+try:
+    from insightface.app import FaceAnalysis  # noqa: F401
+except ImportError:  # pragma: no cover
+    FaceAnalysis = None
+
+try:
+    import transformers  # noqa: F401
+except ImportError:  # pragma: no cover
+    transformers = None
+
+try:
+    import cv2  # noqa: F401
+except ImportError:  # pragma: no cover
+    cv2 = None
+
 warnings.filterwarnings("ignore")
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
@@ -57,15 +94,16 @@ def check_cv2():
     import cv2
     print(f"          opencv version: {cv2.__version__}")
 
-check("opencv-python-headless", check_cv2)
-check("torch", check_torch)
-check("onnxruntime", check_onnx)
-check("transformers", check_transformers)
-check("paddlepaddle", check_paddle)
-check("paddleocr", check_paddleocr)
-check("insightface (real model load)", check_insightface)
-
-print("-" * 60)
-print("If insightface or paddleocr show [MISSING] above, that is exactly")
-print("why your pipeline output was all 'fallback' -- fix those two first,")
-print("they matter the most for face matching and text extraction.")
+if __name__ == "__main__":
+    # Run checks only when the script is executed directly.
+    check("opencv-python-headless", check_cv2)
+    check("torch", check_torch)
+    check("onnxruntime", check_onnx)
+    check("transformers", check_transformers)
+    check("paddlepaddle", check_paddle)
+    check("paddleocr", check_paddleocr)
+    check("insightface (real model load)", check_insightface)
+    print("-" * 60)
+    print("If insightface or paddleocr show [MISSING] above, that is exactly")
+    print("why your pipeline output was all 'fallback' -- fix those two first,")
+    print("they matter the most for face matching and text extraction.")

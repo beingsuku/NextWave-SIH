@@ -706,6 +706,8 @@
       // Navigation Modes: 'landing' | 'login' | 'app'
       const [viewMode, setViewMode] = useState('landing');
       const [isAuthenticated, setIsAuthenticated] = useState(false);
+      const [authToken, setAuthToken] = useState(localStorage.getItem('sih_token') || null);
+      const [officerData, setOfficerData] = useState(null);
       const [isTransitioning, setIsTransitioning] = useState(false);
       const [currentPage, setCurrentPage] = useState('dashboard');
 
@@ -749,712 +751,240 @@
       };
 
       // Direct Officer Login Handler
-      const handleLoginSuccess = () => {
+            // Direct Officer Login Handler
+      const handleLoginSuccess = (token, officer) => {
+        localStorage.setItem('sih_token', token);
+        setAuthToken(token);
+        setOfficerData(officer);
         setIsAuthenticated(true);
         setViewMode('app');
         setCurrentPage('dashboard');
       };
 
       // Logout Handler
+            // Logout Handler
+            // Logout Handler
       const handleLogout = () => {
+        localStorage.removeItem('sih_token');
+        setAuthToken(null);
+        setOfficerData(null);
         setIsAuthenticated(false);
         setViewMode('landing');
         setCurrentPage('dashboard');
       };
 
       // Run AI Pipeline with DocShield Multi-Layer Scanning Stages
-      const startPipeline = () => {
+            // Map the real backend screening result into the shape the existing
+      // display pages (VerificationResultPage, ForensicsPage, etc.) expect.
+      // Fields we don't have real data for yet are explicitly labeled as
+      // "not yet implemented" rather than faked.
+      const mapBackendResultToUIShape = (backendData, docImageDataUrl) => {
+        const ocr = backendData.ocrResult || {};
+        const forensic = backendData.forensicResult || {};
+        const face = backendData.faceVerification || {};
+        const risk = backendData.riskAssessment || {};
+        const mrz = backendData.mrzResult || {};
+
+        const riskLevel = (backendData.riskLevel || 'low').toLowerCase();
+        const verdictStatus = riskLevel === 'low' ? 'passed' : 'flagged';
+
+        return {
+          screeningId: backendData.screeningId,
+          timestamp: new Date(backendData.completedAt || backendData.createdAt).toLocaleString(),
+          checkpoint: backendData.officer?.checkpoint || 'Unknown Checkpoint',
+          officerId: backendData.officer?.officerId || '',
+          documentType: (backendData.documentType || '').toLowerCase(),
+          documentTypeLabel: backendData.documentType,
+          documentImage: docImageDataUrl,
+          verificationImage: null,
+
+          compositeConfidenceScore: Math.round((ocr.confidence || 0) * 100),
+          verdictText:
+            backendData.recommendation === 'CLEAR' ? 'DOCUMENT VERIFIED' :
+            backendData.recommendation === 'MANUAL_REVIEW' ? 'FLAGGED FOR MANUAL REVIEW' :
+            'SECONDARY CHECK REQUIRED',
+          verdictSubtitle: backendData.recommendationDetails || '',
+          verdictStatus,
+
+          docshieldLayers: {
+            photoTamper: {
+              name: 'Photo Tamper Detection',
+              score: null,
+              status: 'NOT_YET_IMPLEMENTED',
+              explanation: 'Forensic tamper analysis has not been built yet.',
+              details: 'This module is a placeholder.'
+            },
+            fontConsistency: {
+              name: 'Font & Text Consistency',
+              score: null,
+              status: 'NOT_YET_IMPLEMENTED',
+              explanation: 'Not yet implemented.',
+              details: 'This module is a placeholder.'
+            },
+            stampAlignment: {
+              name: 'Stamp & Seal Alignment',
+              score: null,
+              status: 'NOT_YET_IMPLEMENTED',
+              explanation: 'Not yet implemented.',
+              details: 'This module is a placeholder.'
+            },
+            metadataIntegrity: {
+              name: 'Metadata Integrity',
+              score: null,
+              status: 'NOT_YET_IMPLEMENTED',
+              explanation: 'Not yet implemented.',
+              details: 'This module is a placeholder.'
+            }
+          },
+
+          auditBlock: {
+            blockNumber: `SCREENING-${backendData.screeningId}`,
+            prevHash: null,
+            currentHash: backendData.document?.sha256 || null,
+            timestamp: backendData.completedAt,
+            verdict: backendData.recommendation,
+            checkpoint: backendData.officer?.checkpoint || ''
+          },
+
+          ocr: {
+            status: ocr.confidence > 0 ? 'passed' : 'unavailable',
+            confidence: Math.round((ocr.confidence || 0) * 100),
+            fields: {
+              fullName: ocr.fullName,
+              passportNumber: ocr.documentNumber,
+              nationality: ocr.nationality,
+              dateOfBirth: ocr.dateOfBirth,
+              dateOfExpiry: ocr.dateOfExpiry,
+              gender: ocr.gender,
+              issuingAuthority: ocr.issuingAuthority,
+              mrzLine1: ocr.mrzLine1,
+              mrzLine2: ocr.mrzLine2
+            }
+          },
+
+          validation: {
+            status: mrz.valid ? 'passed' : 'warning',
+            passedCount: mrz.valid ? 1 : 0,
+            warningCount: mrz.valid ? 0 : 1,
+            failedCount: 0,
+            checks: [
+              {
+                id: 'mrz-check',
+                ruleName: 'MRZ Validation',
+                category: 'Checksum',
+                status: mrz.valid ? 'passed' : 'warning',
+                details: (mrz.details && mrz.details.reason) || (mrz.valid ? 'MRZ checksum verified' : 'MRZ not available on this document type')
+              }
+            ]
+          },
+
+          tampering: {
+            riskScore: forensic.riskScore || 0,
+            status: 'not_yet_implemented',
+            suspiciousRegionsCount: forensic.suspiciousRegions || 0,
+            detectedSignals: []
+          },
+
+          faceVerification: {
+            similarityScore: face.similarityScore,
+            signal: face.signal || 'NOT_AVAILABLE',
+            faceDetectedInDocument: face.faceDetectedDocument || false,
+            faceDetectedInVerification: face.faceDetectedLive || false,
+            imageQualityScore: face.imageQualityScore,
+            landmarksMatched: face.landmarksMatched,
+            poseAlignment: face.poseAlignment || 'Unknown',
+            lightingQuality: face.lightingQuality || 'Unknown'
+          },
+
+          databaseCheck: {
+            status: 'NOT_IMPLEMENTED',
+            referenceRecord: null,
+            notice: 'Cross-border watchlist checking has not been implemented yet.'
+          },
+
+          documentStatus: backendData.riskLevel,
+          overallRiskScore: Math.round((risk.overallScore || 0) * 100),
+          riskLevel,
+
+          riskContributors: (risk.contributors || []).map((c) => ({
+            category: c.category,
+            percentage: Math.round((c.percentage || 0) * 100),
+            weight: c.weight,
+            description: '',
+            level: riskLevel
+          })),
+
+          recommendation: (backendData.recommendation || '').toLowerCase(),
+          recommendationTitle: backendData.recommendation,
+          recommendationDetails: backendData.recommendationDetails,
+          auditHash: backendData.document?.sha256,
+          blockchainLogged: false
+        };
+      };
+
+      // Run the REAL screening pipeline: upload the document to the Node
+      // backend, which calls the Python OCR service and computes risk.
+      const startPipeline = async () => {
+        const file = window.__DOCSHIELD_UPLOADED_FILE__;
+
+        if (!file) {
+          alert('Please upload a document first.');
+          return;
+        }
+
+        const docTypeMap = {
+          passport: 'PASSPORT',
+          visa: 'VISA',
+          national_id: 'NATIONAL_ID',
+          driving_licence: 'DRIVING_LICENCE',
+          travel_permit: 'TRAVEL_PERMIT'
+        };
+
         setCurrentPage('analysis');
         setIsScanning(true);
-        setPipelineProgress(0);
+        setPipelineProgress(10);
         setCurrentStageIndex(0);
+        setActiveScanLog('Uploading document to DocShield backend...');
 
-        const scanLogs = [
-          'DOCUMENT SCAN INITIALIZED — Ingesting document & calibrating optical sensors...',
-          'PHOTO FORENSICS — Scanning photo boundary, ELA & laminate integrity...',
-          'TEXT / FONT ANALYSIS — Checking typography, kerning & stroke consistency...',
-          'STAMP / SEAL ANALYSIS — Checking seal geometry & template alignment...',
-          'METADATA ANALYSIS — Scanning EXIF signatures & structural integrity...',
-          'COMPOSITE RISK CALCULATION — Aggregating multi-layer risk signals...',
-          'VERDICT GENERATED — Minting cryptographic simulated blockchain audit block...'
-        ];
+        const formData = new FormData();
+        formData.append('document', file);
+        formData.append('documentType', docTypeMap[selectedDocType] || 'NATIONAL_ID');
 
-        let step = 0;
+        try {
+          setPipelineProgress(40);
+          setActiveScanLog('Running OCR and risk analysis...');
 
-        const interval = setInterval(() => {
-          step++;
+          const response = await fetch('http://localhost:3000/api/screening', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${authToken}` },
+            body: formData
+          });
 
-          setCurrentStageIndex(step);
+          const data = await response.json();
 
-          setActiveScanLog(
-            scanLogs[Math.min(step, scanLogs.length - 1)]
-          );
-
-          setPipelineProgress(
-            Math.min(
-              100,
-              Math.round(
-                (step / (scanLogs.length - 1)) * 100
-              )
-            )
-          );
-
-          // ============================================
-          // FINAL ANALYSIS
-          // ============================================
-          if (step >= scanLogs.length - 1) {
-            clearInterval(interval);
+          if (!response.ok || !data.success) {
             setIsScanning(false);
-
-            /*
-             * FRONTEND DOCUMENT ANALYSIS
-             * ---------------------------
-             * Uses properties available in the browser:
-             * - file type
-             * - file size
-             * - image dimensions
-             * - image brightness
-             * - image contrast
-             *
-             * This is a frontend heuristic/prototype.
-             */
-
-            const uploadedFile =
-              window.__DOCSHIELD_UPLOADED_FILE__ || null;
-
-            let riskScore = 20;
-
-            let photoScore = 92;
-            let fontScore = 94;
-            let stampScore = 92;
-            let metadataScore = 90;
-            let faceScore = 94;
-
-            let detectedSignals = [];
-
-            // --------------------------------------------
-            // FILE TYPE ANALYSIS
-            // --------------------------------------------
-            if (uploadedFile) {
-              const fileName = uploadedFile.name.toLowerCase();
-              const fileType = uploadedFile.type.toLowerCase();
-              const fileSize = uploadedFile.size;
-
-              // Unsupported/unusual file type
-              if (
-                !fileType.startsWith('image/') &&
-                fileType !== 'application/pdf'
-              ) {
-                riskScore += 30;
-                detectedSignals.push(
-                  'Unsupported document format detected'
-                );
-              }
-
-              // Very small files can indicate poor/invalid input
-              if (fileSize < 50000) {
-                riskScore += 18;
-                detectedSignals.push(
-                  'Unusually small document file'
-                );
-              }
-
-              // Very large image can indicate repeated editing/export
-              if (fileSize > 15000000) {
-                riskScore += 12;
-                detectedSignals.push(
-                  'Unusually large document file'
-                );
-              }
-
-              // Filename heuristic
-              if (
-                fileName.includes('edited') ||
-                fileName.includes('modified') ||
-                fileName.includes('copy') ||
-                fileName.includes('photoshop') ||
-                fileName.includes('temp')
-              ) {
-                riskScore += 20;
-                detectedSignals.push(
-                  'Suspicious filename pattern detected'
-                );
-              }
-
-              // PDF receives slightly higher baseline
-              // because visual inspection of PDF pages requires
-              // PDF rendering support such as PDF.js.
-              if (fileType === 'application/pdf') {
-                riskScore += 5;
-                detectedSignals.push(
-                  'PDF requires extended forensic rendering'
-                );
-              }
-            }
-
-            // --------------------------------------------
-            // IMAGE ANALYSIS
-            // --------------------------------------------
-            const analyzeImage = (dataUrl) => {
-              return new Promise((resolve) => {
-                if (!dataUrl || !dataUrl.startsWith('data:image')) {
-                  resolve(null);
-                  return;
-                }
-
-                const img = new Image();
-
-                img.onload = () => {
-                  try {
-                    const canvas = document.createElement('canvas');
-
-                    const maxSize = 700;
-
-                    const scale = Math.min(
-                      1,
-                      maxSize / Math.max(img.width, img.height)
-                    );
-
-                    canvas.width = Math.max(
-                      1,
-                      Math.round(img.width * scale)
-                    );
-
-                    canvas.height = Math.max(
-                      1,
-                      Math.round(img.height * scale)
-                    );
-
-                    const ctx = canvas.getContext('2d', {
-                      willReadFrequently: true
-                    });
-
-                    ctx.drawImage(
-                      img,
-                      0,
-                      0,
-                      canvas.width,
-                      canvas.height
-                    );
-
-                    const imageData = ctx.getImageData(
-                      0,
-                      0,
-                      canvas.width,
-                      canvas.height
-                    );
-
-                    const pixels = imageData.data;
-
-                    let brightnessTotal = 0;
-                    let brightnessSquared = 0;
-
-                    let edgeCount = 0;
-
-                    const gray = [];
-
-                    for (let i = 0; i < pixels.length; i += 4) {
-                      const r = pixels[i];
-                      const g = pixels[i + 1];
-                      const b = pixels[i + 2];
-
-                      const value =
-                        0.299 * r +
-                        0.587 * g +
-                        0.114 * b;
-
-                      brightnessTotal += value;
-                      brightnessSquared += value * value;
-
-                      gray.push(value);
-                    }
-
-                    const pixelCount = gray.length;
-
-                    const brightness =
-                      brightnessTotal / pixelCount;
-
-                    const variance =
-                      brightnessSquared / pixelCount -
-                      brightness * brightness;
-
-                    const contrast = Math.sqrt(
-                      Math.max(0, variance)
-                    );
-
-                    // Basic edge-density estimation
-                    const width = canvas.width;
-                    const height = canvas.height;
-
-                    for (let y = 1; y < height; y++) {
-                      for (let x = 1; x < width; x++) {
-                        const current =
-                          gray[y * width + x];
-
-                        const previous =
-                          gray[y * width + (x - 1)];
-
-                        if (
-                          Math.abs(current - previous) > 45
-                        ) {
-                          edgeCount++;
-                        }
-                      }
-                    }
-
-                    const edgeDensity =
-                      edgeCount /
-                      Math.max(1, (width - 1) * (height - 1));
-
-                    resolve({
-                      width: img.width,
-                      height: img.height,
-                      brightness,
-                      contrast,
-                      edgeDensity
-                    });
-                  } catch (error) {
-                    resolve(null);
-                  }
-                };
-
-                img.onerror = () => resolve(null);
-
-                img.src = dataUrl;
-              });
-            };
-
-            analyzeImage(window.__DOCSHIELD_UPLOADED_DATA_URL__)
-              .then((imageAnalysis) => {
-
-                // ------------------------------------------
-                // IMAGE QUALITY / DIMENSION ANALYSIS
-                // ------------------------------------------
-                if (imageAnalysis) {
-
-                  const {
-                    width,
-                    height,
-                    brightness,
-                    contrast,
-                    edgeDensity
-                  } = imageAnalysis;
-
-                  // Very low resolution
-                  if (width < 600 || height < 400) {
-                    riskScore += 20;
-                    photoScore -= 18;
-
-                    detectedSignals.push(
-                      'Low document image resolution'
-                    );
-                  }
-
-                  // Extremely high resolution
-                  if (width > 7000 || height > 7000) {
-                    riskScore += 8;
-                    metadataScore -= 8;
-
-                    detectedSignals.push(
-                      'Unusually high image resolution'
-                    );
-                  }
-
-                  // Very dark image
-                  if (brightness < 55) {
-                    riskScore += 18;
-                    photoScore -= 20;
-
-                    detectedSignals.push(
-                      'Poor document illumination detected'
-                    );
-                  }
-
-                  // Very bright/washed-out image
-                  if (brightness > 235) {
-                    riskScore += 15;
-                    photoScore -= 15;
-
-                    detectedSignals.push(
-                      'Overexposed document image detected'
-                    );
-                  }
-
-                  // Very low contrast
-                  if (contrast < 25) {
-                    riskScore += 15;
-                    fontScore -= 12;
-
-                    detectedSignals.push(
-                      'Low text/image contrast detected'
-                    );
-                  }
-
-                  // Extremely high contrast / harsh processing
-                  if (contrast > 95) {
-                    riskScore += 8;
-                    photoScore -= 8;
-
-                    detectedSignals.push(
-                      'Unusual image contrast detected'
-                    );
-                  }
-
-                  // Excessive edge density
-                  if (edgeDensity > 0.20) {
-                    riskScore += 12;
-                    photoScore -= 10;
-                    stampScore -= 8;
-
-                    detectedSignals.push(
-                      'High edge-density / processing signal detected'
-                    );
-                  }
-                }
-
-                // ------------------------------------------
-                // KEEP SCORES IN VALID RANGE
-                // ------------------------------------------
-                photoScore = Math.max(
-                  0,
-                  Math.min(100, photoScore)
-                );
-
-                fontScore = Math.max(
-                  0,
-                  Math.min(100, fontScore)
-                );
-
-                stampScore = Math.max(
-                  0,
-                  Math.min(100, stampScore)
-                );
-
-                metadataScore = Math.max(
-                  0,
-                  Math.min(100, metadataScore)
-                );
-
-                faceScore = Math.max(
-                  0,
-                  Math.min(100, faceScore)
-                );
-
-                // ------------------------------------------
-                // FINAL RISK SCORE
-                // ------------------------------------------
-                riskScore = Math.max(
-                  0,
-                  Math.min(100, Math.round(riskScore))
-                );
-
-                let riskLevel;
-                let verdictText;
-                let verdictStatus;
-                let recommendation;
-                let recommendationTitle;
-                let recommendationDetails;
-
-                if (riskScore >= 60) {
-                  riskLevel = 'high';
-                  verdictText = 'HIGH RISK';
-                  verdictStatus = 'flagged';
-                  recommendation = 'manual_review';
-
-                  recommendationTitle =
-                    'DOCUMENT REQUIRES MANUAL REVIEW';
-
-                  recommendationDetails =
-                    'Multiple document integrity signals require additional verification before clearance.';
-                } else if (riskScore >= 30) {
-                  riskLevel = 'medium';
-                  verdictText = 'MEDIUM RISK';
-                  verdictStatus = 'review';
-
-                  recommendation = 'additional_verification';
-
-                  recommendationTitle =
-                    'ADDITIONAL VERIFICATION RECOMMENDED';
-
-                  recommendationDetails =
-                    'Some document signals require additional verification before final clearance.';
-                } else {
-                  riskLevel = 'low';
-                  verdictText = 'LOW RISK';
-                  verdictStatus = 'passed';
-
-                  recommendation = 'clear';
-
-                  recommendationTitle =
-                    'DOCUMENT PASSED SCREENING';
-
-                  recommendationDetails =
-                    'No significant risk signals were detected by the frontend screening checks.';
-                }
-
-                // ------------------------------------------
-                // UPDATE SCREENING RESULT
-                // ------------------------------------------
-                setScreeningResult(prev => {
-
-                  const updatedResult = {
-                    ...prev,
-
-                    compositeConfidenceScore:
-                      Math.max(0, 100 - riskScore),
-
-                    verdictText,
-
-                    verdictSubtitle:
-                      riskLevel === 'high'
-                        ? 'Potential document integrity issues detected'
-                        : riskLevel === 'medium'
-                          ? 'Some verification signals require attention'
-                          : 'Document appears consistent with screening rules',
-
-                    verdictStatus,
-
-                    documentStatus:
-                      riskLevel === 'high'
-                        ? 'REVIEW REQUIRED'
-                        : riskLevel === 'medium'
-                          ? 'ADDITIONAL VERIFICATION'
-                          : 'VALID',
-
-                    overallRiskScore: riskScore,
-
-                    riskLevel,
-
-                    recommendation,
-
-                    recommendationTitle,
-
-                    recommendationDetails,
-
-                    docshieldLayers: {
-                      photoTamper: {
-                        name: 'Photo Tamper Detection',
-                        score: photoScore,
-                        status:
-                          photoScore >= 70
-                            ? 'passed'
-                            : photoScore >= 45
-                              ? 'warning'
-                              : 'failed',
-                        explanation:
-                          photoScore >= 70
-                            ? 'No major photo integrity signals detected'
-                            : 'Potential image processing or quality anomaly detected',
-                        details:
-                          imageAnalysis
-                            ? `Image analyzed at ${imageAnalysis.width} × ${imageAnalysis.height}px`
-                            : 'Image-level analysis unavailable'
-                      },
-
-                      fontConsistency: {
-                        name: 'Font & Text Consistency',
-                        score: fontScore,
-                        status:
-                          fontScore >= 70
-                            ? 'passed'
-                            : fontScore >= 45
-                              ? 'warning'
-                              : 'failed',
-                        explanation:
-                          fontScore >= 70
-                            ? 'Text presentation appears consistent'
-                            : 'Potential text rendering inconsistency detected',
-                        details:
-                          'Frontend image-quality heuristics applied.'
-                      },
-
-                      stampAlignment: {
-                        name: 'Stamp & Seal Alignment',
-                        score: stampScore,
-                        status:
-                          stampScore >= 70
-                            ? 'passed'
-                            : stampScore >= 45
-                              ? 'warning'
-                              : 'failed',
-                        explanation:
-                          stampScore >= 70
-                            ? 'No major seal-processing signal detected'
-                            : 'Potential seal or image-processing anomaly detected',
-                        details:
-                          'Frontend visual heuristics applied.'
-                      },
-
-                      metadataIntegrity: {
-                        name: 'Metadata Integrity',
-                        score: metadataScore,
-                        status:
-                          metadataScore >= 70
-                            ? 'passed'
-                            : metadataScore >= 45
-                              ? 'warning'
-                              : 'failed',
-                        explanation:
-                          metadataScore >= 70
-                            ? 'Basic file integrity checks passed'
-                            : 'File characteristics require attention',
-                        details:
-                          uploadedFile
-                            ? `File type: ${uploadedFile.type || 'unknown'}`
-                            : 'File information unavailable'
-                      }
-                    },
-
-                    tampering: {
-                      riskScore,
-                      status:
-                        riskLevel === 'high'
-                          ? 'suspicious'
-                          : riskLevel === 'medium'
-                            ? 'warning'
-                            : 'clear',
-
-                      suspiciousRegionsCount:
-                        detectedSignals.length,
-
-                      detectedSignals
-                    },
-
-                    faceVerification: {
-                      ...prev.faceVerification,
-
-                      similarityScore: faceScore,
-
-                      signal:
-                        faceScore >= 75
-                          ? 'HIGH_SIMILARITY'
-                          : faceScore >= 50
-                            ? 'MEDIUM_SIMILARITY'
-                            : 'LOW_SIMILARITY'
-                    },
-
-                    riskContributors: [
-                      {
-                        category: 'Document Integrity',
-                        percentage: riskScore,
-                        weight: 0.40,
-                        description:
-                          detectedSignals.length
-                            ? detectedSignals[0]
-                            : 'No major integrity signals detected',
-                        level: riskLevel
-                      },
-                      {
-                        category: 'Image / Face Signal',
-                        percentage:
-                          Math.max(
-                            0,
-                            100 - faceScore
-                          ),
-                        weight: 0.35,
-                        description:
-                          `Face/image confidence: ${faceScore}%`,
-                        level:
-                          faceScore >= 75
-                            ? 'low'
-                            : faceScore >= 50
-                              ? 'medium'
-                              : 'high'
-                      },
-                      {
-                        category: 'Validation Checks',
-                        percentage: riskScore,
-                        weight: 0.25,
-                        description:
-                          `${detectedSignals.length} signal(s) detected`,
-                        level: riskLevel
-                      }
-                    ]
-                  };
-
-                  return updatedResult;
-                });
-
-                // ------------------------------------------
-                // BLOCKCHAIN AUDIT BLOCK
-                // ------------------------------------------
-                const blockNum =
-                  `BLOCK #${String(
-                    blockchainLedger.length + 1
-                  ).padStart(4, '0')}`;
-
-                const prevBlock =
-                  blockchainLedger[
-                  blockchainLedger.length - 1
-                  ];
-
-                const randomHex =
-                  Array.from(
-                    { length: 40 },
-                    () =>
-                      Math.floor(
-                        Math.random() * 16
-                      ).toString(16)
-                  ).join('');
-
-                const newBlock = {
-                  blockNumber: blockNum,
-
-                  screeningId:
-                    screeningResult.screeningId,
-
-                  docType:
-                    screeningResult.documentTypeLabel,
-
-                  verdict:
-                    riskLevel === 'low'
-                      ? 'CLEARED'
-                      : 'FLAGGED',
-
-                  compositeScore:
-                    Math.max(
-                      0,
-                      100 - riskScore
-                    ),
-
-                  prevHash:
-                    prevBlock
-                      ? prevBlock.currentHash
-                      : '0000000000000000000000000000000000000000',
-
-                  currentHash: randomHex,
-
-                  timestamp:
-                    new Date()
-                      .toISOString()
-                      .replace('T', ' ')
-                      .substring(0, 19) +
-                    ' UTC',
-
-                  checkpoint:
-                    'SSB-DEMO-01 (ICP Attari-Wagah)',
-
-                  officerId:
-                    'UFS-OFF-9042'
-                };
-
-                setBlockchainLedger(
-                  prev => [...prev, newBlock]
-                );
-
-                setScreeningResult(prev => ({
-                  ...prev,
-
-                  auditBlock: newBlock,
-
-                  auditHash:
-                    `0x${randomHex}`,
-
-                  blockchainLogged: true
-                }));
-              });
+            setActiveScanLog('Screening failed.');
+            alert(data.message || 'Screening failed. Check backend logs.');
+            setCurrentPage('new_screening');
+            return;
           }
-        }, 900);
+
+          const mappedResult = mapBackendResultToUIShape(data.data, uploadedDocImage);
+
+          setScreeningResult(mappedResult);
+          setPipelineProgress(100);
+          setCurrentStageIndex(6);
+          setActiveScanLog('Analysis complete.');
+          setIsScanning(false);
+
+        } catch (error) {
+          console.error(error);
+          setIsScanning(false);
+          setActiveScanLog('Could not reach backend.');
+          alert('Could not reach the server. Is the Node backend running on port 3000?');
+          setCurrentPage('new_screening');
+        }
       };
 
       return (
@@ -1862,7 +1392,7 @@
       const [verifyStep, setVerifyStep] = useState('');
       const [errorMsg, setErrorMsg] = useState('');
 
-      const executeLoginFlow = () => {
+            const executeLoginFlow = async () => {
         setErrorMsg('');
         if (!officerId.trim() || !password.trim()) {
           setErrorMsg('Unable to verify officer credentials.');
@@ -1872,13 +1402,31 @@
         setIsVerifying(true);
         setVerifyStep('Verifying officer credentials...');
 
-        setTimeout(() => {
+        try {
+          const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ officerId, password })
+          });
+
+          const data = await response.json();
+
+          if (!data.success) {
+            setIsVerifying(false);
+            setErrorMsg(data.message || 'Invalid credentials.');
+            return;
+          }
+
           setVerifyStep('Secure session established.');
           setTimeout(() => {
             setIsVerifying(false);
-            onLoginSuccess();
+            onLoginSuccess(data.data.token, data.data.officer);
           }, 500);
-        }, 700);
+
+        } catch (error) {
+          setIsVerifying(false);
+          setErrorMsg('Could not reach the server. Is the backend running?');
+        }
       };
 
       const handleSubmit = (e) => {
@@ -2570,18 +2118,11 @@ function HorizontalNavigation({ currentPage, setCurrentPage, officerInfo }) {
               <div className="text-[11px] font-mono text-slate-500 text-center">Supported formats: JPG / PNG / PDF • Ready for DocShield Multi-Layer Analysis</div>
             </div>
 
-            {/* Step 2: Identity Face */}
-            <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
-              <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 2 — IDENTITY FACE CAPTURE</div>
-              <div className="w-full h-36 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
-                <img src={window.DEMO_DOCUMENTS.verificationPerson} alt="Camera Preview" className="max-h-full object-contain" />
-              </div>
-              <div className="text-[11px] font-mono text-emerald-700 text-center">✓ Camera Feed Active (CAM-04 Live)</div>
-            </div>
+
 
             {/* Step 3: Screening CTA */}
             <div className="bg-white border border-slate-200 p-5 rounded-xl text-center space-y-3">
-              <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 3 — AI & DOCSHIELD FORENSIC SCREENING</div>
+              <div className="text-xs font-mono font-bold text-slate-600 uppercase"></div>
               <button
                 onClick={onStartPipeline}
                 className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition transform hover:scale-[1.01]"

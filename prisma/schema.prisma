@@ -25,6 +25,7 @@ enum RiskLevel {
   LOW
   MEDIUM
   HIGH
+  INSUFFICIENT_DATA
 }
 
 enum DocumentType {
@@ -185,7 +186,7 @@ model RiskAssessment {
 
   screening             Screening   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
 
-  overallScore          Float
+  overallScore          Float?
   riskLevel             RiskLevel
 
   tamperingScore        Float?

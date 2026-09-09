@@ -189,17 +189,11 @@ async function createScreening(req, res) {
 
     const risk =
       calculateRisk({
-        tamperingScore:
-          forensic.riskScore || 0,
-
-        faceScore:
-          face.similarityScore || 0,
-
-        mrzScore:
-          mrz.valid ? 100 : 0,
-
-        validityScore:
-          ocr.confidence || 0
+        tamperingScore: forensic.riskScore ?? null,
+        faceSimilarity: face.similarityScore ?? null,
+        mrzValid: (ocr.mrzLine1 && ocr.mrzLine2) ? mrz.valid : null,
+        documentType,
+        ocrConfidence: ocr.confidence ?? null
       });
 
     let recommendation =
@@ -326,7 +320,7 @@ async function createScreening(req, res) {
       }
     });
 
-    await prisma.riskAssessment.create({
+        await prisma.riskAssessment.create({
       data: {
         screeningId: screening.id,
 
@@ -337,16 +331,18 @@ async function createScreening(req, res) {
           risk.riskLevel,
 
         tamperingScore:
-          forensic.riskScore,
+          forensic.riskScore ?? null,
 
         faceScore:
-          face.similarityScore || 0,
+          face.similarityScore ?? null,
 
         mrzScore:
-          mrz.valid ? 100 : 0,
+          mrz.valid === null || mrz.valid === undefined
+            ? null
+            : (mrz.valid ? 100 : 0),
 
         validityScore:
-          ocr.confidence || 0,
+          ocr.confidence ?? null,
 
         contributors:
           risk.contributors,
