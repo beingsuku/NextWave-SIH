@@ -1,8 +1,10 @@
-from fastapi import FastAPI, UploadFile, File
+import time
+from fastapi import FastAPI, UploadFile, File, Form
 
+# pyrefly: ignore [missing-import]
 from ocr import run_ocr
+# pyrefly: ignore [missing-import]
 from forensics import run_forensics
-
 import tempfile
 import os
 
@@ -21,11 +23,11 @@ def root():
 
 @app.post("/ocr")
 async def ocr(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    documentType: str | None = Form(None)
 ):
-    suffix = os.path.splitext(
-        file.filename
-    )[1]
+    filename = file.filename or ""
+    _, suffix = os.path.splitext(filename)
 
     with tempfile.NamedTemporaryFile(
         delete=False,
@@ -38,9 +40,11 @@ async def ocr(
 
         path = temp.name
 
+    t = time.time()
     try:
-        return run_ocr(path)
-
+        result = run_ocr(path, document_type_hint=documentType)
+        print(f"[timing] /ocr took {time.time()-t:.1f}s", flush=True)
+        return result
     finally:
         os.remove(path)
 
@@ -49,9 +53,8 @@ async def ocr(
 async def forensics(
     file: UploadFile = File(...)
 ):
-    suffix = os.path.splitext(
-        file.filename
-    )[1]
+    filename = file.filename or ""
+    _, suffix = os.path.splitext(filename)
 
     with tempfile.NamedTemporaryFile(
         delete=False,
@@ -69,3 +72,4 @@ async def forensics(
 
     finally:
         os.remove(path)
+

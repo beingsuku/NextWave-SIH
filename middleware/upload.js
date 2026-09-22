@@ -41,6 +41,15 @@ const fileFilter = (req, file, cb) => {
     );
   }
 
+  if (
+    file.fieldname === "liveCapture" &&
+    file.mimetype === "application/pdf"
+  ) {
+    return cb(
+      new Error("Live capture must be an image")
+    );
+  }
+
   cb(null, true);
 };
 

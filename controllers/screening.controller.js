@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const fs = require("fs");
 
 const {
   prisma
@@ -32,8 +33,6 @@ const {
 } = require("../services/audit.service");
 
 async function sha256File(filePath) {
-  const fs = require("fs");
-
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash("sha256");
 
@@ -49,9 +48,34 @@ async function sha256File(filePath) {
   });
 }
 
-async function createScreening(req, res) {
+async function removeFileQuietly(filePath) {
+  if (!filePath) return;
+
   try {
-    if (!req.file) {
+    await fs.promises.unlink(filePath);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      console.error("Could not delete file:", filePath, error.message);
+    }
+  }
+}
+
+/*
+  PHASE 1 — document analysis (pipeline steps 1-5)
+  POST /api/screening   (multipart: document, documentType)
+
+  Runs OCR, MRZ and forensics, saves them, then leaves the screening
+  waiting for the live capture. No risk score yet: the face is part of it.
+*/
+async function createScreening(req, res) {
+  const documentFile = req.file;
+  let screening = null;
+
+  try {
+    const t0 = Date.now();                                   
+    const lap = (label) =>                                   
+      console.log(`[timing] ${label}: ${((Date.now() - t0) / 1000).toFixed(1)}s`); 
+    if (!documentFile) {
       return res.status(400).json({
         success: false,
         message: "Document file is required"
@@ -71,6 +95,8 @@ async function createScreening(req, res) {
     ];
 
     if (!validTypes.includes(documentType)) {
+      await removeFileQuietly(documentFile.path);
+
       return res.status(400).json({
         success: false,
         message: "Invalid document type"
@@ -81,14 +107,14 @@ async function createScreening(req, res) {
       generateScreeningId();
 
     const fileHash =
-      await sha256File(req.file.path);
+      await sha256File(documentFile.path);
 
     /*
       STEP 1
       Create database record
     */
 
-    const screening =
+    screening =
       await prisma.screening.create({
         data: {
           screeningId,
@@ -102,19 +128,19 @@ async function createScreening(req, res) {
           document: {
             create: {
               originalName:
-                req.file.originalname,
+                documentFile.originalname,
 
               storedName:
-                req.file.filename,
+                documentFile.filename,
 
               path:
-                req.file.path,
+                documentFile.path,
 
               mimeType:
-                req.file.mimetype,
+                documentFile.mimetype,
 
               size:
-                req.file.size,
+                documentFile.size,
 
               sha256:
                 fileHash
@@ -133,17 +159,19 @@ async function createScreening(req, res) {
       ipAddress: req.ip,
       userAgent: req.headers["user-agent"]
     });
-
+    lap("hash+db+audit");
     /*
       STEP 2
       OCR
     */
 
+
     const ocr =
       await runOCR(
-        req.file.path,
+        documentFile.path,
         documentType
       );
+    lap("ocr");     
 
     /*
       STEP 3
@@ -163,53 +191,12 @@ async function createScreening(req, res) {
 
     const forensic =
       await runForensics(
-        req.file.path
+        documentFile.path
       );
-
+    lap("forensics");  
     /*
       STEP 5
-      Face
-
-      If no second image exists,
-      prototype returns unavailable.
-    */
-
-    const face =
-      await verifyFace(
-        req.file.path,
-        null
-      );
-
-    /*
-      STEP 6
-      Risk
-
-      Prototype face value when unavailable = 0.
-    */
-
-    const risk =
-      calculateRisk({
-        tamperingScore: forensic.riskScore ?? null,
-        faceSimilarity: face.similarityScore ?? null,
-        mrzValid: (ocr.mrzLine1 && ocr.mrzLine2) ? mrz.valid : null,
-        documentType,
-        ocrConfidence: ocr.confidence ?? null
-      });
-
-    let recommendation =
-      "CLEAR";
-
-    if (risk.riskLevel === "HIGH") {
-      recommendation = "MANUAL_REVIEW";
-    } else if (
-      risk.riskLevel === "MEDIUM"
-    ) {
-      recommendation = "SECONDARY_CHECK";
-    }
-
-    /*
-      STEP 7
-      Save ALL results
+      Save document-analysis results
     */
 
     await prisma.oCRResult.create({
@@ -224,6 +211,9 @@ async function createScreening(req, res) {
 
         documentNumber:
           ocr.documentNumber,
+
+        documentNumberChecksumValid:
+          ocr.documentNumberChecksumValid,
 
         nationality:
           ocr.nationality,
@@ -285,139 +275,42 @@ async function createScreening(req, res) {
         suspiciousRegions:
           forensic.suspiciousRegions,
 
+        meanELA:
+          forensic.meanELA,
+
+        maxELA:
+          forensic.maxELA,
+
+        metadataChecked:
+          forensic.metadataChecked,
+
         signals:
           forensic.signals
       }
     });
 
-    await prisma.faceVerification.create({
-      data: {
-        screeningId: screening.id,
-
-        similarityScore:
-          face.similarityScore,
-
-        imageQualityScore:
-          face.imageQualityScore,
-
-        faceDetectedDocument:
-          face.faceDetectedDocument,
-
-        faceDetectedLive:
-          face.faceDetectedLive,
-
-        signal:
-          face.signal,
-
-        landmarksMatched:
-          face.landmarksMatched,
-
-        poseAlignment:
-          face.poseAlignment,
-
-        lightingQuality:
-          face.lightingQuality
-      }
-    });
-
-        await prisma.riskAssessment.create({
-      data: {
-        screeningId: screening.id,
-
-        overallScore:
-          risk.overallScore,
-
-        riskLevel:
-          risk.riskLevel,
-
-        tamperingScore:
-          forensic.riskScore ?? null,
-
-        faceScore:
-          face.similarityScore ?? null,
-
-        mrzScore:
-          mrz.valid === null || mrz.valid === undefined
-            ? null
-            : (mrz.valid ? 100 : 0),
-
-        validityScore:
-          ocr.confidence ?? null,
-
-        contributors:
-          risk.contributors,
-
-        explanation:
-          risk.explanation
-      }
-    });
-
-    /*
-      STEP 8
-      Update main screening
-    */
-
-    const finalScreening =
+    const analysed =
       await prisma.screening.update({
         where: {
           id: screening.id
         },
 
         data: {
-          status:
-            risk.riskLevel === "HIGH"
-              ? "MANUAL_REVIEW"
-              : "COMPLETED",
-
-          riskScore:
-            risk.overallScore,
-
-          riskLevel:
-            risk.riskLevel,
-
-          recommendation,
-
-          recommendationDetails:
-            risk.explanation.join(". "),
-
-          completedAt:
-            new Date()
+          status: "AWAITING_LIVE_CAPTURE"
         },
 
         include: {
           document: true,
           ocrResult: true,
           mrzResult: true,
-          forensicResult: true,
-          faceVerification: true,
-          riskAssessment: true,
-          officer: {
-            select: { officerId: true, name: true, checkpoint: true }
-          }
+          forensicResult: true
         }
       });
-
-    await createAudit({
-      officerId: req.user.id,
-      screeningId: screening.id,
-      action: "SCREENING_COMPLETED",
-      details: {
-        riskScore:
-          risk.overallScore,
-
-        riskLevel:
-          risk.riskLevel,
-
-        recommendation
-      },
-      ipAddress: req.ip,
-      userAgent: req.headers["user-agent"]
-    });
-
+    lap("saved");   
     return res.status(201).json({
       success: true,
 
-      data: finalScreening
+      data: analysed
     });
 
   } catch (error) {
@@ -425,6 +318,20 @@ async function createScreening(req, res) {
       "SCREENING ERROR:",
       error
     );
+
+    if (screening) {
+      try {
+        await prisma.screening.update({
+          where: { id: screening.id },
+          data: { status: "FAILED" }
+        });
+      } catch (updateError) {
+        console.error(
+          "Could not mark screening as FAILED:",
+          updateError.message
+        );
+      }
+    }
 
     res.status(500).json({
       success: false,
@@ -437,6 +344,305 @@ async function createScreening(req, res) {
   }
 }
 
+/*
+  PHASE 2 — live verification, risk scoring, decision (steps 6-9)
+  POST /api/screening/:id/live-capture
+  multipart: liveCapture (image)  — or skipLiveCapture=true with no photo
+*/
+async function completeLiveVerification(req, res) {
+  const liveFile = req.file;
+  let committed = false;
+
+  const reject = async (status, message) => {
+    await removeFileQuietly(liveFile?.path);
+
+    return res.status(status).json({
+      success: false,
+      message
+    });
+  };
+
+  try {
+    const screening =
+      await prisma.screening.findFirst({
+        where: {
+          OR: [
+            { screeningId: req.params.id },
+            { id: req.params.id }
+          ]
+        },
+
+        include: {
+          document: true,
+          ocrResult: true,
+          mrzResult: true,
+          forensicResult: true
+        }
+      });
+
+    if (!screening) {
+      return reject(404, "Screening not found");
+    }
+
+    if (screening.officerId !== req.user.id) {
+      return reject(403, "This screening belongs to another officer");
+    }
+
+    if (screening.status !== "AWAITING_LIVE_CAPTURE") {
+      return reject(
+        409,
+        "This screening is not waiting for a live capture"
+      );
+    }
+
+    const skipRequested =
+      String(req.body?.skipLiveCapture) === "true";
+
+    if (!liveFile && !skipRequested) {
+      return reject(
+        400,
+        "A live capture photo is required (or send skipLiveCapture=true to continue without face verification)"
+      );
+    }
+
+    /*
+      STEP 6 + 7
+      Face detection and comparison
+    */
+
+    const face =
+      await verifyFace(
+        screening.document.path,
+        liveFile?.path ?? null
+      );
+
+    // A bad live photo, or the face service being down, can be retried.
+    // If the DOCUMENT photo has no face, retaking will not help, so that
+    // case is finalized below instead.
+    const canRetry =
+      Boolean(liveFile) &&
+      (
+        face.signal === "ERROR" ||
+        (
+          face.signal === "NO_FACE_DETECTED" &&
+          face.faceDetectedDocument === true
+        )
+      );
+
+    if (canRetry) {
+      await removeFileQuietly(liveFile.path);
+
+      return res.status(200).json({
+        success: true,
+        retryable: true,
+        message:
+          face.signal === "ERROR"
+            ? "Face verification could not run. Check that the face service is running on port 5002, then try again."
+            : "No face was detected in the live photo. Retake it facing the camera in good light.",
+        data: {
+          signal: face.signal,
+          faceDetectedDocument: face.faceDetectedDocument,
+          faceDetectedLive: face.faceDetectedLive
+        }
+      });
+    }
+
+    /*
+      STEP 8
+      Risk — every input is rebuilt from what phase 1 saved
+    */
+
+    const ocr = screening.ocrResult;
+    const mrz = screening.mrzResult;
+    const forensic = screening.forensicResult;
+
+    const mrzPresent =
+      Boolean(ocr?.mrzLine1 && ocr?.mrzLine2);
+
+    const risk = calculateRisk({
+      tamperingScore: forensic?.riskScore ?? null,
+      faceSimilarity: face.similarityScore ?? null,
+      faceSignal: face.signal ?? null,
+      mrzValid: mrzPresent ? (mrz?.valid ?? null) : null,
+      documentType: screening.documentType,
+      ocrConfidence: ocr?.confidence ?? null
+    });
+
+    /*
+      STEP 9
+      Final decision
+    */
+
+    let recommendation = "CLEAR";
+
+    if (risk.riskLevel === "HIGH") {
+      recommendation = "MANUAL_REVIEW";
+    } else if (
+      risk.riskLevel === "MEDIUM" ||
+      risk.riskLevel === "INSUFFICIENT_DATA"
+    ) {
+      recommendation = "SECONDARY_CHECK";
+    }
+
+    // Retention: the live photo is deleted only on a clean pass.
+    const keepLivePhoto =
+      Boolean(liveFile) &&
+      !(face.signal === "MATCH" && recommendation === "CLEAR");
+
+    const finalScreening =
+      await prisma.$transaction(async (tx) => {
+        await tx.faceVerification.create({
+          data: {
+            screeningId: screening.id,
+
+            similarityScore:
+              face.similarityScore,
+
+            imageQualityScore:
+              face.imageQualityScore,
+
+            faceDetectedDocument:
+              face.faceDetectedDocument,
+
+            faceDetectedLive:
+              face.faceDetectedLive,
+
+            signal:
+              face.signal,
+
+            landmarksMatched:
+              face.landmarksMatched,
+
+            poseAlignment:
+              face.poseAlignment,
+
+            lightingQuality:
+              face.lightingQuality,
+
+            ...(keepLivePhoto
+              ? {
+                  liveStoredName: liveFile.filename,
+                  livePath: liveFile.path,
+                  liveMimeType: liveFile.mimetype,
+                  liveSize: liveFile.size
+                }
+              : {})
+          }
+        });
+
+        await tx.riskAssessment.create({
+          data: {
+            screeningId: screening.id,
+            overallScore: risk.overallScore,
+            riskLevel: risk.riskLevel,
+            tamperingScore: forensic?.riskScore ?? null,
+            faceScore: face.similarityScore ?? null,
+            mrzScore: mrzPresent ? (mrz?.valid ? 100 : 0) : null,
+            validityScore: ocr?.confidence ?? null,
+            contributors: risk.contributors,
+            explanation: risk.explanation
+          }
+        });
+
+        return tx.screening.update({
+          where: {
+            id: screening.id
+          },
+
+          data: {
+            status:
+              risk.riskLevel === "HIGH"
+                ? "MANUAL_REVIEW"
+                : "COMPLETED",
+
+            riskScore:
+              risk.overallScore,
+
+            riskLevel:
+              risk.riskLevel,
+
+            recommendation,
+
+            recommendationDetails:
+              risk.explanation.join(". "),
+
+            completedAt:
+              new Date()
+          },
+
+          include: {
+            document: true,
+            ocrResult: true,
+            mrzResult: true,
+            forensicResult: true,
+            faceVerification: true,
+            riskAssessment: true,
+            officer: {
+              select: { officerId: true, name: true, checkpoint: true }
+            }
+          }
+        });
+      });
+
+    committed = true;
+
+    if (liveFile && !keepLivePhoto) {
+      await removeFileQuietly(liveFile.path);
+    }
+
+    await createAudit({
+      officerId: req.user.id,
+      screeningId: screening.id,
+      action: "SCREENING_COMPLETED",
+      details: {
+        riskScore:
+          risk.overallScore,
+
+        riskLevel:
+          risk.riskLevel,
+
+        recommendation,
+
+        faceSignal:
+          face.signal,
+
+        liveCapture:
+          !liveFile
+            ? "SKIPPED"
+            : keepLivePhoto
+              ? "RETAINED"
+              : "DISCARDED"
+      },
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"]
+    });
+
+    return res.status(200).json({
+      success: true,
+
+      data: finalScreening
+    });
+
+  } catch (error) {
+    console.error(
+      "LIVE VERIFICATION ERROR:",
+      error
+    );
+
+    if (liveFile && !committed) {
+      await removeFileQuietly(liveFile.path);
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Live verification failed",
+      error:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : undefined
+    });
+  }
+}
 async function getScreenings(req, res) {
   try {
     const {
@@ -584,6 +790,7 @@ async function getScreening(req, res) {
 
 module.exports = {
   createScreening,
+  completeLiveVerification,
   getScreenings,
   getScreening
 };

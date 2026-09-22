@@ -5,14 +5,23 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+
 # Environment variables
 .env
 .env.*
 !.env.example
+__pycache__
+*.pyc
+*.png
+*.jpg
+*.jpeg
+*.whl
+*.txt   
 
 # Build output
 dist/
 build/
+
 
 # Python
 __pycache__/
@@ -20,14 +29,18 @@ __pycache__/
 .venv/
 venv/
 env/
+.venv-face/
+venv-face/
 
 # IDE
 .vscode/
 .idea/
 
+
 # OS
 .DS_Store
 Thumbs.db
+
 
 # Logs
 *.log
@@ -38,8 +51,10 @@ tempCodeRunnerFile.py
 # Uploads (user-generated content)
 uploads/
 
+
 # Large archive files
 *.zip
 *.tar.gz
 *.rar
 archive/
+

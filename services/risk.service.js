@@ -7,12 +7,33 @@ const MRZ_EXPECTED_DOCUMENT_TYPES = new Set([
   "VISA"
 ]);
 
+const HIGH_THRESHOLD = 70;
+const MEDIUM_THRESHOLD = 40;
+const LEVEL_ORDER = ["LOW", "MEDIUM", "HIGH"];
+
+function raiseRiskLevelTo(current, minimum) {
+  if (!LEVEL_ORDER.includes(current)) return minimum; // e.g. INSUFFICIENT_DATA
+  return LEVEL_ORDER.indexOf(current) >= LEVEL_ORDER.indexOf(minimum)
+    ? current
+    : minimum;
+}
+
+const FACE_NOT_MATCHED_NOTES = {
+  NO_FACE_DETECTED:
+    "No face could be detected for live verification — at least a secondary check is required",
+  ERROR:
+    "Face verification could not run because of a technical error — at least a secondary check is required",
+  NOT_AVAILABLE:
+    "Live face verification was skipped — at least a secondary check is required"
+};
+
 function calculateRisk({
   tamperingScore = null,   // 0-100, higher = more risk. null = not yet checked.
   faceSimilarity = null,   // 0-100, higher = better match. null = no live photo captured.
+  faceSignal = null,       // "MATCH" | "MISMATCH" | "NO_FACE_DETECTED" | "ERROR" | "NOT_AVAILABLE" | null
   mrzValid = null,         // true / false / null
   documentType = null,     // e.g. "PASSPORT", "NATIONAL_ID"
-  ocrConfidence = null      // 0-1 (PaddleOCR's own confidence in the text it read)
+  ocrConfidence = null     // 0-1 (PaddleOCR's own confidence in the text it read)
 }) {
   const signals = [];
 
@@ -117,12 +138,48 @@ function calculateRisk({
 
     overallScore = Number((weightedSum / totalAvailableWeight).toFixed(2));
 
-    if (overallScore >= 70) {
+    if (overallScore >= HIGH_THRESHOLD) {
       riskLevel = "HIGH";
-    } else if (overallScore >= 40) {
+    } else if (overallScore >= MEDIUM_THRESHOLD) {
       riskLevel = "MEDIUM";
     } else {
       riskLevel = "LOW";
+    }
+  }
+
+  const weightedScore = overallScore; // before any policy override
+
+  // ---- Face policy override ----
+  // A weighted average can dilute a bad face result: an impostor holding a
+  // genuine document has a clean tampering score, and the average alone
+  // still comes out LOW. The face outcome therefore sets a minimum level.
+  const overrideNotes = [];
+
+  if (faceSignal === "MISMATCH") {
+    const raised = raiseRiskLevelTo(riskLevel, "HIGH");
+    if (raised !== riskLevel) {
+      overrideNotes.push(
+        "Face did not match the document photo — escalated to HIGH regardless of the other checks"
+      );
+      riskLevel = raised;
+    }
+  } else if (faceSignal && faceSignal !== "MATCH") {
+    const raised = raiseRiskLevelTo(riskLevel, "MEDIUM");
+    if (raised !== riskLevel) {
+      overrideNotes.push(
+        FACE_NOT_MATCHED_NOTES[faceSignal] ||
+          "Face verification did not produce a match result — at least a secondary check is required"
+      );
+      riskLevel = raised;
+    }
+  }
+
+  // Keep the displayed score consistent with the level
+  if (overallScore !== null) {
+    if (riskLevel === "HIGH") {
+      overallScore = Math.max(overallScore, HIGH_THRESHOLD);
+    } else if (riskLevel === "MEDIUM") {
+      overallScore = Math.max(overallScore, MEDIUM_THRESHOLD);
     }
   }
 
@@ -133,6 +190,8 @@ function calculateRisk({
       `Only ${confidenceCoverage}% of the full risk model could be evaluated for this screening — remaining checks are not yet implemented or not applicable to this document type.`
     );
   }
+
+  explanation.push(...overrideNotes);
 
   signals.forEach((s) => {
     if (!s.available) return;
@@ -150,7 +209,8 @@ function calculateRisk({
   }
 
   return {
-    overallScore,        // null if nothing could be evaluated at all
+    overallScore,         // null if nothing could be evaluated at all
+    weightedScore,        // the plain weighted average, before the face override
     riskLevel,            // "HIGH" | "MEDIUM" | "LOW" | "INSUFFICIENT_DATA"
     confidenceCoverage,   // 0-100: how much of the full risk model actually ran
 

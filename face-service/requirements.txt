@@ -2,8 +2,7 @@ fastapi
 uvicorn
 python-multipart
 pillow
-opencv-python
-numpy
+numpy<2
 dlib==19.24.1
 face_recognition
 setuptools<82

@@ -1,3 +1,6 @@
+# UNUSED — not imported or called anywhere in this service.
+# The live risk engine is calculateRisk() in the Node backend.
+# Kept here for reference only.
 def calculate_risk(
     tampering_score: float,
     face_score: float,

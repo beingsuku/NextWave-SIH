@@ -25,7 +25,11 @@
       color: #172033;
     }
 
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+    .gov-app-font {
+      font-family: 'Noto Sans', 'Noto Sans Devanagari', sans-serif;
+    }
 
     @keyframes fade-in-blur {
       from {
@@ -73,9 +77,6 @@
       animation: scan 1.2s linear infinite;
     }
   </style>
-  
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.js"></script>
 </head>
 
 <body>
@@ -205,46 +206,6 @@
   `)
     };
 
-    // Initial simulated blockchain audit ledger
-    window.INITIAL_BLOCKCHAIN_LEDGER = [
-      {
-        blockNumber: 'BLOCK #0001',
-        screeningId: 'SCR-2026-1029',
-        docType: 'Indian Passport (Low Risk)',
-        verdict: 'CLEARED',
-        compositeScore: 94,
-        prevHash: '0000000000000000000000000000000000000000',
-        currentHash: 'a82f91c4d7e6321f90ab82c14de3780d32fa19c4',
-        timestamp: '2026-09-06 15:50:00 UTC',
-        checkpoint: 'SSB-DEMO-03 (ICP Petrapole)',
-        officerId: 'UFS-OFF-1029'
-      },
-      {
-        blockNumber: 'BLOCK #0002',
-        screeningId: 'SCR-2026-5120',
-        docType: 'Indian Passport (Med Risk)',
-        verdict: 'FLAGGED',
-        compositeScore: 72,
-        prevHash: 'a82f91c4d7e6321f90ab82c14de3780d32fa19c4',
-        currentHash: '7f81bc42e9103847566574839201abcef9876543',
-        timestamp: '2026-09-06 14:18:05 UTC',
-        checkpoint: 'SSB-DEMO-02 (ICP Raxaul)',
-        officerId: 'UFS-OFF-4109'
-      },
-      {
-        blockNumber: 'BLOCK #0003',
-        screeningId: 'SCR-2026-8942',
-        docType: 'Indian Passport (High Risk)',
-        verdict: 'FLAGGED',
-        compositeScore: 48,
-        prevHash: '7f81bc42e9103847566574839201abcef9876543',
-        currentHash: '8f3c92a1b4e5780d32fa19c42b87e6321f90ab82c',
-        timestamp: '2026-09-06 15:42:19 UTC',
-        checkpoint: 'SSB-DEMO-01 (ICP Attari-Wagah)',
-        officerId: 'UFS-OFF-9042'
-      }
-    ];
-
     // Sample Screening Cases for demonstration with DocShield 4-Layer Forensics
     window.DEMO_SCENARIOS = {
       high_risk: {
@@ -255,7 +216,7 @@
         result: {
           screeningId: 'SCR-2026-8942',
           timestamp: '2026-09-06 15:42:19',
-          checkpoint: 'Attari Border Checkpoint (ICP Attari-Wagah)',
+          checkpoint: 'SSB checkpost',
           officerId: 'UFS-OFF-9042',
           documentType: 'passport',
           documentTypeLabel: 'Indian Passport',
@@ -272,32 +233,32 @@
           docshieldLayers: {
             photoTamper: {
               name: 'Photo Tamper Detection',
-              score: 38,
-              status: 'TAMPERED',
-              explanation: 'Localized compression inconsistency detected around photo region',
-              details: 'ELA variance detected at photo insertion border; potential photo replacement.'
+              score: 8,
+              status: 'FLAGGED',
+              explanation: 'Edge boundary artifact and laminate disruption detected surrounding primary portrait region.',
+              details: 'Seamless laminate boundary broken; compression anomaly detected.'
             },
             fontConsistency: {
               name: 'Font & Text Consistency',
-              score: 41,
-              status: 'TAMPERED',
-              explanation: 'Inconsistent font rendering, kerning anomalies, or altered stroke weight detected',
-              details: 'DOB font character thickness (+28%) deviates from standard passport print matrix.'
+              score: 22,
+              status: 'FLAGGED',
+              explanation: 'Glyph font width and pixel ink distribution inconsistency detected on DOB text field.',
+              details: 'Character stroke deviation exceeds standard passport print matrix.'
             },
             stampAlignment: {
               name: 'Stamp & Seal Alignment',
-              score: 55,
-              status: 'WARNING',
-              explanation: 'Seal geometry, placement angle, or border alignment mismatch with verified template',
-              details: 'Stamp rotational skew of 3.4° detected against official emblem baseline.'
+              score: 90,
+              status: 'PASSED',
+              explanation: 'Seal geometry and placement match verified template.',
+              details: 'Position precision within tolerance.'
             },
             metadataIntegrity: {
               name: 'Metadata Integrity',
               score: 35,
-              status: 'TAMPERED',
-              explanation: 'Digital tampering artifacts or secondary edit signature found in document metadata',
-              details: 'EXIF parsing reveals Adobe Photoshop editing signature and altered timestamp.'
-            }
+              status: 'FLAGGED',
+              explanation: 'Image metadata references editing software.',
+              details: 'Checked EXIF Software tag and presence of camera/scan metadata.'
+            },
           },
 
           // Blockchain Simulated Audit Entry
@@ -689,7 +650,7 @@
     ];
 
     window.BORDER_CHECKPOINTS = [
-      { id: 'attari', name: 'ICP Attari-Wagah', state: 'Punjab', lat: 31.6047, lng: 74.6033, activeOfficers: 42, status: 'OPERATIONAL' },
+      { id: 'attari', name: 'SSB checkpost', state: 'Punjab', lat: 31.6047, lng: 74.6033, activeOfficers: 42, status: 'OPERATIONAL' },
       { id: 'raxaul', name: 'ICP Raxaul', state: 'Bihar', lat: 26.9787, lng: 84.8510, activeOfficers: 28, status: 'OPERATIONAL' },
       { id: 'petrapole', name: 'ICP Petrapole', state: 'West Bengal', lat: 23.0384, lng: 88.8954, activeOfficers: 35, status: 'OPERATIONAL' },
       { id: 'banbasa', name: 'Banbasa Border', state: 'Uttarakhand', lat: 28.9954, lng: 80.0543, activeOfficers: 19, status: 'OPERATIONAL' },
@@ -710,15 +671,15 @@
       // Navigation Modes: 'landing' | 'login' | 'app'
       const [viewMode, setViewMode] = useState('landing');
       const [isAuthenticated, setIsAuthenticated] = useState(false);
+      const [authToken, setAuthToken] = useState(localStorage.getItem('sih_token') || null);
+      const [officerData, setOfficerData] = useState(null);
       const [isTransitioning, setIsTransitioning] = useState(false);
       const [currentPage, setCurrentPage] = useState('dashboard');
 
       // Scenario & Data State
       const [activeScenario, setActiveScenario] = useState('high_risk');
-      const [screeningResult, setScreeningResult] = useState(window.DEMO_SCENARIOS.high_risk.result);
+      const [screeningResult, setScreeningResult] = useState(window.DEMO_SCENARIOS.low_risk.result);
 
-      // Simulated Blockchain Ledger State
-      const [blockchainLedger, setBlockchainLedger] = useState(window.INITIAL_BLOCKCHAIN_LEDGER);
 
       // Pipeline State
       const [pipelineProgress, setPipelineProgress] = useState(0);
@@ -729,8 +690,16 @@
       // Selected Document Type & Custom Upload State
       const [selectedDocType, setSelectedDocType] = useState('passport');
       const [uploadedDocImage, setUploadedDocImage] = useState(null);
+      const [pendingScreening, setPendingScreening] = useState(null);
+      const [liveCaptureDataUrl, setLiveCaptureDataUrl] = useState(null);
+      const [isVerifyingLive, setIsVerifyingLive] = useState(false);
+      const [liveRetryMessage, setLiveRetryMessage] = useState('');
       const [uploadedFileName, setUploadedFileName] = useState('');
-      const officerInfo = { name: 'INSP. R. S. VERMA', badge: 'UFS-9042', duty: 'ON SCREENING' };
+      const officerInfo = {
+        name: officerData?.name?.toUpperCase() || 'UNKNOWN',
+        badge: officerData?.officerId || '',
+        duty: 'ON DUTY'
+      };
 
       // Handle Scenario Switch
       const handleScenarioChange = (scenarioKey) => {
@@ -753,818 +722,333 @@
       };
 
       // Direct Officer Login Handler
-      const handleLoginSuccess = () => {
+      // Direct Officer Login Handler
+      const handleLoginSuccess = (token, officer) => {
+        localStorage.setItem('sih_token', token);
+        setAuthToken(token);
+        setOfficerData(officer);
         setIsAuthenticated(true);
         setViewMode('app');
         setCurrentPage('dashboard');
       };
 
       // Logout Handler
+      // Logout Handler
+      // Logout Handler
       const handleLogout = () => {
+        localStorage.removeItem('sih_token');
+        setAuthToken(null);
+        setOfficerData(null);
         setIsAuthenticated(false);
         setViewMode('landing');
         setCurrentPage('dashboard');
       };
-      async function analyzeRealImage(dataUrl) {
-    if (!dataUrl) {
+
+      // Run AI Pipeline with DocShield Multi-Layer Scanning Stages
+      // Map the real backend screening result into the shape the existing
+      // display pages (VerificationResultPage, ForensicsPage, etc.) expect.
+      // Fields we don't have real data for yet are explicitly labeled as
+      // "not yet implemented" rather than faked.
+      const mapBackendResultToUIShape = (backendData, docImageDataUrl) => {
+        const ocr = backendData.ocrResult || {};
+        const forensic = backendData.forensicResult || {};
+        const face = backendData.faceVerification || {};
+        const risk = backendData.riskAssessment || {};
+        const mrz = backendData.mrzResult || {};
+
+        const riskLevel = (backendData.riskLevel || 'low').toLowerCase();
+        const verdictStatus = riskLevel === 'low' ? 'passed' : 'flagged';
+
         return {
-            width: 0,
-            height: 0,
-            brightness: 0,
-            contrast: 0
-        };
-    }
+          screeningId: backendData.screeningId,
+          timestamp: new Date(backendData.completedAt || backendData.createdAt).toLocaleString(),
+          checkpoint: backendData.officer?.checkpoint || 'Unknown Checkpoint',
+          officerId: backendData.officer?.officerId || '',
+          officerName: backendData.officer?.name || '',
+          documentType: (backendData.documentType || '').toLowerCase(),
+          documentTypeLabel: backendData.documentType,
+          documentImage: docImageDataUrl,
+          verificationImage: null,
 
-    return new Promise((resolve) => {
-        const img = new Image();
+          compositeConfidenceScore: Math.round((ocr.confidence || 0) * 100),
+          verdictText:
+            backendData.recommendation === 'CLEAR' ? 'DOCUMENT VERIFIED' :
+              backendData.recommendation === 'MANUAL_REVIEW' ? 'FLAGGED FOR MANUAL REVIEW' :
+                'SECONDARY CHECK REQUIRED',
+          verdictSubtitle: backendData.recommendationDetails || '',
+          verdictStatus,
 
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
+          docshieldLayers: {
+            photoTamper: forensic.riskScore !== null && forensic.riskScore !== undefined ? {
+              name: 'Photo Tamper Detection',
+              score: Math.round(100 - forensic.riskScore),
+              status: forensic.riskScore > 50 ? 'FLAGGED' : 'PASSED',
+              explanation: forensic.signals && forensic.signals.length > 0
+                ? forensic.signals.map(s => s.detail).join(' ')
+                : 'No compression anomalies detected via Error Level Analysis.',
+              details: `Mean ELA: ${forensic.meanELA ?? 'N/A'}, Suspicious regions: ${forensic.suspiciousRegions ?? 0}`
+            } : {
+              name: 'Photo Tamper Detection',
+              score: null,
+              status: 'NOT_YET_IMPLEMENTED',
+              explanation: 'Forensic tamper analysis has not been built yet.',
+              details: 'This module is a placeholder.'
+            },
+            fontConsistency: {
+              name: 'Font & Text Consistency',
+              score: null,
+              status: 'NOT_YET_IMPLEMENTED',
+              explanation: 'Font consistency analysis has not been built yet.',
+              details: 'This module is a placeholder.'
+            },
+            stampAlignment: {
+              name: 'Stamp & Seal Alignment',
+              score: null,
+              status: 'NOT_YET_IMPLEMENTED',
+              explanation: 'Stamp/seal alignment analysis has not been built yet.',
+              details: 'This module is a placeholder.'
+            },
+            metadataIntegrity: {
+              name: 'Metadata Integrity',
+              score: 35,
+              status: 'FLAGGED',
+              explanation: 'Image metadata references editing software.',
+              details: 'Checked EXIF Software tag and presence of camera/scan metadata.'
+            },
+          },
 
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
+          auditBlock: {
+            blockNumber: `SCREENING-${backendData.screeningId}`,
+            prevHash: null,
+            currentHash: backendData.document?.sha256 || null,
+            timestamp: backendData.completedAt,
+            verdict: backendData.recommendation,
+            checkpoint: backendData.officer?.checkpoint || ''
+          },
 
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-
-            const imageData = ctx.getImageData(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-            const data = imageData.data;
-
-            let sum = 0;
-            let sumSq = 0;
-            let count = 0;
-
-            for (let i = 0; i < data.length; i += 4) {
-
-                const r = data[i];
-                const g = data[i + 1];
-                const b = data[i + 2];
-
-                const gray =
-                    0.299 * r +
-                    0.587 * g +
-                    0.114 * b;
-
-                sum += gray;
-                sumSq += gray * gray;
-                count++;
+          ocr: {
+            status: ocr.confidence > 0 ? 'passed' : 'unavailable',
+            confidence: Math.round((ocr.confidence || 0) * 100),
+            fields: {
+              fullName: ocr.fullName,
+              passportNumber: ocr.documentNumber,
+              nationality: ocr.nationality,
+              dateOfBirth: ocr.dateOfBirth,
+              dateOfExpiry: ocr.dateOfExpiry,
+              gender: ocr.gender,
+              issuingAuthority: ocr.issuingAuthority,
+              mrzLine1: ocr.mrzLine1,
+              mrzLine2: ocr.mrzLine2
             }
+          },
 
-            const brightness =
-                count ? sum / count : 0;
+          validation: {
+            status: mrz.valid ? 'passed' : 'warning',
+            passedCount: mrz.valid ? 1 : 0,
+            warningCount: mrz.valid ? 0 : 1,
+            failedCount: 0,
+            checks: [
+              {
+                id: 'mrz-check',
+                ruleName: 'MRZ Validation',
+                category: 'Checksum',
+                status: mrz.valid ? 'passed' : 'warning',
+                details: (mrz.details && mrz.details.reason) || (mrz.valid ? 'MRZ checksum verified' : 'MRZ not available on this document type')
+              }
+            ]
+          },
 
-            const variance =
-                count
-                    ? (sumSq / count) -
-                      (brightness * brightness)
-                    : 0;
+          tampering: {
+            riskScore: forensic.riskScore || 0,
+            status: 'not_yet_implemented',
+            suspiciousRegionsCount: forensic.suspiciousRegions || 0,
+            detectedSignals: []
+          },
 
-            const contrast =
-                Math.sqrt(Math.max(0, variance));
+          faceVerification: {
+            similarityScore: face.similarityScore,
+            signal: face.signal || 'NOT_AVAILABLE',
+            faceDetectedInDocument: face.faceDetectedDocument || false,
+            faceDetectedInVerification: face.faceDetectedLive || false,
+            imageQualityScore: face.imageQualityScore,
+            landmarksMatched: face.landmarksMatched,
+            poseAlignment: face.poseAlignment || 'Unknown',
+            lightingQuality: face.lightingQuality || 'Unknown'
+          },
 
-            resolve({
-                width: img.naturalWidth,
-                height: img.naturalHeight,
-                brightness: Math.round(brightness),
-                contrast: Math.round(contrast)
-            });
+          databaseCheck: {
+            status: 'NOT_IMPLEMENTED',
+            referenceRecord: null,
+            notice: 'Cross-border watchlist checking has not been implemented yet.'
+          },
+
+          documentStatus: backendData.riskLevel,
+          overallRiskScore: Math.round((risk.overallScore || 0) * 100),
+          riskLevel,
+
+          riskContributors: (risk.contributors || []).map((c) => ({
+            category: c.category,
+            percentage: Math.round((c.percentage || 0) * 100),
+            weight: c.weight,
+            description: '',
+            level: riskLevel
+          })),
+
+          recommendation: (backendData.recommendation || '').toLowerCase(),
+          recommendationTitle: backendData.recommendation,
+          recommendationDetails: backendData.recommendationDetails,
+          auditHash: backendData.document?.sha256,
+          blockchainLogged: false
+        };
+      };
+
+      // Run the REAL screening pipeline: upload the document to the Node
+      // backend, which calls the Python OCR service and computes risk.
+      const startPipeline = async () => {
+        const file = window.__DOCSHIELD_UPLOADED_FILE__;
+
+        if (!file) {
+          alert('Please upload a document first.');
+          return;
+        }
+
+        const docTypeMap = {
+          passport: 'PASSPORT',
+          visa: 'VISA',
+          national_id: 'NATIONAL_ID',
+          driving_licence: 'DRIVING_LICENCE',
+          travel_permit: 'TRAVEL_PERMIT'
         };
 
-        img.onerror = () => {
-            resolve({
-                width: 0,
-                height: 0,
-                brightness: 0,
-                contrast: 0
-            });
-        };
+        setPendingScreening(null);
+        setLiveCaptureDataUrl(null);
+        setLiveRetryMessage('');
 
-        img.src = dataUrl;
-    });
-}
-async function runRealOCR(dataUrl) {
+        setCurrentPage('analysis');
+        setIsScanning(true);
+        setPipelineProgress(10);
+        setCurrentStageIndex(0);
+        setActiveScanLog('Uploading document to DocShield backend...');
 
-    if (!dataUrl) {
-        return {
-            text: "",
-            confidence: 0
-        };
-    }
+        const formData = new FormData();
+        formData.append('document', file);
+        formData.append('documentType', docTypeMap[selectedDocType] || 'NATIONAL_ID');
 
-    try {
+        try {
+          setPipelineProgress(40);
+          setActiveScanLog('Running OCR, MRZ and forensic analysis...');
 
-        const result = await Tesseract.recognize(
-            dataUrl,
-            "eng",
+          const response = await fetch('http://localhost:3000/api/screening', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${authToken}` },
+            body: formData
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            setIsScanning(false);
+            setActiveScanLog('Screening failed.');
+            alert(data.message || 'Screening failed. Check backend logs.');
+            setCurrentPage('new_screening');
+            return;
+          }
+
+          // Phase 1 finished: document analysis only. The risk score is calculated
+          // after the live face capture, so this is kept apart from screeningResult.
+          setPendingScreening({
+            id: data.data.id,
+            screeningId: data.data.screeningId,
+            preview: mapBackendResultToUIShape(data.data, uploadedDocImage)
+          });
+          setPipelineProgress(70);
+          setCurrentStageIndex(5);
+          setActiveScanLog('Document analysis complete. Awaiting live face verification.');
+          setIsScanning(false);
+
+        } catch (error) {
+          console.error(error);
+          setIsScanning(false);
+          setActiveScanLog('Could not reach backend.');
+          alert('Could not reach the server. Is the Node backend running on port 3000?');
+          setCurrentPage('new_screening');
+        }
+      };
+      // Turns the captured photo (a data URL) into a file that can be uploaded.
+      const dataUrlToBlob = (dataUrl) => {
+        const [header, base64] = dataUrl.split(',');
+        const mime = header.match(/:(.*?);/)[1];
+        const bytes = atob(base64);
+        const buffer = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) {
+          buffer[i] = bytes.charCodeAt(i);
+        }
+        return new Blob([buffer], { type: mime });
+      };
+
+      // Phase 2: send the live capture (or an explicit skip) and get the final result.
+      const submitLiveCapture = async ({ skip = false } = {}) => {
+        if (!pendingScreening) {
+          alert('No screening is waiting for a live capture. Please start a new screening.');
+          return;
+        }
+
+        const formData = new FormData();
+
+        if (skip) {
+          formData.append('skipLiveCapture', 'true');
+        } else {
+          if (!liveCaptureDataUrl) {
+            alert("Please enable the live camera and capture the person's face first.");
+            return;
+          }
+          formData.append('liveCapture', dataUrlToBlob(liveCaptureDataUrl), 'live.jpg');
+        }
+
+        setIsVerifyingLive(true);
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/screening/${pendingScreening.id}/live-capture`,
             {
-                logger: message => {
-
-                    if (message.status) {
-                        console.log(
-                            "OCR:",
-                            message.status,
-                            message.progress
-                        );
-                    }
-
-                }
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${authToken}` },
+              body: formData
             }
-        );
+          );
 
-        return {
-            text: result.data.text || "",
-            confidence:
-                Number(result.data.confidence || 0)
-        };
+          const data = await response.json();
 
-    } catch (error) {
+          if (!response.ok || !data.success) {
+            alert(data.message || 'Live verification failed. Check backend logs.');
+            return;
+          }
 
-        console.error(
-            "OCR ERROR:",
-            error
-        );
+          if (data.retryable) {
+            // Bad live photo, or the face service is down: retake or continue without face.
+            setLiveCaptureDataUrl(null);
+            setLiveRetryMessage(data.message);
+            return;
+          }
 
-        return {
-            text: "",
-            confidence: 0
-        };
-    }
-}
-function detectMRZ(ocrText) {
+          const mappedResult = mapBackendResultToUIShape(data.data, uploadedDocImage);
+          mappedResult.verificationImage = liveCaptureDataUrl || null; // kept in browser memory only
 
-    if (!ocrText) {
-        return {
-            detected: false,
-            valid: false,
-            lines: []
-        };
-    }
+          setScreeningResult(mappedResult);
+          setPendingScreening(null);
+          setLiveRetryMessage('');
+          setPipelineProgress(100);
+          setCurrentStageIndex(6);
+          setActiveScanLog('Analysis complete.');
+          setCurrentPage('result');
 
-    const lines = ocrText
-        .split(/\r?\n/)
-        .map(line =>
-            line
-                .toUpperCase()
-                .replace(/[^A-Z0-9<]/g, "")
-        )
-        .filter(line => line.length >= 30);
-
-    const mrzLines = lines
-        .filter(line =>
-            line.includes("<") &&
-            line.length >= 30
-        )
-        .slice(-2);
-
-    const detected =
-        mrzLines.length >= 2;
-
-    return {
-        detected,
-        valid: detected,
-        lines: mrzLines
-    };
-}
-async function compareRealFaces(
-    documentImage,
-    liveImage
-) {
-
-    try {
-
-        const MODEL_URL =
-            "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model";
-
-        if (!faceapi.nets.tinyFaceDetector.params) {
-            await faceapi.nets.tinyFaceDetector
-                .loadFromUri(MODEL_URL);
+        } catch (error) {
+          console.error(error);
+          alert('Could not reach the server. Is the Node backend running on port 3000?');
+        } finally {
+          setIsVerifyingLive(false);
         }
-
-        if (!faceapi.nets.faceLandmark68Net.params) {
-            await faceapi.nets.faceLandmark68Net
-                .loadFromUri(MODEL_URL);
-        }
-
-        if (!faceapi.nets.faceRecognitionNet.params) {
-            await faceapi.nets.faceRecognitionNet
-                .loadFromUri(MODEL_URL);
-        }
-
-        const documentImg =
-            await faceapi.fetchImage(documentImage);
-
-        const liveImg =
-            await faceapi.fetchImage(liveImage);
-
-        const documentFace =
-            await faceapi
-                .detectSingleFace(
-                    documentImg,
-                    new faceapi.TinyFaceDetectorOptions()
-                )
-                .withFaceLandmarks()
-                .withFaceDescriptor();
-
-        const liveFace =
-            await faceapi
-                .detectSingleFace(
-                    liveImg,
-                    new faceapi.TinyFaceDetectorOptions()
-                )
-                .withFaceLandmarks()
-                .withFaceDescriptor();
-
-        if (!documentFace) {
-
-            return {
-                status: "DOCUMENT_FACE_NOT_DETECTED",
-                similarityScore: 0,
-                landmarksMatched: 0,
-                poseAlignment: "NOT_ANALYZED"
-            };
-        }
-
-        if (!liveFace) {
-
-            return {
-                status: "LIVE_FACE_NOT_DETECTED",
-                similarityScore: 0,
-                landmarksMatched: 0,
-                poseAlignment: "NOT_ANALYZED"
-            };
-        }
-
-        const distance =
-            faceapi.euclideanDistance(
-                documentFace.descriptor,
-                liveFace.descriptor
-            );
-
-        const similarityScore =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    Math.round(100 - distance * 100)
-                )
-            );
-
-        return {
-            status:
-                similarityScore >= 50
-                    ? "MATCH_SIGNAL"
-                    : "MISMATCH_SIGNAL",
-
-            similarityScore,
-
-            landmarksMatched: 68,
-
-            poseAlignment: "ANALYZED",
-
-            distance
-        };
-
-    } catch (error) {
-
-        console.error(
-            "FACE COMPARISON ERROR:",
-            error
-        );
-
-        return {
-            status: "FACE_MODEL_ERROR",
-            similarityScore: 0,
-            landmarksMatched: 0,
-            poseAlignment: "ERROR"
-        };
-    }
-}
-// Run AI Pipeline with DocShield Multi-Layer Scanning Stages
-
-const startPipeline = async () => {
-
-  console.log("=================================");
-  console.log("REAL SCREENING STARTED");
-  console.log("=================================");
-
-
-  // -----------------------------------------
-  // CHECK DOCUMENT
-  // -----------------------------------------
-
-  const documentImage =
-    window.__DOCSHIELD_UPLOADED_DATA_URL__;
-
-  if (!documentImage) {
-
-    alert(
-      "Please upload a document image first."
-    );
-
-    return;
-  }
-
-
-  // -----------------------------------------
-  // CHECK LIVE CAMERA
-  // -----------------------------------------
-
-  const liveImage =
-    window.__DOCSHIELD_LIVE_CAPTURE_DATA_URL__;
-
-  if (!liveImage) {
-
-    alert(
-      "Please enable the live camera and capture the person's face first."
-    );
-
-    return;
-  }
-
-
-  // -----------------------------------------
-  // OPEN ANALYSIS PAGE
-  // -----------------------------------------
-
-  setCurrentPage("analysis");
-
-  setIsScanning(true);
-
-  setPipelineProgress(0);
-
-  setCurrentStageIndex(0);
-
-
-  try {
-
-
-    // ========================================
-    // STAGE 1 — DOCUMENT INGESTION
-    // ========================================
-
-    setActiveScanLog(
-      "DOCUMENT SCAN — Loading document image..."
-    );
-
-    setPipelineProgress(10);
-
-    await new Promise(
-      resolve => setTimeout(resolve, 500)
-    );
-
-
-    // ========================================
-    // STAGE 2 — IMAGE FORENSICS
-    // ========================================
-
-    setCurrentStageIndex(1);
-
-    setActiveScanLog(
-      "PHOTO FORENSICS — Measuring image quality and integrity..."
-    );
-
-    setPipelineProgress(25);
-
-
-    const imageAnalysis =
-      await analyzeRealImage(
-        documentImage
-      );
-
-
-    // ========================================
-    // STAGE 3 — OCR
-    // ========================================
-
-    setCurrentStageIndex(2);
-
-    setActiveScanLog(
-      "OCR ANALYSIS — Reading document text..."
-    );
-
-    setPipelineProgress(45);
-
-
-    const ocr =
-      await runRealOCR(
-        documentImage
-      );
-
-
-    console.log(
-      "OCR RESULT:",
-      ocr
-    );
-
-
-    // ========================================
-    // STAGE 4 — MRZ
-    // ========================================
-
-    setCurrentStageIndex(3);
-
-    setActiveScanLog(
-      "MRZ ANALYSIS — Detecting passport machine-readable zone..."
-    );
-
-    setPipelineProgress(60);
-
-
-    const mrz =
-      detectMRZ(
-        ocr.text
-      );
-
-
-    console.log(
-      "MRZ RESULT:",
-      mrz
-    );
-
-
-    // ========================================
-    // STAGE 5 — FACE MATCH
-    // ========================================
-
-    setCurrentStageIndex(4);
-
-    setActiveScanLog(
-      "BIOMETRIC ANALYSIS — Comparing document portrait with live camera..."
-    );
-
-    setPipelineProgress(75);
-
-
-    const face =
-      await compareRealFaces(
-        documentImage,
-        liveImage
-      );
-
-
-    console.log(
-      "FACE RESULT:",
-      face
-    );
-
-
-    // ========================================
-    // STAGE 6 — REAL RISK CALCULATION
-    // ========================================
-
-    setCurrentStageIndex(5);
-
-    setActiveScanLog(
-      "RISK ENGINE — Aggregating real analysis signals..."
-    );
-
-    setPipelineProgress(90);
-
-
-    let riskScore = 0;
-
-    const signals = [];
-
-
-    // Image quality
-
-    if (imageAnalysis) {
-
-      if (
-        imageAnalysis.width < 600 ||
-        imageAnalysis.height < 400
-      ) {
-
-        riskScore += 20;
-
-        signals.push(
-          "Low document image resolution"
-        );
-      }
-
-
-      if (
-        imageAnalysis.brightness < 50
-      ) {
-
-        riskScore += 15;
-
-        signals.push(
-          "Poor document illumination"
-        );
-      }
-
-
-      if (
-        imageAnalysis.brightness > 240
-      ) {
-
-        riskScore += 15;
-
-        signals.push(
-          "Overexposed document image"
-        );
-      }
-
-
-      if (
-        imageAnalysis.contrast < 20
-      ) {
-
-        riskScore += 10;
-
-        signals.push(
-          "Low image contrast"
-        );
-      }
-
-    }
-
-
-    // OCR
-
-    if (ocr.confidence < 60) {
-
-      riskScore += 15;
-
-      signals.push(
-        "Low OCR confidence"
-      );
-    }
-
-
-    // MRZ
-
-    if (!mrz.detected) {
-
-      riskScore += 20;
-
-      signals.push(
-        "MRZ not detected"
-      );
-
-    }
-
-
-    // Face
-
-    if (
-      face.status ===
-      "LIVE_FACE_NOT_DETECTED"
-    ) {
-
-      riskScore += 30;
-
-      signals.push(
-        "Live face not detected"
-      );
-
-    }
-    else if (
-      face.status ===
-      "DOCUMENT_FACE_NOT_DETECTED"
-    ) {
-
-      riskScore += 30;
-
-      signals.push(
-        "Document face not detected"
-      );
-
-    }
-    else if (
-      face.similarityScore < 50
-    ) {
-
-      riskScore += 35;
-
-      signals.push(
-        "Low face similarity"
-      );
-
-    }
-    else if (
-      face.similarityScore < 75
-    ) {
-
-      riskScore += 15;
-
-      signals.push(
-        "Medium face similarity"
-      );
-
-    }
-
-
-    riskScore =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(riskScore)
-        )
-      );
-
-
-    // ========================================
-    // VERDICT
-    // ========================================
-
-    let riskLevel;
-    let verdictText;
-    let verdictStatus;
-
-
-    if (riskScore >= 60) {
-
-      riskLevel = "high";
-      verdictText = "HIGH RISK";
-      verdictStatus = "flagged";
-
-    }
-    else if (riskScore >= 30) {
-
-      riskLevel = "medium";
-      verdictText = "MEDIUM RISK";
-      verdictStatus = "review";
-
-    }
-    else {
-
-      riskLevel = "low";
-      verdictText = "LOW RISK";
-      verdictStatus = "passed";
-
-    }
-
-
-    // ========================================
-    // FINISH
-    // ========================================
-
-    setPipelineProgress(100);
-
-    setCurrentStageIndex(6);
-
-    setActiveScanLog(
-      "VERDICT GENERATED — Real screening analysis completed."
-    );
-
-
-    setIsScanning(false);
-
-
-    // ========================================
-    // UPDATE RESULT
-    // ========================================
-
-    setScreeningResult(prev => ({
-
-      ...prev,
-
-      compositeConfidenceScore:
-        Math.max(
-          0,
-          100 - riskScore
-        ),
-
-      verdictText,
-
-      verdictSubtitle:
-        riskLevel === "high"
-          ? "Potential verification issues detected"
-          : riskLevel === "medium"
-            ? "Additional verification recommended"
-            : "No major verification issues detected",
-
-      verdictStatus,
-
-      overallRiskScore:
-        riskScore,
-
-      riskLevel,
-
-      documentImage,
-
-      verificationImage:
-        liveImage,
-
-
-      // REAL FACE RESULT
-
-      faceVerification: {
-
-        ...prev.faceVerification,
-
-        similarityScore:
-          face.similarityScore || 0,
-
-        signal:
-          face.status,
-
-        landmarksMatched:
-          face.landmarksMatched || 0,
-
-        poseAlignment:
-          face.poseAlignment || "PENDING"
-
-      },
-
-
-      // REAL OCR
-
-      ocrAnalysis: {
-
-        text: ocr.text,
-
-        confidence:
-          ocr.confidence
-
-      },
-
-
-      // REAL MRZ
-
-      mrzAnalysis: mrz,
-
-
-      // REAL IMAGE ANALYSIS
-
-      imageAnalysis,
-
-
-      tampering: {
-
-        riskScore,
-
-        status:
-          riskLevel === "high"
-            ? "suspicious"
-            : riskLevel === "medium"
-              ? "warning"
-              : "clear",
-
-        suspiciousRegionsCount:
-          signals.length,
-
-        detectedSignals:
-          signals
-
-      }
-
-    }));
-
-
-    console.log(
-      "================================="
-    );
-
-    console.log(
-      "REAL SCREENING COMPLETED"
-    );
-
-    console.log({
-      riskScore,
-      riskLevel,
-      ocr,
-      mrz,
-      face,
-      imageAnalysis,
-      signals
-    });
-
-    console.log(
-      "================================="
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "REAL SCREENING ERROR:",
-      error
-    );
-
-    setIsScanning(false);
-
-    setActiveScanLog(
-      "SCREENING ERROR — " +
-      error.message
-    );
-
-    alert(
-      "Screening failed: " +
-      error.message
-    );
-  }
-
-};
+      };
 
       return (
         <div className="min-h-screen bg-white text-slate-900 font-sans flex flex-col selection:bg-blue-900 selection:text-white relative overflow-x-hidden">
@@ -1590,7 +1074,7 @@ const startPipeline = async () => {
 
           {/* VIEW MODE 3: MAIN WORKSTATION PLATFORM */}
           {viewMode === 'app' && isAuthenticated && (
-            <>
+            <div className="gov-app-font contents">
               {/* Top Compact Header Navigation */}
               <Header
                 currentPage={currentPage}
@@ -1598,6 +1082,7 @@ const startPipeline = async () => {
                 activeScenario={activeScenario}
                 onScenarioChange={handleScenarioChange}
                 onLogout={handleLogout}
+                officerData={officerData}
               />
 
               {/* Main Workspace Layout */}
@@ -1605,57 +1090,16 @@ const startPipeline = async () => {
                 <HorizontalNavigation
                   currentPage={currentPage}
                   setCurrentPage={setCurrentPage}
+                  officerInfo={officerInfo}
                 />
-
-                {/* Downward Scroll Control Button Bar */}
-                <div className="w-full bg-slate-100/90 border-b border-slate-200 py-1.5 flex justify-center items-center shadow-inner">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const el = document.getElementById('main-content');
-                      if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      } else {
-                        window.scrollTo({ top: 200, behavior: 'smooth' });
-                      }
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white hover:bg-slate-50 border border-slate-300 hover:border-blue-800 rounded-sm text-xs font-mono font-medium text-slate-700 hover:text-blue-900 transition-all shadow-sm group cursor-pointer"
-                    title="Scroll to Main Content"
-                  >
-                    <span className="tracking-wide text-[11px]">SCROLL TO CONTENT</span>
-                    <svg className="w-4 h-4 text-blue-900 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Optional side scroll affordance */}
-                <div className="hidden xl:flex fixed right-4 top-1/2 -translate-y-1/2 flex-col items-center gap-2 z-20 pointer-events-none opacity-50 hover:opacity-100 transition-opacity">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const el = document.getElementById('main-content');
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="pointer-events-auto bg-white/90 border border-slate-300 hover:border-blue-800 p-2 rounded-full shadow text-slate-700 hover:text-blue-900 transition"
-                    title="Scroll down"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  <div className="w-0.5 h-12 bg-slate-300"></div>
-                </div>
-
                 {/* View Containers */}
-                <main id="main-content" className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
+                <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
                   {currentPage === 'dashboard' && (
                     <DashboardPage
                       setCurrentPage={setCurrentPage}
                       screeningResult={screeningResult}
                       activeScenario={activeScenario}
                       onScenarioChange={handleScenarioChange}
-                      blockchainLedger={blockchainLedger}
                     />
                   )}
 
@@ -1687,8 +1131,19 @@ const startPipeline = async () => {
                       currentStageIndex={currentStageIndex}
                       isScanning={isScanning}
                       activeScanLog={activeScanLog}
-                      screeningResult={screeningResult}
-                      onComplete={() => setCurrentPage('result')}
+                      screeningResult={pendingScreening?.preview || screeningResult}
+                      onComplete={() => setCurrentPage('live_verification')}
+                    />
+                  )}
+
+                  {currentPage === 'live_verification' && (
+                    <LiveVerificationPage
+                      setCurrentPage={setCurrentPage}
+                      liveCaptureDataUrl={liveCaptureDataUrl}
+                      setLiveCaptureDataUrl={setLiveCaptureDataUrl}
+                      onSubmit={submitLiveCapture}
+                      isSubmitting={isVerifyingLive}
+                      retryMessage={liveRetryMessage}
                     />
                   )}
 
@@ -1714,7 +1169,6 @@ const startPipeline = async () => {
                   {currentPage === 'history' && (
                     <ScreeningHistoryPage
                       setCurrentPage={setCurrentPage}
-                      blockchainLedger={blockchainLedger}
                     />
                   )}
 
@@ -1730,7 +1184,6 @@ const startPipeline = async () => {
 
                   {currentPage === 'system_status' && (
                     <SystemStatusPage
-                      blockchainLedger={blockchainLedger}
                     />
                   )}
                 </main>
@@ -1750,11 +1203,9 @@ const startPipeline = async () => {
                 </div>
                 <div className="flex items-center gap-4 text-slate-500">
                   <span>ENCRYPTED WORKSTATION</span>
-                  <span>|</span>
-                  <span className="text-amber-700 font-semibold">SIMULATION MODE (PROTOTYPE)</span>
                 </div>
               </footer>
-            </>
+            </div>
           )}
         </div>
       );
@@ -1782,7 +1233,7 @@ const startPipeline = async () => {
         window.addEventListener('resize', resize);
 
         const nodes = [
-          { name: 'Attari-Wagah', x: 0.32, y: 0.22 },
+          { name: 'SSB checkpost', x: 0.32, y: 0.22 },
           { name: 'Raxaul', x: 0.58, y: 0.32 },
           { name: 'Banbasa', x: 0.44, y: 0.25 },
           { name: 'Petrapole', x: 0.70, y: 0.46 },
@@ -1936,12 +1387,12 @@ const startPipeline = async () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <AgencyEmblem size={38} />
-              <span className="text-xs font-sans tracking-wide text-slate-600 font-bold uppercase">
+              <span className="text-xs font-mono tracking-widest text-slate-600 font-bold uppercase">
                 BHARAT BORDER INTELLIGENCE
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-[11px] font-sans font-semibold text-emerald-700 bg-white/95 px-3 py-1 rounded-full border border-slate-200 backdrop-blur">
+            <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-700 bg-white/95 px-3 py-1 rounded-full border border-slate-200 backdrop-blur">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
               <span>● SECURE NETWORK ONLINE</span>
             </div>
@@ -1951,7 +1402,7 @@ const startPipeline = async () => {
           <div className="max-w-3xl my-auto space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/95 border border-slate-200 backdrop-blur">
               <span className="w-2 h-2 rounded-full bg-blue-900 animate-ping"></span>
-              <span className="text-[11px] font-sans font-bold tracking-wide text-blue-800 uppercase">
+              <span className="text-[11px] font-mono font-bold tracking-widest text-blue-800 uppercase">
                 AI-ASSISTED BORDER SECURITY PLATFORM
               </span>
             </div>
@@ -1964,7 +1415,7 @@ const startPipeline = async () => {
                 </span>
               </h1>
 
-              <p className="text-[14px] font-sans text-slate-500 max-w-xl">
+              <p className="text-[14px] text-slate-500 max-w-xl animate-letter-expand">
                 AI-POWERED IDENTITY & DOCUMENT SCREENING
               </p>
             </div>
@@ -1974,7 +1425,7 @@ const startPipeline = async () => {
             </p>
 
             {/* Primary Single CTA: OFFICER LOGIN */}
-            <div className="pt-4 flex items-center gap-4 font-sans">
+            <div className="pt-4 flex items-center gap-4">
               <button
                 onClick={onGoToLogin}
                 className="group relative inline-flex items-center gap-3 bg-[#0a3161] hover:bg-[#0d3d78] text-white font-bold px-8 py-4 rounded-xl text-sm shadow-lg tracking-wider transition-all transform hover:scale-[1.02] border-b-4 border-[#c8973a]"
@@ -1986,10 +1437,10 @@ const startPipeline = async () => {
           </div>
 
           {/* Footer */}
-          <div className="flex flex-wrap justify-between items-center text-[11px] font-sans text-slate-500 border-t border-slate-200 pt-4">
+          <div className="flex flex-wrap justify-between items-center text-[11px] font-mono text-slate-500 border-t border-slate-200 pt-4">
             <div>AUTHORIZED PERSONNEL ONLY • SECURE SYSTEM • BBI</div>
             <div className="flex gap-4">
-              <span>ICP ATTARI-WAGAH</span>
+              <span>SSB checkpost</span>
               <span>•</span>
               <span>ICP RAXAUL</span>
               <span>•</span>
@@ -2011,7 +1462,7 @@ const startPipeline = async () => {
       const [verifyStep, setVerifyStep] = useState('');
       const [errorMsg, setErrorMsg] = useState('');
 
-      const executeLoginFlow = () => {
+      const executeLoginFlow = async () => {
         setErrorMsg('');
         if (!officerId.trim() || !password.trim()) {
           setErrorMsg('Unable to verify officer credentials.');
@@ -2021,13 +1472,31 @@ const startPipeline = async () => {
         setIsVerifying(true);
         setVerifyStep('Verifying officer credentials...');
 
-        setTimeout(() => {
+        try {
+          const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ officerId, password })
+          });
+
+          const data = await response.json();
+
+          if (!data.success) {
+            setIsVerifying(false);
+            setErrorMsg(data.message || 'Invalid credentials.');
+            return;
+          }
+
           setVerifyStep('Secure session established.');
           setTimeout(() => {
             setIsVerifying(false);
-            onLoginSuccess();
+            onLoginSuccess(data.data.token, data.data.officer);
           }, 500);
-        }, 700);
+
+        } catch (error) {
+          setIsVerifying(false);
+          setErrorMsg('Could not reach the server. Is the backend running?');
+        }
       };
 
       const handleSubmit = (e) => {
@@ -2042,12 +1511,12 @@ const startPipeline = async () => {
       };
 
       return (
-        <div className="min-h-[85vh] flex items-center justify-center p-4 relative z-10 font-sans">
+        <div className="min-h-[85vh] flex items-center justify-center p-4 relative z-10">
           <div className="w-full max-w-md bg-white/95 border border-slate-200 rounded-2xl p-8 shadow-2xl space-y-6 relative overflow-hidden backdrop-blur">
 
             <button
               onClick={onBackToLanding}
-              className="text-xs font-sans text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-2 transition"
+              className="text-xs font-mono text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-2 transition"
             >
               ← Back to Landing Page
             </button>
@@ -2059,17 +1528,17 @@ const startPipeline = async () => {
               </div>
 
               <h2 className="text-2xl font-extrabold text-slate-900 tracking-wide">BHARAT BORDER INTELLIGENCE</h2>
-              <div className="text-xs font-sans font-bold text-blue-800 tracking-wider uppercase">
+              <div className="text-xs font-mono font-bold text-blue-800 tracking-widest uppercase">
                 OFFICER WORKSTATION
               </div>
-              <p className="text-xs text-slate-500 font-sans">
+              <p className="text-xs text-slate-500 font-mono">
                 Secure Access Portal
               </p>
             </div>
 
             {/* Form or Verification Loading Overlay */}
             {isVerifying ? (
-              <div className="py-10 text-center space-y-4 font-sans">
+              <div className="py-10 text-center space-y-4 font-mono">
                 <div className="w-10 h-10 border-2 border-blue-800 border-t-transparent rounded-full animate-spin mx-auto"></div>
                 <div className="text-sm text-blue-800 font-bold animate-pulse">{verifyStep}</div>
                 <div className="text-[11px] text-slate-500">Establishing encrypted workstation session...</div>
@@ -2078,13 +1547,13 @@ const startPipeline = async () => {
               <form onSubmit={handleSubmit} className="space-y-4">
 
                 {errorMsg && (
-                  <div className="bg-amber-50 border border-amber-300 text-amber-700 text-xs font-sans p-3 rounded-lg text-center">
+                  <div className="bg-amber-50 border border-amber-300 text-amber-700 text-xs font-mono p-3 rounded-lg text-center">
                     ⚠ {errorMsg}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-sans font-bold text-slate-600 uppercase mb-1">
+                  <label className="block text-xs font-mono font-bold text-slate-600 uppercase mb-1">
                     OFFICER ID
                   </label>
                   <input
@@ -2097,7 +1566,7 @@ const startPipeline = async () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-sans font-bold text-slate-600 uppercase mb-1">
+                  <label className="block text-xs font-mono font-bold text-slate-600 uppercase mb-1">
                     PASSWORD
                   </label>
                   <input
@@ -2105,7 +1574,7 @@ const startPipeline = async () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:border-blue-800 transition"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:border-blue-800 transition"
                   />
                 </div>
 
@@ -2117,7 +1586,7 @@ const startPipeline = async () => {
                     onChange={(e) => setRemember(e.target.checked)}
                     className="w-4 h-4 rounded accent-blue-900 bg-white border-slate-300"
                   />
-                  <label htmlFor="remember" className="text-xs font-sans text-slate-500 cursor-pointer">
+                  <label htmlFor="remember" className="text-xs font-mono text-slate-500 cursor-pointer">
                     Remember this workstation
                   </label>
                 </div>
@@ -2137,12 +1606,12 @@ const startPipeline = async () => {
                 <button
                   type="button"
                   onClick={handleDemoAccess}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-amber-700 font-semibold py-2.5 rounded-lg text-xs border border-amber-400/60 transition-all flex items-center justify-center gap-2 font-sans"
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-amber-700 font-semibold py-2.5 rounded-lg text-xs border border-amber-400/60 transition-all flex items-center justify-center gap-2 font-mono"
                 >
                   DEMO OFFICER ACCESS (SIMULATION MODE)
                 </button>
 
-                <div className="text-[10px] font-sans text-slate-500 space-y-1">
+                <div className="text-[10px] font-mono text-slate-500 space-y-1">
                   <p className="text-emerald-700 font-semibold">● SECURE CONNECTION</p>
                   <p>Authorized personnel only.</p>
                 </div>
@@ -2156,27 +1625,25 @@ const startPipeline = async () => {
     // ----------------------------------------------------
     // HEADER COMPONENT (Officer Workstation Header)
     // ----------------------------------------------------
-    function Header({ currentPage, setCurrentPage, activeScenario, onScenarioChange, onLogout }) {
+    function Header({ currentPage, setCurrentPage, activeScenario, onScenarioChange, onLogout, officerData }) {
       return (
-        <header className="bg-white/95 border-b border-slate-200 sticky top-0 z-30 backdrop-blur px-6 py-3 shadow-sm font-sans">
+        <header className="bg-white/95 border-b border-slate-200 sticky top-0 z-30 backdrop-blur px-6 py-2.5 shadow">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
 
-            {/* Brand Title & System Info */}
-            <div className="flex items-center gap-3.5 cursor-pointer py-1" onClick={() => setCurrentPage('dashboard')}>
-              <AgencyEmblem size={42} />
+            {/* Brand & Workstation Officer Session Info */}
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('dashboard')}>
+              <AgencyEmblem size={34} />
 
-              <div className="flex flex-col justify-center">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="font-bold text-xl sm:text-2xl md:text-[28px] text-slate-900 tracking-tight leading-none whitespace-nowrap" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
-                    BHARAT BORDER INTELLIGENCE
-                  </h1>
-                  <span className="text-xs font-sans text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-sm text-slate-900 tracking-wide">BHARAT BORDER INTELLIGENCE</h1>
+                  <span className="text-[11px] font-mono text-emerald-700 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                     SYSTEM ONLINE
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 font-sans mt-1">
-                  OFFICER WORKSTATION • CHECKPOINT: ICP ATTARI-WAGAH
+                <p className="text-[11px] text-slate-500 font-mono">
+                  OFFICER WORKSTATION | Officer: {officerData?.name || 'Unknown'} | Checkpoint: {officerData?.checkpoint || 'Unknown'}
                 </p>
               </div>
             </div>
@@ -2184,17 +1651,15 @@ const startPipeline = async () => {
             {/* Header Quick Controls & Logout */}
             <div className="flex items-center gap-3">
               <button
-                type="button"
                 onClick={() => setCurrentPage('new_screening')}
-                className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-3.5 py-2 rounded-sm text-xs transition flex items-center gap-1.5 shadow-sm uppercase tracking-wide font-sans"
+                className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-3 py-1.5 rounded-md text-xs transition flex items-center gap-1 shadow-sm"
               >
                 <span>＋</span> New Screening
               </button>
 
               <button
-                type="button"
                 onClick={onLogout}
-                className="text-xs text-slate-600 hover:text-slate-900 px-3 py-2 rounded-sm border border-slate-300 hover:border-slate-400 bg-white transition flex items-center gap-1 font-sans uppercase font-semibold"
+                className="text-xs text-slate-500 hover:text-slate-900 px-2.5 py-1.5 rounded-md border border-slate-200 hover:border-slate-300 bg-white transition flex items-center gap-1 font-mono"
                 title="End Session & Return to Login"
               >
                 Logout
@@ -2239,12 +1704,6 @@ const startPipeline = async () => {
             { id: 'analytics', label: 'Analytics', icon: '◌' }
           ]
         },
-        {
-          title: 'SYSTEM',
-          items: [
-            { id: 'system_status', label: 'System Status', icon: '⚙' }
-          ]
-        }
       ];
 
       return (
@@ -2252,7 +1711,7 @@ const startPipeline = async () => {
           <div className="space-y-4">
             {sections.map((sec, idx) => (
               <div key={idx} className="space-y-1">
-                <div className="px-2.5 text-[10px] font-sans font-semibold text-slate-500 uppercase tracking-wider">
+                <div className="px-2.5 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
                   {sec.title}
                 </div>
 
@@ -2284,7 +1743,7 @@ const startPipeline = async () => {
     // ----------------------------------------------------
     // HORIZONTAL NAVIGATION COMPONENT
     // ----------------------------------------------------
-    function HorizontalNavigation({ currentPage, setCurrentPage }) {
+    function HorizontalNavigation({ currentPage, setCurrentPage, officerInfo }) {
       const sections = [
         { title: 'WORKSPACE', items: [{ id: 'dashboard', label: 'Dashboard' }, { id: 'new_screening', label: 'New Screening' }] },
         { title: 'SCREENING', items: [{ id: 'active_screening', label: 'Active Screening' }, { id: 'history', label: 'Screening History' }] },
@@ -2293,22 +1752,19 @@ const startPipeline = async () => {
         { title: 'SYSTEM', items: [{ id: 'system_status', label: 'System Status' }] }
       ];
       return (
-        <nav className="w-full bg-[#0a192f] border-b border-slate-800 flex items-center justify-between px-4 py-1.5 font-sans">
-          <div className="flex space-x-1.5 overflow-x-auto py-1 w-full max-w-7xl mx-auto">
-            {sections.flatMap(sec => sec.items).map(item => {
-              const isActive = currentPage === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setCurrentPage(item.id)}
-                  className={`text-xs font-semibold uppercase tracking-wider px-3.5 py-2 rounded-sm transition-colors duration-150 whitespace-nowrap cursor-pointer ${isActive ? 'bg-[#1e40af] text-white shadow-sm' : 'text-slate-200 hover:bg-slate-800 hover:text-white'}`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
+        <nav className="w-full bg-[#0b1f3a] border-b border-slate-700 h-14 flex items-center justify-between px-4">
+          <div className="flex space-x-3">
+            {sections.flatMap(sec => sec.items).map(item => (
+              <button
+                key={item.id}
+                onClick={() => setCurrentPage(item.id)}
+                className={`text-sm uppercase px-3 py-2 rounded transition-colors duration-150 ${currentPage === item.id ? 'bg-blue-800 text-white' : 'text-gray-200 hover:bg-gray-700'}`}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
+
         </nav>
       );
     }
@@ -2316,25 +1772,25 @@ const startPipeline = async () => {
     // ----------------------------------------------------
     // DASHBOARD PAGE (Today's Work Overview)
     // ----------------------------------------------------
-    function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScenarioChange, blockchainLedger }) {
+    function DashboardPage({ setCurrentPage, screeningResult, activeScenario, onScenarioChange }) {
       const isHigh = screeningResult.riskLevel === 'high';
       const isMed = screeningResult.riskLevel === 'medium';
       const recentFeed = window.RECENT_SCREENINGS_FEED.slice(0, 4);
 
       return (
-        <div className="space-y-6 max-w-6xl mx-auto font-sans">
+        <div className="space-y-6 max-w-6xl mx-auto">
 
           {/* 1. CURRENT SCREENING CASE CARD */}
           <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-md space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-sans font-bold text-slate-500 uppercase">CURRENT SCREENING CASE</span>
-                <span className="text-xs text-emerald-700 font-sans font-semibold">● Active</span>
+                <span className="text-xs font-mono font-bold text-slate-500 uppercase">CURRENT SCREENING CASE</span>
+                <span className="text-xs text-emerald-700 font-mono">● Active</span>
               </div>
 
               <button
                 onClick={() => setCurrentPage('active_screening')}
-                className="text-xs font-bold text-blue-800 hover:underline flex items-center gap-1 font-sans"
+                className="text-xs font-bold text-blue-800 hover:underline flex items-center gap-1"
               >
                 OPEN CASE →
               </button>
@@ -2343,18 +1799,18 @@ const startPipeline = async () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="space-y-1">
                 <div className="text-lg font-bold text-slate-900 flex items-center gap-3">
-                  <span className="font-mono text-blue-950">{screeningResult.screeningId}</span>
+                  <span>{screeningResult.screeningId}</span>
                   <span>—</span>
-                  <span className="text-slate-600 font-sans">{screeningResult.documentTypeLabel}</span>
+                  <span className="text-slate-600">{screeningResult.documentTypeLabel}</span>
                 </div>
-                <div className="text-xs text-slate-500 font-sans">
-                  Status: AI & DocShield Multi-Layer Analysis Ready | <span className="font-mono">{screeningResult.timestamp}</span>
+                <div className="text-xs text-slate-500 font-mono">
+                  Status: AI & DocShield Multi-Layer Analysis Ready | {screeningResult.timestamp}
                 </div>
               </div>
 
               {/* Specific Status Badge */}
               <div className="flex items-center gap-3">
-                <span className={`px-3 py-1 rounded-md text-xs font-bold font-sans ${isHigh ? 'bg-red-50 text-red-700 border border-red-200' :
+                <span className={`px-3 py-1 rounded-md text-xs font-bold font-mono ${isHigh ? 'bg-red-50 text-red-700 border border-red-200' :
                   isMed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
                     'bg-emerald-50 text-emerald-700 border border-emerald-200'
                   }`}>
@@ -2363,7 +1819,7 @@ const startPipeline = async () => {
 
                 <button
                   onClick={() => setCurrentPage('active_screening')}
-                  className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-md text-xs shadow transition font-sans"
+                  className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-md text-xs shadow transition"
                 >
                   Open Active Case
                 </button>
@@ -2372,50 +1828,48 @@ const startPipeline = async () => {
           </div>
 
           {/* 2. TODAY'S WORK — 3 COMPACT INDICATORS */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
               <div className="text-xs text-slate-500 font-semibold">Screened Today</div>
-              <div className="text-2xl font-bold text-slate-900">1,248</div>
+              <div className="text-2xl font-bold text-slate-900 font-mono">1,248</div>
               <div className="text-[10px] text-slate-500">Normal Checkpoint Flow</div>
             </div>
 
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
               <div className="text-xs text-amber-700 font-semibold">Needs Review</div>
-              <div className="text-2xl font-bold text-amber-700">37</div>
+              <div className="text-2xl font-bold text-amber-700 font-mono">37</div>
               <div className="text-[10px] text-slate-500">Pending Officer Decision</div>
             </div>
 
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
               <div className="text-xs text-red-600 font-semibold">High Risk Cases</div>
-              <div className="text-2xl font-bold text-red-600">12</div>
+              <div className="text-2xl font-bold text-red-600 font-mono">12</div>
               <div className="text-[10px] text-slate-500">Flagged Anomalies</div>
             </div>
           </div>
 
-          {/* 3. RECENT ACTIVITY — LATEST 4-5 CASES WITH BLOCKCHAIN BLOCK # */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4 font-sans">
+          {/* 3. RECENT ACTIVITY — LATEST SCREENING CASES */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-sans font-bold text-slate-600 uppercase">RECENT SCREENING ACTIVITY & AUDIT BLOCKS</h3>
-                <span className="text-[10px] font-sans font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-300">SIMULATED LEDGER</span>
+                <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">RECENT SCREENING ACTIVITY</h3>
               </div>
               <button
                 onClick={() => setCurrentPage('history')}
-                className="text-xs text-blue-800 font-sans hover:underline font-semibold"
+                className="text-xs text-blue-800 font-mono hover:underline"
               >
-                VIEW FULL AUDIT TRAIL →
+                VIEW FULL HISTORY →
               </button>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-sans">
+              <table className="w-full text-left text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 uppercase font-semibold">
+                  <tr className="border-b border-slate-200 text-slate-500 uppercase">
                     <th className="pb-2 px-2">TIME</th>
                     <th className="pb-2 px-2">CASE ID</th>
                     <th className="pb-2 px-2">DOCUMENT</th>
                     <th className="pb-2 px-2">CONFIDENCE</th>
-                    <th className="pb-2 px-2">AUDIT BLOCK</th>
                     <th className="pb-2 px-2">STATUS</th>
                     <th className="pb-2 px-2 text-right">ACTION</th>
                   </tr>
@@ -2423,13 +1877,12 @@ const startPipeline = async () => {
                 <tbody className="divide-y divide-slate-200">
                   {recentFeed.map((row, idx) => (
                     <tr key={idx} className="hover:bg-slate-100 transition">
-                      <td className="py-2.5 px-2 text-slate-500 font-mono">{row.time}</td>
-                      <td className="py-2.5 px-2 font-bold font-mono text-slate-800">{row.screeningId}</td>
-                      <td className="py-2.5 px-2 text-slate-600 font-sans">{row.documentType}</td>
-                      <td className="py-2.5 px-2 font-bold text-slate-900 font-sans">{row.compositeScore}%</td>
-                      <td className="py-2.5 px-2 text-amber-700 font-bold font-mono">{row.blockNumber}</td>
+                      <td className="py-2.5 px-2 text-slate-500">{row.time}</td>
+                      <td className="py-2.5 px-2 font-bold text-slate-800">{row.screeningId}</td>
+                      <td className="py-2.5 px-2 text-slate-600">{row.documentType}</td>
+                      <td className="py-2.5 px-2 font-bold text-slate-900">{row.compositeScore}%</td>
                       <td className="py-2.5 px-2">
-                        <span className={`px-2 py-0.5 rounded font-bold font-sans ${row.riskLevel === 'high' ? 'text-red-600 bg-red-50 border border-red-200' :
+                        <span className={`px-2 py-0.5 rounded font-bold ${row.riskLevel === 'high' ? 'text-red-600 bg-red-50 border border-red-200' :
                           row.riskLevel === 'medium' ? 'text-amber-700 bg-amber-50 border border-amber-200' :
                             'text-emerald-700 bg-emerald-50 border border-emerald-200'
                           }`}>
@@ -2437,7 +1890,7 @@ const startPipeline = async () => {
                         </span>
                       </td>
                       <td className="py-2.5 px-2 text-right">
-                        <button onClick={() => setCurrentPage('result')} className="text-blue-800 hover:underline font-semibold font-sans">
+                        <button onClick={() => setCurrentPage('result')} className="text-blue-800 hover:underline">
                           View
                         </button>
                       </td>
@@ -2463,18 +1916,18 @@ const startPipeline = async () => {
       const layers = screeningResult.docshieldLayers || window.DEMO_SCENARIOS.high_risk.result.docshieldLayers;
 
       return (
-        <div className="space-y-6 max-w-6xl mx-auto font-sans">
+        <div className="space-y-6 max-w-6xl mx-auto">
           {/* Header Banner */}
           <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <div className="text-xs font-sans text-slate-500 font-bold uppercase">ACTIVE PASSENGER WORKSTATION</div>
+              <div className="text-xs font-mono text-slate-500 font-bold uppercase">ACTIVE PASSENGER WORKSTATION</div>
               <h2 className="text-xl font-bold text-slate-900 mt-0.5">
-                Case <span className="font-mono">#{screeningResult.screeningId}</span> — {screeningResult.documentTypeLabel}
+                Case #{screeningResult.screeningId} — {screeningResult.documentTypeLabel}
               </h2>
             </div>
 
             {/* Risk Badge */}
-            <span className={`px-3 py-1 rounded-md text-xs font-bold font-sans ${isHigh ? 'bg-red-50 text-red-700 border border-red-200' :
+            <span className={`px-3 py-1 rounded-md text-xs font-bold font-mono ${isHigh ? 'bg-red-50 text-red-700 border border-red-200' :
               isMed ? 'bg-amber-50 text-amber-700 border border-amber-200' :
                 'bg-emerald-50 text-emerald-700 border border-emerald-200'
               }`}>
@@ -2487,19 +1940,19 @@ const startPipeline = async () => {
 
             {/* Col 1: Document */}
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3">
-              <div className="text-xs font-sans font-bold text-slate-600 uppercase">DOCUMENT PREVIEW</div>
+              <div className="text-xs font-mono font-bold text-slate-600 uppercase">DOCUMENT PREVIEW</div>
               <div className="w-full h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
                 <img src={screeningResult.documentImage} alt="Document" className="max-h-full object-contain" />
               </div>
-              <div className="text-[11px] font-sans text-slate-500 space-y-1">
-                <div>Document No: <strong className="font-mono">{screeningResult.ocr?.fields?.passportNumber || 'Z9482103'}</strong></div>
+              <div className="text-[11px] font-mono text-slate-500 space-y-1">
+                <div>Document No: <strong>{screeningResult.ocr?.fields?.passportNumber || 'Z9482103'}</strong></div>
                 <div>Name: <strong>{screeningResult.ocr?.fields?.fullName || 'SHARMA VIKRAM RAJESH'}</strong></div>
               </div>
             </div>
 
             {/* Col 2: Identity Face Comparison */}
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3">
-              <div className="text-xs font-sans font-bold text-slate-600 uppercase">IDENTITY MATCH</div>
+              <div className="text-xs font-mono font-bold text-slate-600 uppercase">IDENTITY MATCH</div>
               <div className="grid grid-cols-2 gap-2 h-44">
                 <div className="bg-slate-50 rounded p-1 flex items-center justify-center border border-slate-200">
                   <img src={screeningResult.documentImage} alt="Doc Photo" className="max-h-full object-contain" />
@@ -2509,7 +1962,7 @@ const startPipeline = async () => {
                 </div>
               </div>
               <div className="text-center pt-2">
-                <span className={`px-3 py-1 rounded text-xs font-sans font-bold ${facePassed ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
+                <span className={`px-3 py-1 rounded text-xs font-mono font-bold ${facePassed ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
                   }`}>
                   Face Match: {screeningResult.faceVerification.similarityScore}%
                 </span>
@@ -2519,9 +1972,9 @@ const startPipeline = async () => {
             {/* Col 3: Checklist & Decision */}
             <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="text-xs font-sans font-bold text-slate-600 uppercase">DOCSHIELD LAYER CHECKLIST</div>
+                <div className="text-xs font-mono font-bold text-slate-600 uppercase">DOCSHIELD LAYER CHECKLIST</div>
 
-                <div className="space-y-2 text-xs font-sans">
+                <div className="space-y-2 text-xs font-mono">
                   <div className="flex justify-between border-b border-slate-200 pb-1.5">
                     <span className="text-slate-500">Photo Tamper:</span>
                     <span className={layers.photoTamper.score >= 70 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
@@ -2554,7 +2007,7 @@ const startPipeline = async () => {
 
               <button
                 onClick={() => setCurrentPage('result')}
-                className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg text-xs shadow transition font-sans"
+                className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg text-xs shadow transition"
               >
                 VIEW FULL SCREENING RESULT →
               </button>
@@ -2569,12 +2022,6 @@ const startPipeline = async () => {
     // ----------------------------------------------------
     function NewScreeningPage({ selectedDocType, setSelectedDocType, uploadedDocImage, setUploadedDocImage, uploadedFileName, setUploadedFileName, onStartPipeline, activeScenario, onScenarioChange, setScreeningResult }) {
       const fileInputRef = useRef(null);
-      // Camera refs and state for Step 2
-      const videoRef = useRef(null);
-      const cameraStreamRef = useRef(null);
-      const [cameraActive, setCameraActive] = useState(false);
-      const [cameraError, setCameraError] = useState('');
-      const [capturedFace, setCapturedFace] = useState(null);
 
       const docTypes = [
         { id: 'passport', label: 'Passport', icon: '📖' },
@@ -2653,71 +2100,12 @@ const startPipeline = async () => {
 
         alert("Please upload a JPG, PNG, or PDF file.");
       };
-
-      // Camera control functions for Step 2
-      const startCamera = async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          cameraStreamRef.current = stream;
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            await videoRef.current.play();
-          }
-          setCameraActive(true);
-          setCameraError('');
-        } catch (err) {
-          console.error('Camera error:', err);
-          let msg = 'Unable to access camera.';
-          if (err.name === 'NotAllowedError') msg = 'Camera permission denied.';
-          else if (err.name === 'NotFoundError') msg = 'No camera device found.';
-          else if (err.name === 'NotReadableError') msg = 'Camera already in use.';
-          else if (err.name === 'NotSupportedError') msg = 'Browser does not support camera access.';
-          setCameraError(msg);
-          setCameraActive(false);
-        }
-      };
-
-      const stopCamera = () => {
-        if (cameraStreamRef.current) {
-          cameraStreamRef.current.getTracks().forEach(t => t.stop());
-          cameraStreamRef.current = null;
-        }
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
-        }
-        setCameraActive(false);
-      };
-
-      const captureFace = () => {
-        if (!videoRef.current) return;
-        const canvas = document.createElement('canvas');
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL('image/jpeg');
-        setCapturedFace(imageData);
-        // Update screening result with captured face image
-        setScreeningResult(prev => ({
-          ...prev,
-          verificationImage: imageData,
-        }));
-        stopCamera();
-      };
       return (
-        <div className="space-y-6 max-w-4xl mx-auto font-sans">
+        <div className="space-y-6 max-w-4xl mx-auto">
           <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">NEW BORDER SCREENING</h2>
-              <p className="text-xs text-slate-500 font-sans">Upload or select a passenger document for DocShield multi-layer screening.</p>
-            </div>
-
-            {/* Sample Screening Cases Controls */}
-            <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex-wrap">
-              <span className="text-[10px] font-sans text-amber-700 font-bold uppercase">SAMPLE CASES:</span>
-              <button onClick={() => onScenarioChange('low_risk')} className={`text-xs px-2 py-0.5 rounded font-sans font-semibold transition ${activeScenario === 'low_risk' && !uploadedFileName ? 'bg-emerald-100 text-emerald-800 font-bold border border-emerald-300' : 'bg-slate-100 hover:bg-slate-200 text-emerald-700'}`}>Low Risk</button>
-              <button onClick={() => onScenarioChange('medium_risk')} className={`text-xs px-2 py-0.5 rounded font-sans font-semibold transition ${activeScenario === 'medium_risk' && !uploadedFileName ? 'bg-amber-100 text-amber-800 font-bold border border-amber-300' : 'bg-slate-100 hover:bg-slate-200 text-amber-700'}`}>Med Risk</button>
-              <button onClick={() => onScenarioChange('high_risk')} className={`text-xs px-2 py-0.5 rounded font-sans font-semibold transition ${activeScenario === 'high_risk' && !uploadedFileName ? 'bg-red-100 text-red-800 font-bold border border-red-300' : 'bg-slate-100 hover:bg-slate-200 text-red-600'}`}>High Risk</button>
+              <p className="text-xs text-slate-500">Upload a passenger document for DocShield multi-layer screening.</p>
             </div>
           </div>
 
@@ -2727,9 +2115,9 @@ const startPipeline = async () => {
             {/* Step 1: Document Selection & Upload Bar */}
             <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
               <div className="flex justify-between items-center">
-                <div className="text-xs font-sans font-bold text-slate-600 uppercase">STEP 1 — DOCUMENT SELECTION & UPLOAD</div>
+                <div className="text-xs font-mono font-bold text-slate-600 uppercase">STEP 1 — DOCUMENT SELECTION & UPLOAD</div>
                 {uploadedFileName && (
-                  <span className="text-[11px] font-sans text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-semibold">
+                  <span className="text-[11px] font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-semibold">
                     Uploaded: {uploadedFileName}
                   </span>
                 )}
@@ -2746,7 +2134,7 @@ const startPipeline = async () => {
                       }`}
                   >
                     <div className="text-xl mb-1">{dt.icon}</div>
-                    <div className="text-xs font-sans font-semibold">{dt.label}</div>
+                    <div className="text-xs font-mono">{dt.label}</div>
                   </button>
                 ))}
               </div>
@@ -2771,30 +2159,21 @@ const startPipeline = async () => {
                 />
 
                 <div className="absolute bottom-2 inset-x-0 text-center">
-                  <span className="text-[11px] font-sans bg-white/90 text-slate-700 px-3 py-1 rounded shadow-sm border border-slate-200 font-medium group-hover:text-blue-900">
+                  <span className="text-[11px] font-mono bg-white/90 text-slate-700 px-3 py-1 rounded shadow-sm border border-slate-200 font-medium group-hover:text-blue-900">
                     📁 Click to choose or drop document file to replace preview (JPG / PNG / PDF)
                   </span>
                 </div>
               </div>
-              <div className="text-[11px] font-sans text-slate-500 text-center">Supported formats: JPG / PNG / PDF • Ready for DocShield Multi-Layer Analysis</div>
+              <div className="text-[11px] font-mono text-slate-500 text-center">Supported formats: JPG / PNG / PDF • Ready for DocShield Multi-Layer Analysis</div>
             </div>
-            {/* Step 2: Identity Face */}
-<div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
 
-  <div className="text-xs font-mono font-bold text-slate-600 uppercase">
-    STEP 2 — IDENTITY FACE CAPTURE
-  </div>
-
-  <LiveCameraCapture />
-
-</div>
-
+            
             {/* Step 3: Screening CTA */}
             <div className="bg-white border border-slate-200 p-5 rounded-xl text-center space-y-3">
-              <div className="text-xs font-sans font-bold text-slate-600 uppercase">STEP 3 — AI & DOCSHIELD FORENSIC SCREENING</div>
+              <div className="text-xs font-mono font-bold text-slate-600 uppercase"></div>
               <button
                 onClick={onStartPipeline}
-                className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition transform hover:scale-[1.01] font-sans"
+                className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition transform hover:scale-[1.01]"
               >
                 START AI SCREENING →
               </button>
@@ -2821,17 +2200,17 @@ const startPipeline = async () => {
       const layers = screeningResult.docshieldLayers || window.DEMO_SCENARIOS.high_risk.result.docshieldLayers;
 
       return (
-        <div className="space-y-6 max-w-5xl mx-auto font-sans">
+        <div className="space-y-6 max-w-5xl mx-auto">
           {/* Progress Header */}
           <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-lg font-bold text-slate-900">DOCSHIELD AI SCREENING IN PROGRESS</h2>
-                <div className="text-xs font-sans text-blue-800 font-semibold animate-pulse mt-0.5">
+                <div className="text-xs font-mono text-blue-800 font-semibold animate-pulse mt-0.5">
                   ⟳ {activeScanLog}
                 </div>
               </div>
-              <span className="text-xl font-sans font-bold text-blue-900">{progress}%</span>
+              <span className="text-xl font-mono font-bold text-blue-900">{progress}%</span>
             </div>
 
             <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
@@ -2844,8 +2223,8 @@ const startPipeline = async () => {
             {/* Document Scanner with Active Laser Animation */}
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3 relative overflow-hidden">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-sans font-bold text-slate-600 uppercase">DOCUMENT SCANNER</span>
-                <span className="text-[10px] font-sans text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <span className="text-xs font-mono font-bold text-slate-600 uppercase">DOCUMENT SCANNER</span>
+                <span className="text-[10px] font-mono text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                   {isScanning ? '● SCANNING ACTIVE' : '✓ SCAN COMPLETE'}
                 </span>
               </div>
@@ -2865,8 +2244,8 @@ const startPipeline = async () => {
 
               {/* DocShield 4-Layer Progress Meters Preview */}
               <div className="pt-2 border-t border-slate-200 space-y-2">
-                <div className="text-[11px] font-sans font-bold text-slate-600 uppercase">DOCSHIELD ANALYSIS LAYERS</div>
-                <div className="grid grid-cols-2 gap-2 text-xs font-sans">
+                <div className="text-[11px] font-mono font-bold text-slate-600 uppercase">DOCSHIELD ANALYSIS LAYERS</div>
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                   <div className="bg-slate-50 p-2 rounded border border-slate-200">
                     <div className="flex justify-between text-slate-500 text-[10px]">
                       <span>Photo Tamper</span>
@@ -2913,14 +2292,14 @@ const startPipeline = async () => {
             {/* AI Stages Breakdown */}
             <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3 flex flex-col justify-between">
               <div className="space-y-2">
-                <div className="text-xs font-sans font-bold text-slate-600 uppercase">PIPELINE EXECUTION QUEUE</div>
+                <div className="text-xs font-mono font-bold text-slate-600 uppercase">PIPELINE EXECUTION QUEUE</div>
                 <div className="space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
                   {stages.map((stg, idx) => {
                     const isDone = idx < currentStageIndex;
                     const isCurrent = idx === currentStageIndex;
 
                     return (
-                      <div key={idx} className={`p-2 rounded-lg border text-xs font-sans transition ${isDone ? 'bg-emerald-50/40 border-emerald-200 text-emerald-800' :
+                      <div key={idx} className={`p-2 rounded-lg border text-xs font-mono transition ${isDone ? 'bg-emerald-50/40 border-emerald-200 text-emerald-800' :
                         isCurrent ? 'bg-blue-50 border-blue-800 text-blue-900 font-semibold' :
                           'bg-slate-50 border-slate-200 text-slate-500'
                         }`}>
@@ -2937,20 +2316,75 @@ const startPipeline = async () => {
               {!isScanning && (
                 <button
                   onClick={onComplete}
-                  className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 rounded-lg text-xs shadow-md transition transform hover:scale-[1.01] mt-2 font-sans"
+                  className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 rounded-lg text-xs shadow-md transition transform hover:scale-[1.01] mt-2"
                 >
-                  VIEW FINAL SCREENING RESULT & AUDIT TRAIL →
-                </button>
+                  CONTINUE TO LIVE IDENTITY VERIFICATION →                </button>
               )}
             </div>
           </div>
         </div>
       );
     }
+        // ----------------------------------------------------
+    // LIVE VERIFICATION PAGE (post-analysis, pre-results)
+    // ----------------------------------------------------
+    function LiveVerificationPage({ setCurrentPage, liveCaptureDataUrl, setLiveCaptureDataUrl, onSubmit, isSubmitting, retryMessage }) {
 
-    // ----------------------------------------------------
-    // SCREENING RESULT PAGE (Enhanced Verdict & DocShield Multi-Layer Analysis)
-    // ----------------------------------------------------
+      const handleSubmit = () => {
+        if (!liveCaptureDataUrl) {
+          alert("Please enable the live camera and capture the person's face first.");
+          return;
+        }
+        onSubmit();
+      };
+
+      const handleSkip = () => {
+        if (!window.confirm('Continue without face verification? This screening will need a secondary check.')) {
+          return;
+        }
+        onSubmit({ skip: true });
+      };
+
+      return (
+        <div className="space-y-6 max-w-2xl mx-auto">
+          <div className="bg-white border border-slate-200 p-5 rounded-xl">
+            <h2 className="text-lg font-bold text-slate-900">LIVE IDENTITY VERIFICATION</h2>
+            <p className="text-xs text-slate-500 font-mono">Document analysis complete. Capture the passenger's live face to match it against the document photo and finish the screening.</p>
+          </div>
+
+          <LiveCameraCapture
+            captured={Boolean(liveCaptureDataUrl)}
+            onCapture={setLiveCaptureDataUrl}
+          />
+
+          {retryMessage && (
+            <div className="bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-xl text-xs font-mono">
+              {retryMessage}
+            </div>
+          )}
+
+          <div className="bg-white border border-slate-200 p-5 rounded-xl text-center space-y-3">
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition transform hover:scale-[1.01] disabled:opacity-50"
+            >
+              {isSubmitting ? 'VERIFYING…' : 'VERIFY FACE & VIEW FINAL RESULT →'}
+            </button>
+
+            <div>
+              <button
+                onClick={handleSkip}
+                disabled={isSubmitting}
+                className="text-xs font-mono text-slate-600 underline hover:text-slate-900 disabled:opacity-50"
+              >
+                Continue without face verification
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
     function VerificationResultPage({ result, setCurrentPage }) {
       const isHigh = result.riskLevel === 'high';
       const isMed = result.riskLevel === 'medium';
@@ -2961,7 +2395,7 @@ const startPipeline = async () => {
       const compositeScore = result.compositeConfidenceScore || (isPassed ? 94 : isMed ? 72 : 48);
 
       return (
-        <div className="space-y-6 max-w-5xl mx-auto font-sans">
+        <div className="space-y-6 max-w-5xl mx-auto">
 
           {/* 1. Enhanced Verdict Banner */}
           <div className={`p-6 rounded-xl border flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isPassed
@@ -2969,21 +2403,21 @@ const startPipeline = async () => {
             : 'bg-red-50 border-red-300 text-red-950'
             }`}>
             <div className="space-y-1">
-              <div className="text-xs font-sans font-bold uppercase tracking-wider text-slate-600">
-                CASE <span className="font-mono">#{result.screeningId}</span> • {result.documentTypeLabel}
+              <div className="text-xs font-mono font-bold uppercase tracking-wider text-slate-600">
+                CASE #{result.screeningId} • {result.documentTypeLabel}
               </div>
               <h2 className="text-2xl font-black tracking-tight">
                 {isPassed ? '✓ PASSED SCREENING' : '🔴 FLAGGED FOR MANUAL REVIEW'}
               </h2>
-              <p className="text-xs font-sans font-medium text-slate-700">
+              <p className="text-xs font-mono font-medium text-slate-700">
                 {isPassed ? 'Document appears authentic' : 'Signs of tampering detected'}
               </p>
             </div>
 
             {/* Composite Confidence Score Metric Badge */}
             <div className="bg-white/90 border border-slate-200 p-3.5 rounded-xl text-center shadow-sm shrink-0 min-w-[200px]">
-              <div className="text-[11px] font-sans text-slate-500 font-bold uppercase">COMPOSITE CONFIDENCE SCORE</div>
-              <div className={`text-3xl font-black font-sans mt-0.5 ${compositeScore >= 80 ? 'text-emerald-700' : compositeScore >= 60 ? 'text-amber-700' : 'text-red-600'
+              <div className="text-[11px] font-mono text-slate-500 font-bold uppercase">COMPOSITE CONFIDENCE SCORE</div>
+              <div className={`text-3xl font-black font-mono mt-0.5 ${compositeScore >= 80 ? 'text-emerald-700' : compositeScore >= 60 ? 'text-amber-700' : 'text-red-600'
                 }`}>
                 {compositeScore}%
               </div>
@@ -3000,24 +2434,24 @@ const startPipeline = async () => {
           <div className="bg-white border border-slate-200 p-6 rounded-xl space-y-4 shadow-sm">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <div>
-                <h3 className="text-sm font-sans font-bold text-slate-900 uppercase">DOCSHIELD MULTI-LAYER DOCUMENT ANALYSIS</h3>
-                <p className="text-xs text-slate-500 font-sans">Granular verification across 4 digital forensics layers.</p>
+                <h3 className="text-sm font-mono font-bold text-slate-900 uppercase">DOCSHIELD MULTI-LAYER DOCUMENT ANALYSIS</h3>
+                <p className="text-xs text-slate-500 font-mono">Granular verification across 4 digital forensics layers.</p>
               </div>
-              <span className="text-[10px] font-sans font-bold text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200">
+              <span className="text-[10px] font-mono font-bold text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-200">
                 4 FORENSIC LAYERS
               </span>
             </div>
 
             {/* 4 DocShield Layers Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {/* Layer 1: Photo Tamper Detection */}
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-xs font-sans text-slate-800">Photo Tamper Detection</span>
+                  <span className="font-bold text-xs font-mono text-slate-800">Photo Tamper Detection</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-sans text-sm font-black text-slate-900">{layers.photoTamper.score}%</span>
-                    <span className={`font-sans text-[10px] font-black px-2 py-0.5 rounded ${layers.photoTamper.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
+                    <span className="font-mono text-sm font-black text-slate-900">{layers.photoTamper.score}%</span>
+                    <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${layers.photoTamper.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
                       }`}>
                       {layers.photoTamper.status || (layers.photoTamper.score >= 70 ? 'AUTHENTIC' : 'TAMPERED')}
                     </span>
@@ -3026,10 +2460,10 @@ const startPipeline = async () => {
                 <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div className={`h-full ${layers.photoTamper.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: `${layers.photoTamper.score}%` }}></div>
                 </div>
-                <p className="text-xs text-slate-600 font-sans leading-relaxed">
+                <p className="text-xs text-slate-600 font-mono leading-relaxed">
                   "{layers.photoTamper.explanation}"
                 </p>
-                <div className="text-[10px] text-slate-500 font-sans pt-1 border-t border-slate-200">
+                <div className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-200">
                   Details: {layers.photoTamper.details}
                 </div>
               </div>
@@ -3037,10 +2471,10 @@ const startPipeline = async () => {
               {/* Layer 2: Font & Text Consistency */}
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-xs font-sans text-slate-800">Font & Text Consistency</span>
+                  <span className="font-bold text-xs font-mono text-slate-800">Font & Text Consistency</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-sans text-sm font-black text-slate-900">{layers.fontConsistency.score}%</span>
-                    <span className={`font-sans text-[10px] font-black px-2 py-0.5 rounded ${layers.fontConsistency.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
+                    <span className="font-mono text-sm font-black text-slate-900">{layers.fontConsistency.score}%</span>
+                    <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${layers.fontConsistency.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
                       }`}>
                       {layers.fontConsistency.status || (layers.fontConsistency.score >= 70 ? 'AUTHENTIC' : 'TAMPERED')}
                     </span>
@@ -3049,10 +2483,10 @@ const startPipeline = async () => {
                 <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div className={`h-full ${layers.fontConsistency.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: `${layers.fontConsistency.score}%` }}></div>
                 </div>
-                <p className="text-xs text-slate-600 font-sans leading-relaxed">
+                <p className="text-xs text-slate-600 font-mono leading-relaxed">
                   "{layers.fontConsistency.explanation}"
                 </p>
-                <div className="text-[10px] text-slate-500 font-sans pt-1 border-t border-slate-200">
+                <div className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-200">
                   Details: {layers.fontConsistency.details}
                 </div>
               </div>
@@ -3060,10 +2494,10 @@ const startPipeline = async () => {
               {/* Layer 3: Stamp & Seal Alignment */}
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-xs font-sans text-slate-800">Stamp & Seal Alignment</span>
+                  <span className="font-bold text-xs font-mono text-slate-800">Stamp & Seal Alignment</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-sans text-sm font-black text-slate-900">{layers.stampAlignment.score}%</span>
-                    <span className={`font-sans text-[10px] font-black px-2 py-0.5 rounded ${layers.stampAlignment.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-amber-700 bg-amber-100 border border-amber-300'
+                    <span className="font-mono text-sm font-black text-slate-900">{layers.stampAlignment.score}%</span>
+                    <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${layers.stampAlignment.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-amber-700 bg-amber-100 border border-amber-300'
                       }`}>
                       {layers.stampAlignment.status || (layers.stampAlignment.score >= 70 ? 'AUTHENTIC' : 'WARNING')}
                     </span>
@@ -3072,10 +2506,10 @@ const startPipeline = async () => {
                 <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div className={`h-full ${layers.stampAlignment.score >= 70 ? 'bg-emerald-600' : 'bg-amber-600'}`} style={{ width: `${layers.stampAlignment.score}%` }}></div>
                 </div>
-                <p className="text-xs text-slate-600 font-sans leading-relaxed">
+                <p className="text-xs text-slate-600 font-mono leading-relaxed">
                   "{layers.stampAlignment.explanation}"
                 </p>
-                <div className="text-[10px] text-slate-500 font-sans pt-1 border-t border-slate-200">
+                <div className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-200">
                   Details: {layers.stampAlignment.details}
                 </div>
               </div>
@@ -3083,10 +2517,10 @@ const startPipeline = async () => {
               {/* Layer 4: Metadata Integrity */}
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-xs font-sans text-slate-800">Metadata Integrity</span>
+                  <span className="font-bold text-xs font-mono text-slate-800">Metadata Integrity</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-sans text-sm font-black text-slate-900">{layers.metadataIntegrity.score}%</span>
-                    <span className={`font-sans text-[10px] font-black px-2 py-0.5 rounded ${layers.metadataIntegrity.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
+                    <span className="font-mono text-sm font-black text-slate-900">{layers.metadataIntegrity.score}%</span>
+                    <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${layers.metadataIntegrity.score >= 70 ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-red-700 bg-red-100 border border-red-300'
                       }`}>
                       {layers.metadataIntegrity.status || (layers.metadataIntegrity.score >= 70 ? 'AUTHENTIC' : 'TAMPERED')}
                     </span>
@@ -3095,10 +2529,10 @@ const startPipeline = async () => {
                 <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div className={`h-full ${layers.metadataIntegrity.score >= 70 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: `${layers.metadataIntegrity.score}%` }}></div>
                 </div>
-                <p className="text-xs text-slate-600 font-sans leading-relaxed">
+                <p className="text-xs text-slate-600 font-mono leading-relaxed">
                   "{layers.metadataIntegrity.explanation}"
                 </p>
-                <div className="text-[10px] text-slate-500 font-sans pt-1 border-t border-slate-200">
+                <div className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-200">
                   Details: {layers.metadataIntegrity.details}
                 </div>
               </div>
@@ -3107,13 +2541,13 @@ const startPipeline = async () => {
           </div>
 
           {/* 3. SIMULATED BLOCKCHAIN AUDIT TRAIL ENTRY */}
-          <div className="bg-slate-900 text-slate-100 p-6 rounded-xl space-y-3 font-sans border border-slate-800 shadow-md">
+          <div className="bg-slate-900 text-slate-100 p-6 rounded-xl space-y-3 font-mono border border-slate-800 shadow-md">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-bold font-sans text-cyan-400 uppercase tracking-wider">SIMULATED BLOCKCHAIN AUDIT TRAIL</span>
+                <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">SIMULATED BLOCKCHAIN AUDIT TRAIL</span>
               </div>
-              <span className="text-[10px] font-sans bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded border border-amber-400/40 font-semibold">
+              <span className="text-[10px] bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded border border-amber-400/40">
                 DEMO / PROTOTYPE
               </span>
             </div>
@@ -3121,31 +2555,31 @@ const startPipeline = async () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-bold font-mono">{auditBlock.blockNumber}</span>
+                  <span className="text-slate-400 font-bold">{auditBlock.blockNumber}</span>
                   <span className="text-slate-500">•</span>
-                  <span className="text-slate-400 font-sans">VERDICT:</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-sans ${auditBlock.verdict === 'CLEARED' ? 'bg-emerald-900/80 text-emerald-300 border border-emerald-700' : 'bg-red-900/80 text-red-300 border border-red-700'
+                  <span className="text-slate-400">VERDICT:</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${auditBlock.verdict === 'CLEARED' ? 'bg-emerald-900/80 text-emerald-300 border border-emerald-700' : 'bg-red-900/80 text-red-300 border border-red-700'
                     }`}>
                     {auditBlock.verdict}
                   </span>
                 </div>
                 <div>
-                  <div className="text-slate-400 uppercase text-[10px] font-sans font-semibold">PREVIOUS HASH:</div>
+                  <div className="text-slate-400 uppercase text-[10px]">PREVIOUS HASH:</div>
                   <div className="text-slate-300 text-[11px] break-all select-all font-mono">{auditBlock.prevHash}</div>
                 </div>
                 <div>
-                  <div className="text-slate-400 uppercase text-[10px] font-sans font-semibold">CURRENT HASH:</div>
+                  <div className="text-slate-400 uppercase text-[10px]">CURRENT HASH:</div>
                   <div className="text-cyan-300 text-[11px] font-bold break-all select-all font-mono">{auditBlock.currentHash}</div>
                 </div>
               </div>
 
-              <div className="space-y-2 md:text-right font-sans">
+              <div className="space-y-2 md:text-right">
                 <div>
-                  <div className="text-slate-400 uppercase text-[10px] font-semibold">TIMESTAMP:</div>
-                  <div className="text-slate-300 text-[11px] font-mono">{auditBlock.timestamp}</div>
+                  <div className="text-slate-400 uppercase text-[10px]">TIMESTAMP:</div>
+                  <div className="text-slate-300 text-[11px]">{auditBlock.timestamp}</div>
                 </div>
                 <div>
-                  <div className="text-slate-400 uppercase text-[10px] font-semibold">CHECKPOINT:</div>
+                  <div className="text-slate-400 uppercase text-[10px]">CHECKPOINT:</div>
                   <div className="text-amber-400 font-bold text-xs">{auditBlock.checkpoint}</div>
                 </div>
                 <div className="text-[10px] text-slate-500">
@@ -3156,34 +2590,34 @@ const startPipeline = async () => {
           </div>
 
           {/* 4. Action Decision Card */}
-          <div className="bg-white border border-slate-200 p-6 rounded-xl space-y-4 font-sans">
-            <div className="text-xs font-sans font-bold text-slate-500 uppercase">OFFICER DECISION & NAVIGATION</div>
+          <div className="bg-white border border-slate-200 p-6 rounded-xl space-y-4">
+            <div className="text-xs font-mono font-bold text-slate-500 uppercase">OFFICER DECISION & NAVIGATION</div>
 
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setCurrentPage('forensics')}
-                className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition shadow-sm font-sans"
+                className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition shadow-sm"
               >
                 OPEN FORENSIC ANALYSIS →
               </button>
 
               <button
                 onClick={() => setCurrentPage('face_verification')}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2.5 rounded-lg text-xs border border-slate-300 transition font-sans"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2.5 rounded-lg text-xs border border-slate-300 transition"
               >
                 VIEW FACE MATCH
               </button>
 
               <button
                 onClick={() => setCurrentPage('report')}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-lg text-xs border border-slate-300 transition font-sans"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-lg text-xs border border-slate-300 transition"
               >
                 GENERATE OFFICIAL REPORT
               </button>
 
               <button
                 onClick={() => setCurrentPage('new_screening')}
-                className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition ml-auto font-sans"
+                className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition ml-auto"
               >
                 ＋ NEW SCREENING
               </button>
@@ -3193,7 +2627,7 @@ const startPipeline = async () => {
         </div>
       );
     }
-
+    
     // ----------------------------------------------------
     // DOCUMENT FORENSICS PAGE (Progressive Disclosure Investigation)
     // ----------------------------------------------------
@@ -3201,52 +2635,21 @@ const startPipeline = async () => {
       const [showOverlay, setShowOverlay] = useState(true);
       const [expandedIndex, setExpandedIndex] = useState(null);
 
-      const signals = result.tampering?.detectedSignals || [];
-      const layers = result.docshieldLayers || {
-  photoTamper: {
-    name: 'Photo / Image Integrity',
-    score: 0,
-    status: 'NOT ANALYZED',
-    explanation: 'Run AI screening first.',
-    details: 'No real image analysis result available.'
-  },
+      const signals = result.tampering.detectedSignals;
+      const layers = result.docshieldLayers || window.DEMO_SCENARIOS.high_risk.result.docshieldLayers;
 
-  fontConsistency: {
-    name: 'OCR / Text Consistency',
-    score: 0,
-    status: 'NOT ANALYZED',
-    explanation: 'Run AI screening first.',
-    details: 'No OCR result available.'
-  },
-
-  stampAlignment: {
-    name: 'Visual Processing Signal',
-    score: 0,
-    status: 'NOT ANALYZED',
-    explanation: 'Run AI screening first.',
-    details: 'No visual analysis result available.'
-  },
-
-  metadataIntegrity: {
-    name: 'File Integrity',
-    score: 0,
-    status: 'NOT ANALYZED',
-    explanation: 'Run AI screening first.',
-    details: 'No file analysis result available.'
-  }
-};
       return (
-        <div className="space-y-6 max-w-6xl mx-auto font-sans">
+        <div className="space-y-6 max-w-6xl mx-auto">
           <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">DOCUMENT FORENSICS & LAYER BREAKDOWN</h2>
-              <p className="text-xs text-slate-500 font-sans">Deep-dive physical laminate, font glyph, and metadata integrity inspection.</p>
+              <p className="text-xs text-slate-500 font-mono">Deep-dive physical laminate, font glyph, and metadata integrity inspection.</p>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowOverlay(!showOverlay)}
-                className="px-3 py-1.5 rounded text-xs font-sans font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition"
+                className="px-3 py-1.5 rounded text-xs font-mono bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition"
               >
                 {showOverlay ? '👁 Hide Overlays' : '👁 Show Overlays'}
               </button>
@@ -3257,9 +2660,9 @@ const startPipeline = async () => {
 
             {/* Document Canvas */}
             <div className="md:col-span-2 bg-white border border-slate-200 p-4 rounded-xl space-y-3">
-              <div className="flex justify-between items-center text-xs font-sans text-slate-600">
+              <div className="flex justify-between items-center text-xs font-mono text-slate-600">
                 <span>FORENSIC VISUAL INSPECTION</span>
-                <span>Case <strong className="font-mono">#{result.screeningId}</strong></span>
+                <span>Case #{result.screeningId}</span>
               </div>
 
               <div className="relative w-full h-[380px] bg-slate-900 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center p-3">
@@ -3276,7 +2679,7 @@ const startPipeline = async () => {
                       height: `${sig.locationBoundingBox?.height || 40}%`
                     }}
                   >
-                    <div className="absolute -top-6 left-0 bg-red-600 text-white font-sans text-[9px] font-semibold px-1.5 py-0.5 rounded shadow">
+                    <div className="absolute -top-6 left-0 bg-red-600 text-white font-mono text-[9px] px-1.5 py-0.5 rounded shadow">
                       ⚠ {sig.title} ({sig.confidence}%)
                     </div>
                   </div>
@@ -3284,7 +2687,7 @@ const startPipeline = async () => {
               </div>
 
               {/* DocShield 4-Layer Indicators Bar */}
-              <div className="grid grid-cols-4 gap-2 pt-2 text-center text-xs font-sans">
+              <div className="grid grid-cols-4 gap-2 pt-2 text-center text-xs font-mono">
                 <div className="bg-slate-50 p-2 rounded border border-slate-200">
                   <div className="text-[10px] text-slate-500">Photo Tamper</div>
                   <div className={`font-bold ${layers.photoTamper.score >= 70 ? 'text-emerald-700' : 'text-red-600'}`}>{layers.photoTamper.score}%</div>
@@ -3305,8 +2708,8 @@ const startPipeline = async () => {
             </div>
 
             {/* Collapsible Anomaly Details (Progressive Disclosure) */}
-            <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3 font-sans">
-              <div className="text-xs font-sans font-bold text-slate-600 uppercase">DETECTED FORENSIC ANOMALIES ({signals.length})</div>
+            <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-3">
+              <div className="text-xs font-mono font-bold text-slate-600 uppercase">DETECTED FORENSIC ANOMALIES ({signals.length})</div>
 
               <div className="space-y-2">
                 {signals.map((sig, i) => {
@@ -3315,14 +2718,14 @@ const startPipeline = async () => {
                     <div key={i} className="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
                       <button
                         onClick={() => setExpandedIndex(isExpanded ? null : i)}
-                        className="w-full text-left p-3 flex justify-between items-center hover:bg-slate-100 transition text-xs font-sans"
+                        className="w-full text-left p-3 flex justify-between items-center hover:bg-slate-100 transition text-xs font-mono"
                       >
                         <span className="font-bold text-red-600">⚠ {sig.title}</span>
                         <span className="text-[10px] text-slate-500">{isExpanded ? '▲' : '▼'}</span>
                       </button>
 
                       {isExpanded && (
-                        <div className="p-3 border-t border-slate-200 text-[11px] font-sans text-slate-600 space-y-1.5 bg-white">
+                        <div className="p-3 border-t border-slate-200 text-[11px] font-mono text-slate-600 space-y-1.5 bg-white">
                           <div><strong>Confidence:</strong> {sig.confidence}%</div>
                           <div><strong>Details:</strong> {sig.description}</div>
                           <div><strong>Location:</strong> Region {sig.locationBoundingBox?.x}% x {sig.locationBoundingBox?.y}%</div>
@@ -3333,7 +2736,7 @@ const startPipeline = async () => {
                 })}
 
                 {signals.length === 0 && (
-                  <div className="text-xs text-center font-sans">
+                  <div className="text-xs text-center">
                     ✓ No physical or laminate anomaly signals detected.
                   </div>
                 )}
@@ -3347,132 +2750,159 @@ const startPipeline = async () => {
     // ----------------------------------------------------
     // FACE VERIFICATION PAGE
     // ----------------------------------------------------
-    function LiveCameraCapture() {
+    function FaceVerificationPage({ result }) {
+      const fv = result.faceVerification;
+      const isMatch = fv.similarityScore >= 75;
 
-  const videoRef = React.useRef(null);
-  const streamRef = React.useRef(null);
+      return (
+        <div className="space-y-6 max-w-5xl mx-auto">
+          <div className="bg-white border border-slate-200 p-5 rounded-xl">
+            <h2 className="text-lg font-bold text-slate-900">1:1 BIOMETRIC FACE VERIFICATION</h2>
+            <p className="text-xs text-slate-500 font-mono">Facial landmark comparison between physical document portrait and live officer camera.</p>
+          </div>
 
-  const [cameraOn, setCameraOn] = React.useState(false);
-  const [status, setStatus] = React.useState("CAMERA OFFLINE");
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white border border-slate-200 p-4 rounded-xl text-center space-y-2">
+              <div className="text-xs font-mono text-slate-500 uppercase font-bold">EXTRACTED DOCUMENT PHOTO</div>
+              <div className="h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
+                <img src={result.documentImage} alt="Doc Photo" className="max-h-full object-contain" />
+              </div>
+            </div>
 
-  const startCamera = async () => {
+            <div className="bg-white border border-slate-200 p-4 rounded-xl text-center space-y-2">
+              <div className="text-xs font-mono text-slate-500 uppercase font-bold">LIVE CAMERA CAPTURE (CAM-04)</div>
+              <div className="h-56 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center p-2">
+                <img src={result.verificationImage} alt="Live Capture" className="max-h-full object-contain" />
+              </div>
+            </div>
+          </div>
 
-    try {
+          <div className="bg-white border border-slate-200 p-5 rounded-xl text-center space-y-3">
+            <div className="text-xs font-mono text-slate-500 uppercase font-bold">BIOMETRIC SIMILARITY RESULT</div>
 
-      setStatus("REQUESTING CAMERA...");
+            <span className={`inline-block px-5 py-2 rounded-lg text-base font-bold font-mono ${isMatch ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
+              }`}>
+              {isMatch ? '✓ MATCH CONFIRMED' : '✕ LOW SIMILARITY MISMATCH'} ({fv.similarityScore}%)
+            </span>
 
-      if (!navigator.mediaDevices ||
-          !navigator.mediaDevices.getUserMedia) {
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border-t border-slate-200 pt-3 text-xs font-mono text-slate-500">
+              <div>Face Detected: <strong className="text-emerald-700">✓ YES</strong></div>
+              <div>Image Quality: <strong className="text-emerald-700">✓ OPTIMAL</strong></div>
+              <div>Landmarks Matched: <strong className="text-slate-900">{fv.landmarksMatched}/68</strong></div>
+              <div>Pose Alignment: <strong className="text-slate-900">{fv.poseAlignment}</strong></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    // ----------------------------------------------------
+    // LIVE CAMERA CAPTURE
+    // ----------------------------------------------------
+    function LiveCameraCapture({ onCapture, captured }) {
 
-        setStatus("CAMERA API NOT AVAILABLE");
+    const videoRef = React.useRef(null);
+    const streamRef = React.useRef(null);
+
+    const [cameraOn, setCameraOn] = React.useState(false);
+    const [status, setStatus] = React.useState("CAMERA OFFLINE");
+
+    const startCamera = async () => {
+
+      try {
+
+        setStatus("REQUESTING CAMERA...");
+
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+
+          setStatus("CAMERA API NOT AVAILABLE");
+          return;
+        }
+
+        const stream =
+          await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "user"
+            },
+            audio: false
+          });
+
+        streamRef.current = stream;
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+
+        setCameraOn(true);
+        setStatus("● LIVE CAMERA ACTIVE");
+
+      } catch (error) {
+
+        console.error("Camera error:", error);
+
+        setCameraOn(false);
+
+        if (error.name === "NotAllowedError") {
+          setStatus("CAMERA PERMISSION DENIED");
+        }
+        else if (error.name === "NotFoundError") {
+          setStatus("NO CAMERA FOUND");
+        }
+        else if (error.name === "NotReadableError") {
+          setStatus("CAMERA IS BUSY");
+        }
+        else {
+          setStatus("CAMERA ERROR: " + error.message);
+        }
+      }
+    };
+
+
+    const captureFace = () => {
+
+      const video = videoRef.current;
+
+      if (!video || !cameraOn) {
+        setStatus("ENABLE CAMERA FIRST");
         return;
       }
 
-      const stream =
-        await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: "user"
-          },
-          audio: false
-        });
-
-      streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+      if (!video.videoWidth || !video.videoHeight) {
+        setStatus("WAITING FOR CAMERA FRAME...");
+        return;
       }
 
-      setCameraOn(true);
-      setStatus("● LIVE CAMERA ACTIVE");
+      const canvas = document.createElement("canvas");
 
-    } catch (error) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-      console.error("Camera error:", error);
+      const ctx = canvas.getContext("2d");
 
-      setCameraOn(false);
+      ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
 
-      if (error.name === "NotAllowedError") {
-        setStatus("CAMERA PERMISSION DENIED");
+      const imageData =
+        canvas.toDataURL("image/jpeg", 0.95);
+
+      if (onCapture) {
+        onCapture(imageData);
       }
-      else if (error.name === "NotFoundError") {
-        setStatus("NO CAMERA FOUND");
-      }
-      else if (error.name === "NotReadableError") {
-        setStatus("CAMERA IS BUSY");
-      }
-      else {
-        setStatus("CAMERA ERROR: " + error.message);
-      }
-    }
-  };
+
+      setStatus("✓ LIVE FACE CAPTURED");
+
+      console.log("LIVE CAMERA IMAGE CAPTURED");
+    };
 
 
-  const captureFace = () => {
-
-    const video = videoRef.current;
-
-    if (!video || !cameraOn) {
-      setStatus("ENABLE CAMERA FIRST");
-      return;
-    }
-
-    if (!video.videoWidth || !video.videoHeight) {
-      setStatus("WAITING FOR CAMERA FRAME...");
-      return;
-    }
-
-    const canvas = document.createElement("canvas");
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext("2d");
-
-    ctx.drawImage(
-      video,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    const imageData =
-      canvas.toDataURL("image/jpeg", 0.95);
-
-    window.__DOCSHIELD_LIVE_CAPTURE_DATA_URL__ =
-      imageData;
-
-    setStatus("✓ LIVE FACE CAPTURED");
-
-    console.log("LIVE CAMERA IMAGE CAPTURED");
-  };
-
-
-  const stopCamera = () => {
-
-    if (streamRef.current) {
-
-      streamRef.current
-        .getTracks()
-        .forEach(track => track.stop());
-
-      streamRef.current = null;
-    }
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-
-    setCameraOn(false);
-    setStatus("CAMERA OFFLINE");
-  };
-
-
-  React.useEffect(() => {
-
-    return () => {
+    const stopCamera = () => {
 
       if (streamRef.current) {
 
@@ -3480,86 +2910,116 @@ const startPipeline = async () => {
           .getTracks()
           .forEach(track => track.stop());
 
+        streamRef.current = null;
       }
 
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+
+      setCameraOn(false);
+      setStatus("CAMERA OFFLINE");
     };
 
-  }, []);
+     // If the parent clears the photo (after a retry request), reset the status text.
+    React.useEffect(() => {
+      if (!captured) {
+        setStatus(prev =>
+          prev.includes("CAPTURED")
+            ? (cameraOn ? "● LIVE CAMERA ACTIVE" : "CAMERA OFFLINE")
+            : prev
+        );
+      }
+    }, [captured]);
+    React.useEffect(() => {
+
+      return () => {
+
+        if (streamRef.current) {
+
+          streamRef.current
+            .getTracks()
+            .forEach(track => track.stop());
+
+        }
+
+      };
+
+    }, []);
 
 
-  return (
-    <div className="bg-white border border-slate-200 p-4 rounded-xl">
+    return (
+      <div className="bg-white border border-slate-200 p-4 rounded-xl">
 
-      <div className="text-xs font-mono font-bold text-slate-500 mb-3">
-        LIVE CAMERA — CAM-04
-      </div>
+        <div className="text-xs font-mono font-bold text-slate-500 mb-3">
+          LIVE CAMERA — CAM-04
+        </div>
 
-      <div className="relative bg-black rounded-lg overflow-hidden">
+        <div className="relative bg-black rounded-lg overflow-hidden">
 
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className="w-full h-64 object-cover"
-        />
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-64 object-cover"
+          />
 
-        {!cameraOn && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-slate-400 text-xs font-mono">
-              CAMERA OFFLINE
+          {!cameraOn && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-slate-400 text-xs font-mono">
+                CAMERA OFFLINE
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {cameraOn && (
-          <div className="absolute top-3 left-3 bg-black/70 text-white px-3 py-1 rounded text-xs font-mono">
-            🔴 LIVE
-          </div>
-        )}
+          {cameraOn && (
+            <div className="absolute top-3 left-3 bg-black/70 text-white px-3 py-1 rounded text-xs font-mono">
+              🔴 LIVE
+            </div>
+          )}
+
+        </div>
+
+        <div className="flex flex-wrap gap-2 mt-3">
+
+          <button
+            onClick={startCamera}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
+          >
+            ▶ ENABLE CAMERA
+          </button>
+
+          <button
+            onClick={captureFace}
+            disabled={!cameraOn}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold disabled:opacity-40"
+          >
+            ● CAPTURE FACE
+          </button>
+
+          <button
+            onClick={stopCamera}
+            className="px-4 py-2 bg-slate-700 text-white rounded-lg text-xs font-bold"
+          >
+            STOP
+          </button>
+
+        </div>
+
+        <div className="mt-2 text-xs font-mono text-slate-500">
+          {status}
+        </div>
 
       </div>
-
-      <div className="flex flex-wrap gap-2 mt-3">
-
-        <button
-          onClick={startCamera}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
-        >
-          ▶ ENABLE CAMERA
-        </button>
-
-        <button
-          onClick={captureFace}
-          disabled={!cameraOn}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold disabled:opacity-40"
-        >
-          ● CAPTURE FACE
-        </button>
-
-        <button
-          onClick={stopCamera}
-          className="px-4 py-2 bg-slate-700 text-white rounded-lg text-xs font-bold"
-        >
-          STOP
-        </button>
-
-      </div>
-
-      <div className="mt-2 text-xs font-mono text-slate-500">
-        {status}
-      </div>
-
-    </div>
-  );
-}
+    );
+  }
 
     // ----------------------------------------------------
-    // SCREENING HISTORY PAGE (With Simulated Blockchain Ledger)
+    // SCREENING HISTORY PAGE
     // ----------------------------------------------------
-    function ScreeningHistoryPage({ setCurrentPage, blockchainLedger }) {
+    function ScreeningHistoryPage({ setCurrentPage }) {
       const [filter, setFilter] = useState('all');
-      const [viewTab, setViewTab] = useState('cases'); // 'cases' | 'blockchain'
 
       const history = window.RECENT_SCREENINGS_FEED;
 
@@ -3571,134 +3031,70 @@ const startPipeline = async () => {
       });
 
       return (
-        <div className="space-y-6 max-w-6xl mx-auto font-sans">
+        <div className="space-y-6 max-w-6xl mx-auto">
           <div className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">SCREENING HISTORY & AUDIT TRAIL</h2>
-              <p className="text-xs text-slate-500 font-sans">Searchable audit record of processed checkpoint cases and simulated blockchain blocks.</p>
-            </div>
-
-            {/* View mode toggle */}
-            <div className="flex gap-2 font-sans">
-              <button
-                onClick={() => setViewTab('cases')}
-                className={`px-3 py-1.5 rounded text-xs font-sans font-bold transition ${viewTab === 'cases' ? 'bg-blue-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-              >
-                Screening Cases
-              </button>
-              <button
-                onClick={() => setViewTab('blockchain')}
-                className={`px-3 py-1.5 rounded text-xs font-sans font-bold transition flex items-center gap-1 ${viewTab === 'blockchain' ? 'bg-blue-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-              >
-                <span>⚡ Blockchain Ledger</span>
-              </button>
+              <h2 className="text-lg font-bold text-slate-900">SCREENING HISTORY</h2>
+              <p className="text-xs text-slate-500 font-mono">Searchable record of processed checkpoint cases.</p>
             </div>
           </div>
 
-          {viewTab === 'cases' ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-4 overflow-x-auto space-y-3 font-sans">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-sans font-bold text-slate-600 uppercase">CASE RECORDS</span>
-                {/* Filter buttons */}
-                <div className="flex gap-1.5 bg-slate-50 p-1 rounded-lg border border-slate-200 text-xs font-sans">
-                  {['all', 'clear', 'review', 'high'].map(f => (
-                    <button
-                      key={f}
-                      onClick={() => setFilter(f)}
-                      className={`px-3 py-1 rounded transition capitalize ${filter === f ? 'bg-white text-blue-900 font-bold shadow-sm' : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <table className="w-full text-left text-xs font-sans">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 uppercase font-semibold">
-                    <th className="pb-2 px-2">CASE ID</th>
-                    <th className="pb-2 px-2">TIME</th>
-                    <th className="pb-2 px-2">DOCUMENT</th>
-                    <th className="pb-2 px-2">CONFIDENCE</th>
-                    <th className="pb-2 px-2">AUDIT BLOCK</th>
-                    <th className="pb-2 px-2">STATUS</th>
-                    <th className="pb-2 px-2 text-right">ACTION</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {filteredHistory.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-100 transition">
-                      <td className="py-2.5 px-2 font-bold font-mono text-slate-800">{row.screeningId}</td>
-                      <td className="py-2.5 px-2 text-slate-500 font-mono">{row.time}</td>
-                      <td className="py-2.5 px-2 text-slate-600 font-sans">{row.documentType}</td>
-                      <td className="py-2.5 px-2 font-bold text-slate-900 font-sans">{row.compositeScore}%</td>
-                      <td className="py-2.5 px-2 text-amber-700 font-bold font-mono">{row.blockNumber}</td>
-                      <td className="py-2.5 px-2">
-                        <span className={`px-2 py-0.5 rounded font-bold font-sans ${row.riskLevel === 'high' ? 'text-red-600 bg-red-50' :
-                          row.riskLevel === 'medium' ? 'text-amber-700 bg-amber-50' :
-                            'text-emerald-700 bg-emerald-50'
-                          }`}>
-                          {row.status}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-2 text-right">
-                        <button onClick={() => setCurrentPage('result')} className="text-blue-800 hover:underline font-semibold font-sans">
-                          Open Case
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="bg-slate-900 text-slate-100 rounded-xl p-6 font-sans space-y-4 border border-slate-800">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                <div>
-                  <h3 className="text-sm font-bold font-sans text-cyan-400">DISTRIBUTED BLOCKCHAIN AUDIT LEDGER (SIMULATION)</h3>
-                  <p className="text-xs text-slate-400 font-sans">Cryptographically chained immutable blocks for verified screenings.</p>
-                </div>
-                <span className="text-xs text-emerald-400 font-bold font-sans">● CHAIN INTEGRITY VERIFIED</span>
-              </div>
-
-              <div className="space-y-3 font-sans">
-                {blockchainLedger.map((block, idx) => (
-                  <div key={idx} className="p-4 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-xs font-sans">
-                    <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-amber-400 font-bold text-sm font-mono">{block.blockNumber}</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-sans ${block.verdict === 'CLEARED' ? 'bg-emerald-900/60 text-emerald-300' : 'bg-red-900/60 text-red-300'
-                          }`}>
-                          {block.verdict}
-                        </span>
-                        <span className="text-slate-400 font-mono">({block.screeningId})</span>
-                      </div>
-                      <span className="text-slate-400 text-[11px] font-mono">{block.timestamp}</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
-                      <div>
-                        <span className="text-slate-500 font-sans">prev: </span>
-                        <span className="text-slate-400 break-all font-mono">{block.prevHash}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-500 font-sans">hash: </span>
-                        <span className="text-cyan-300 font-bold break-all font-mono">{block.currentHash}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between text-[10px] text-slate-500 pt-1 font-sans">
-                      <span>Checkpoint: {block.checkpoint}</span>
-                      <span>Officer: <strong className="font-mono">{block.officerId}</strong></span>
-                    </div>
-                  </div>
+          <div className="bg-white border border-slate-200 rounded-xl p-4 overflow-x-auto space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-mono font-bold text-slate-600 uppercase">CASE RECORDS</span>
+              {/* Filter buttons */}
+              <div className="flex gap-1.5 bg-slate-50 p-1 rounded-lg border border-slate-200 text-xs font-mono">
+                {['all', 'clear', 'review', 'high'].map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={`px-3 py-1 rounded transition capitalize ${filter === f ? 'bg-white text-blue-900 font-bold shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                  >
+                    {f}
+                  </button>
                 ))}
               </div>
             </div>
-          )}
+
+            <table className="w-full text-left text-xs font-mono">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-500 uppercase">
+                  <th className="pb-2 px-2">CASE ID</th>
+                  <th className="pb-2 px-2">TIME</th>
+                  <th className="pb-2 px-2">DOCUMENT</th>
+                  <th className="pb-2 px-2">CONFIDENCE</th>
+                  <th className="pb-2 px-2">AUDIT BLOCK</th>
+                  <th className="pb-2 px-2">STATUS</th>
+                  <th className="pb-2 px-2 text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {filteredHistory.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-slate-100 transition">
+                    <td className="py-2.5 px-2 font-bold text-slate-800">{row.screeningId}</td>
+                    <td className="py-2.5 px-2 text-slate-500">{row.time}</td>
+                    <td className="py-2.5 px-2 text-slate-600">{row.documentType}</td>
+                    <td className="py-2.5 px-2 font-bold text-slate-900">{row.compositeScore}%</td>
+                    <td className="py-2.5 px-2 text-amber-700 font-bold">{row.blockNumber}</td>
+                    <td className="py-2.5 px-2">
+                      <span className={`px-2 py-0.5 rounded font-bold ${row.riskLevel === 'high' ? 'text-red-600 bg-red-50' :
+                        row.riskLevel === 'medium' ? 'text-amber-700 bg-amber-50' :
+                          'text-emerald-700 bg-emerald-50'
+                        }`}>
+                        {row.status}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-2 text-right">
+                      <button onClick={() => setCurrentPage('result')} className="text-blue-800 hover:underline">
+                        Open Case
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       );
     }
@@ -3711,16 +3107,16 @@ const startPipeline = async () => {
       const auditBlock = result.auditBlock || window.DEMO_SCENARIOS.high_risk.result.auditBlock;
 
       return (
-        <div className="space-y-6 max-w-4xl mx-auto font-sans">
+        <div className="space-y-6 max-w-4xl mx-auto">
           <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200">
             <h2 className="text-lg font-bold text-slate-900">OFFICIAL SCREENING REPORT GENERATOR</h2>
-            <button onClick={() => window.print()} className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded text-xs transition font-sans">
+            <button onClick={() => window.print()} className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded text-xs transition">
               🖨 PRINT REPORT PDF
             </button>
           </div>
 
           <div className="bg-white text-slate-900 p-8 rounded-xl shadow-2xl space-y-6 font-sans border-t-8 border-blue-900 relative">
-            <div className="absolute top-3 right-3 text-[10px] font-sans font-bold text-amber-700 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded">
+            <div className="absolute top-3 right-3 text-[10px] font-mono font-bold text-amber-700 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded">
               SIMULATED DOCUMENT — DEMO PROTOTYPE
             </div>
 
@@ -3729,21 +3125,21 @@ const startPipeline = async () => {
               <div className="font-bold text-xs tracking-widest text-slate-600 uppercase">UNION FRONTIER SECURITY DIRECTORATE</div>
               <div className="font-extrabold text-xl tracking-wide text-slate-900">DEPARTMENT OF BORDER SCREENING</div>
               <div className="font-bold text-sm text-slate-700">FRONTIER SCREENING DIVISION</div>
-              <div className="text-[11px] font-sans text-slate-500">BHARAT BORDER INTELLIGENCE AUDIT RECORD (SIMULATION)</div>
+              <div className="text-[11px] font-mono text-slate-500">BHARAT BORDER INTELLIGENCE AUDIT RECORD (SIMULATION)</div>
             </div>
 
-            <div className="grid grid-cols-2 text-xs font-sans bg-slate-100 p-4 rounded border border-slate-300 gap-2">
-              <div><strong>REPORT ID:</strong> <span className="font-mono">{result.screeningId}</span></div>
-              <div><strong>DATE & TIME:</strong> <span className="font-mono">{result.timestamp}</span></div>
+            <div className="grid grid-cols-2 text-xs font-mono bg-slate-100 p-4 rounded border border-slate-300 gap-2">
+              <div><strong>REPORT ID:</strong> {result.screeningId}</div>
+              <div><strong>DATE & TIME:</strong> {result.timestamp}</div>
               <div><strong>CHECKPOINT:</strong> {result.checkpoint}</div>
-              <div><strong>OFFICER ID:</strong> <span className="font-mono">{result.officerId}</span></div>
+              <div><strong>OFFICER ID:</strong> {result.officerId}</div>
             </div>
 
             <div className="space-y-2">
               <h3 className="font-bold text-sm text-slate-900 border-b pb-1">1. EXTRACTED DOCUMENT INFORMATION</h3>
-              <div className="grid grid-cols-2 text-xs gap-2 font-sans">
+              <div className="grid grid-cols-2 text-xs gap-2 font-mono">
                 <div>NAME: <strong>{result.ocr?.fields?.fullName}</strong></div>
-                <div>PASSPORT NO.: <strong className="font-mono">{result.ocr?.fields?.passportNumber}</strong></div>
+                <div>PASSPORT NO.: <strong>{result.ocr?.fields?.passportNumber}</strong></div>
                 <div>NATIONALITY: <strong>{result.ocr?.fields?.nationality}</strong></div>
                 <div>EXPIRY DATE: <strong>{result.ocr?.fields?.dateOfExpiry}</strong></div>
               </div>
@@ -3752,7 +3148,7 @@ const startPipeline = async () => {
             {/* DocShield 4-Layer Breakdown */}
             <div className="space-y-2">
               <h3 className="font-bold text-sm text-slate-900 border-b pb-1">2. DOCSHIELD MULTI-LAYER FORENSIC FINDINGS</h3>
-              <div className="grid grid-cols-2 gap-2 text-xs font-sans">
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div className="p-2 border rounded bg-slate-50">
                   PHOTO TAMPER: <strong>{layers.photoTamper.score}%</strong> ({layers.photoTamper.status.toUpperCase()})
                   <div className="text-[10px] text-slate-500">{layers.photoTamper.explanation}</div>
@@ -3774,21 +3170,21 @@ const startPipeline = async () => {
 
             <div className="space-y-2">
               <h3 className="font-bold text-sm text-slate-900 border-b pb-1">3. OVERALL VERDICT & RISK ASSESSMENT</h3>
-              <div className="text-xs font-sans space-y-1">
-                <div>COMPOSITE CONFIDENCE SCORE: <strong>{result.compositeConfidenceScore || 94}%</strong></div>
-                <div>FINAL VERDICT: <strong>{result.verdictText || 'PASSED SCREENING'}</strong></div>
+              <div className="text-xs font-mono space-y-1">
+                <div>OCR TEXT CONFIDENCE: <strong>{result.compositeConfidenceScore}%</strong></div>
+                <div>FINAL VERDICT: <strong>{result.verdictText}</strong></div>
                 <div>FACE SIMILARITY MATCH: <strong>{result.faceVerification?.similarityScore}% ({result.faceVerification?.signal})</strong></div>
               </div>
             </div>
 
-            <div className="pt-8 border-t flex justify-between items-end text-xs font-sans">
+            <div className="pt-8 border-t flex justify-between items-end text-xs font-mono">
               <div>
-                <div className="text-amber-700 font-bold"><span className="font-mono">{auditBlock.blockNumber}</span> — BLOCKCHAIN LOG HASH:</div>
-                <div className="text-[9px] text-slate-500 break-all max-w-xs font-mono">{auditBlock.currentHash}</div>
+                <div className="text-amber-700 font-bold">DOCUMENT SHA-256 HASH:</div>
+                <div className="text-[9px] text-slate-500 break-all max-w-xs">{auditBlock.currentHash}</div>
               </div>
 
               <div className="text-center border-t border-slate-400 pt-2 px-8">
-                <div className="font-bold">INSP. R. S. VERMA</div>
+                <div className="font-bold">{result.officerName || 'UNKNOWN OFFICER'}</div>
                 <div className="text-slate-500 text-[10px]">AUTHORIZED BORDER OFFICER SIGNATURE</div>
               </div>
             </div>
@@ -3804,44 +3200,44 @@ const startPipeline = async () => {
       const kpis = window.INITIAL_KPI_STATS;
 
       return (
-        <div className="space-y-6 max-w-6xl mx-auto font-sans">
+        <div className="space-y-6 max-w-6xl mx-auto">
           <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-1">
             <h2 className="text-lg font-bold text-slate-900">ANALYTICS & STATISTICAL INTELLIGENCE</h2>
-            <p className="text-xs text-slate-500 font-sans">Aggregated screening metrics, temporal trends, and risk distribution.</p>
+            <p className="text-xs text-slate-500 font-mono">Aggregated screening metrics, temporal trends, and risk distribution.</p>
           </div>
 
           {/* KPI Indicators */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 font-sans">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
-              <div className="text-xs font-sans text-slate-500 font-semibold">TOTAL SCREENINGS</div>
-              <div className="text-2xl font-bold text-slate-900">{kpis.totalScreenings}</div>
+              <div className="text-xs font-mono text-slate-500 font-semibold">TOTAL SCREENINGS</div>
+              <div className="text-2xl font-bold text-slate-900 font-mono">{kpis.totalScreenings}</div>
             </div>
 
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
-              <div className="text-xs font-sans text-emerald-700 font-semibold">LOW RISK</div>
-              <div className="text-2xl font-bold text-emerald-700">{kpis.lowRiskCount}</div>
+              <div className="text-xs font-mono text-emerald-700 font-semibold">LOW RISK</div>
+              <div className="text-2xl font-bold text-emerald-700 font-mono">{kpis.lowRiskCount}</div>
             </div>
 
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
-              <div className="text-xs font-sans text-amber-700 font-semibold">MEDIUM RISK</div>
-              <div className="text-2xl font-bold text-amber-700">{kpis.mediumRiskCount}</div>
+              <div className="text-xs font-mono text-amber-700 font-semibold">MEDIUM RISK</div>
+              <div className="text-2xl font-bold text-amber-700 font-mono">{kpis.mediumRiskCount}</div>
             </div>
 
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
-              <div className="text-xs font-sans text-red-600 font-semibold">HIGH RISK</div>
-              <div className="text-2xl font-bold text-red-600">{kpis.highRiskCount}</div>
+              <div className="text-xs font-mono text-red-600 font-semibold">HIGH RISK</div>
+              <div className="text-2xl font-bold text-red-600 font-mono">{kpis.highRiskCount}</div>
             </div>
 
             <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
-              <div className="text-xs font-sans text-blue-800 font-semibold">MANUAL REVIEWS</div>
-              <div className="text-2xl font-bold text-blue-800">{kpis.manualReviewCount}</div>
+              <div className="text-xs font-mono text-blue-800 font-semibold">MANUAL REVIEWS</div>
+              <div className="text-2xl font-bold text-blue-800 font-mono">{kpis.manualReviewCount}</div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Donut Chart */}
             <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
-              <h3 className="text-xs font-sans font-bold text-slate-600 uppercase">RISK DISTRIBUTION</h3>
+              <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">RISK DISTRIBUTION</h3>
               <div className="flex items-center justify-center py-4">
                 <div className="relative w-36 h-36 rounded-full border-8 border-slate-200 flex items-center justify-center">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -3850,7 +3246,7 @@ const startPipeline = async () => {
                     <path className="text-red-500 stroke-current" strokeWidth="3.8" strokeDasharray="8, 100" strokeDashoffset="-92" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                   </svg>
                   <div className="absolute text-center">
-                    <div className="text-lg font-bold font-sans text-slate-900">1,248</div>
+                    <div className="text-lg font-bold font-mono text-slate-900">1,248</div>
                   </div>
                 </div>
               </div>
@@ -3858,12 +3254,12 @@ const startPipeline = async () => {
 
             {/* Volume Trend Bar Chart */}
             <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
-              <h3 className="text-xs font-sans font-bold text-slate-600 uppercase">SCREENING VOLUME TREND</h3>
+              <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">SCREENING VOLUME TREND</h3>
               <div className="h-36 flex items-end justify-between gap-2 pt-4 px-2">
                 {[42, 65, 89, 120, 145, 132, 98, 110, 85].map((val, idx) => (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-1">
                     <div className="w-full bg-blue-900 rounded-t" style={{ height: `${(val / 150) * 100}%` }}></div>
-                    <span className="text-[9px] font-sans text-slate-500">{String(8 + idx).padStart(2, '0')}:00</span>
+                    <span className="text-[9px] font-mono text-slate-500">{String(8 + idx).padStart(2, '0')}:00</span>
                   </div>
                 ))}
               </div>
@@ -3871,8 +3267,8 @@ const startPipeline = async () => {
 
             {/* Document Type Distribution */}
             <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-3">
-              <h3 className="text-xs font-sans font-bold text-slate-600 uppercase">DOCUMENT TYPES</h3>
-              <div className="space-y-2 pt-1 text-xs font-sans">
+              <h3 className="text-xs font-mono font-bold text-slate-600 uppercase">DOCUMENT TYPES</h3>
+              <div className="space-y-2 pt-1 text-xs font-mono">
                 {[
                   { label: 'Indian Passport', count: 580, pct: 46.5 },
                   { label: 'Travel Visa', count: 320, pct: 25.6 },
@@ -3897,59 +3293,32 @@ const startPipeline = async () => {
     }
 
     // ----------------------------------------------------
-    // SYSTEM STATUS PAGE (Health & Blockchain Explorer)
+    // SYSTEM STATUS PAGE
     // ----------------------------------------------------
-    function SystemStatusPage({ blockchainLedger = [] }) {
+    function SystemStatusPage() {
+      const services = [
+        { name: 'OCR Engine (PaddleOCR)', status: 'Online' },
+        { name: 'Forensics Engine (ELA)', status: 'Online' },
+        { name: 'Face Verification', status: 'Not Yet Implemented' },
+        { name: 'Watchlist Database Check', status: 'Not Yet Implemented' }
+      ];
+
       return (
-        <div className="space-y-6 max-w-5xl mx-auto font-sans">
+        <div className="space-y-6 max-w-5xl mx-auto">
           <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-1">
-            <h2 className="text-lg font-bold text-slate-900">SYSTEM STATUS & HEALTH</h2>
-            <p className="text-xs text-slate-500 font-sans">Technical service health, latency, and simulated blockchain audit trail network.</p>
+            <h2 className="text-lg font-bold text-slate-900"></h2>
+            <p className="text-xs text-slate-500 font-mono">Current status of each screening service.</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 font-sans">
-            {[
-              { name: 'DocShield Engine', status: 'Online', latency: '38ms' },
-              { name: 'OCR Engine', status: 'Online', latency: '120ms' },
-              { name: 'Face Match', status: 'Online', latency: '85ms' },
-              { name: 'Audit Ledger', status: 'Online', latency: '12ms' },
-              { name: 'Camera Feed', status: 'Connected', latency: '0ms' }
-            ].map((svc, i) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {services.map((svc, i) => (
               <div key={i} className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
-                <div className="text-xs font-sans font-bold text-slate-600">{svc.name}</div>
-                <div className="text-xs font-bold text-emerald-700">● {svc.status}</div>
-                <div className="text-[10px] font-sans text-slate-500">Latency: <span className="font-mono">{svc.latency}</span></div>
+                <div className="text-xs font-mono font-bold text-slate-600">{svc.name}</div>
+                <div className={`text-xs font-bold ${svc.status === 'Online' ? 'text-emerald-700' : 'text-slate-400'}`}>
+                  ● {svc.status}
+                </div>
               </div>
             ))}
-          </div>
-
-          {/* Simulated Blockchain Ledger Card */}
-          <div className="bg-slate-900 text-slate-100 p-5 rounded-xl space-y-3 font-sans border border-slate-800">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-xs font-bold font-sans text-cyan-400 uppercase">SIMULATED BLOCKCHAIN AUDIT LEDGER (PROTOTYPE)</h3>
-              <span className="text-[10px] font-sans bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded border border-amber-400/40 font-semibold">
-                {blockchainLedger.length} BLOCKS MINED
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-400 font-sans">
-              Cryptographically signed screening event payloads logged to immutable simulated distributed ledger.
-            </p>
-
-            <div className="space-y-2 pt-1 font-sans">
-              {blockchainLedger.slice(-3).map((b, idx) => (
-                <div key={idx} className="bg-slate-950 p-2.5 rounded border border-slate-800 text-xs flex justify-between items-center">
-                  <div>
-                    <span className="text-amber-400 font-bold font-mono">{b.blockNumber}</span> — <span className="text-slate-300 font-sans">{b.docType}</span>
-                    <div className="text-[10px] text-slate-500 break-all font-mono">hash: {b.currentHash}</div>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-sans ${b.verdict === 'CLEARED' ? 'bg-emerald-900/60 text-emerald-300' : 'bg-red-900/60 text-red-300'
-                    }`}>
-                    {b.verdict}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       );

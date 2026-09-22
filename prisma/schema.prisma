@@ -16,6 +16,7 @@ enum Role {
 enum ScreeningStatus {
   CREATED
   PROCESSING
+  AWAITING_LIVE_CAPTURE
   COMPLETED
   MANUAL_REVIEW
   FAILED
@@ -116,6 +117,9 @@ model OCRResult {
 
   fullName          String?
   documentNumber    String?
+
+  documentNumberChecksumValid  Boolean?
+
   nationality       String?
   dateOfBirth       String?
   dateOfExpiry      String?
@@ -153,8 +157,11 @@ model ForensicResult {
 
   screening             Screening   @relation(fields: [screeningId], references: [id], onDelete: Cascade)
 
-  riskScore             Float      @default(0)
-  suspiciousRegions     Int        @default(0)
+  riskScore             Float?
+  suspiciousRegions     Int?
+  meanELA               Float?
+  maxELA                Float?
+  metadataChecked       Boolean?
 
   signals               Json?
 
@@ -176,6 +183,10 @@ model FaceVerification {
   landmarksMatched      Int?
   poseAlignment         String?
   lightingQuality       String?
+  liveStoredName        String?
+  livePath              String?
+  liveMimeType          String?
+  liveSize              Int?
 
   createdAt             DateTime    @default(now())
 }
