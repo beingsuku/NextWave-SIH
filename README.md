@@ -1,7 +1,7 @@
 # Bharat Border Intelligence
 ### Assistant for Indian Border Migration
 
-Smart India Hackathon 2026 · Problem Statement SIH26188
+**Smart India Hackathon 2026 · Problem Statement SIH26188**
 
 AI-Based Fake Identity & Document Screening System
 Theme: Blockchain & Cyber Security · Team: NextWave
@@ -57,12 +57,12 @@ are never the verdict.
 - Fully offline — no external API calls at runtime
 
 ## Architecture
-   Officer UI (React)
-           │
+Officer UI (React)
+│
 Backend API (Node/Express + Prisma) ── PostgreSQL
-           │
-      ┌────┴────┐
-AI service     Face service
+     │
+┌────┴────┐
+AI service    Face service
 :5001          :5002
 (OCR, ELA,  (InsightFace match)
 EXIF, risk               
